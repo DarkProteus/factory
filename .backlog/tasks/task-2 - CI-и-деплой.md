@@ -1,11 +1,11 @@
 ---
 id: TASK-2
 title: CI и деплой
-status: In Progress
+status: Done
 assignee:
   - '@claude'
 created_date: '2026-11-16T15:54:00Z'
-updated_date: '2026-11-16T16:15:00Z'
+updated_date: '2026-11-16T16:17:00Z'
 labels: []
 dependencies:
   - TASK-1
@@ -29,7 +29,13 @@ ordinal: 2000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 GitHub Actions запускает `pnpm test` на каждый pull request; упавший тест делает проверку красной
-- [ ] #2 Пуш в ветку main собирает проект и выкладывает его на GitHub Pages
-- [ ] #3 Выложенная сборка открывается по ссылке Pages без ошибок загрузки ресурсов (учтён базовый путь репозитория)
+- [x] #1 GitHub Actions запускает `pnpm test` на каждый pull request; упавший тест делает проверку красной
+- [x] #2 Пуш в ветку main собирает проект и выкладывает его на GitHub Pages
+- [x] #3 Выложенная сборка открывается по ссылке Pages без ошибок загрузки ресурсов (учтён базовый путь репозитория)
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Проверено: пробный PR #1 с падающим тестом — проверка test красная (закрыт). Push в main → Deploy success, https://darkproteus.github.io/factory/ отдаёт 200, ассеты с /factory/ тоже 200. BASE_PATH задаёт workflow, по умолчанию '/'.
+<!-- SECTION:NOTES:END -->
