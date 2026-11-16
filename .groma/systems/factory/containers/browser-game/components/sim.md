@@ -22,6 +22,10 @@ groma:
     - scanner: typescript
       file: packages/sim/src/tick.ts
       symbol: tick
+    - scanner: typescript
+      file: packages/sim/src/grid.ts
+    - scanner: typescript
+      file: packages/sim/src/buildings.ts
   technology: TypeScript
 description: Хранит состояние мира и обновляет его раз в тик
 ---

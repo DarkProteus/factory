@@ -54,7 +54,7 @@ describe('детерминизм', () => {
     const state = run(8);
     const restored = JSON.parse(JSON.stringify(state));
     expect(hash(restored)).toBe(hash(state));
-    const reordered = { counters: state.counters, rng: state.rng, tick: state.tick };
+    const reordered = Object.fromEntries(Object.entries(state).reverse());
     expect(hash(reordered)).toBe(hash(state));
   });
 
