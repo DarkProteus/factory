@@ -9,6 +9,17 @@ groma:
     - scanner: typescript
       file: packages/content/src/index.ts
       symbol: PACKAGE
+    - scanner: typescript
+      file: packages/content/src/items.ts
+      symbol: items
+    - scanner: typescript
+      file: packages/content/src/recipes.ts
+      symbol: recipes
+    - scanner: typescript
+      file: packages/content/src/buildings.ts
+      symbol: buildings
+    - scanner: typescript
+      file: packages/content/src/types.ts
   technology: TypeScript
 description: Типизированные таблицы предметов, рецептов, зданий и врагов
 ---
