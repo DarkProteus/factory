@@ -1,14 +1,22 @@
 ---
 id: TASK-2
 title: CI и деплой
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2026-11-16T15:54:00Z'
+updated_date: '2026-11-16T16:15:00Z'
 labels: []
 dependencies:
   - TASK-1
 documentation:
   - docs/design.md
+modified_files:
+  - tools/pages-base.test.ts
+  - packages/app/vite.config.ts
+  - package.json
+  - .github/workflows/ci.yml
+  - .github/workflows/deploy.yml
 type: chore
 ordinal: 2000
 ---

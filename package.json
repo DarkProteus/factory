@@ -2,6 +2,7 @@
   "name": "factory",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@11.26.0",
   "scripts": {
     "test": "vitest run",
     "lint": "eslint .",
