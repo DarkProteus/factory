@@ -4,10 +4,14 @@ title: Сохранение
 status: To Do
 assignee: []
 created_date: '2026-11-16T15:55:00Z'
+updated_date: '2026-11-16T16:58:00Z'
 labels: []
 dependencies:
   - TASK-4
   - TASK-8
+references:
+  - save
+  - sim
 documentation:
   - docs/design.md
 type: feature

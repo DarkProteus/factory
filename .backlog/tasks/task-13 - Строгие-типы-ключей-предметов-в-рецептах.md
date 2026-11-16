@@ -4,9 +4,12 @@ title: Строгие типы ключей предметов в рецепта
 status: To Do
 assignee: []
 created_date: '2026-11-16T16:51:00Z'
+updated_date: '2026-11-16T16:58:00Z'
 labels: []
 dependencies:
   - TASK-3
+references:
+  - content
 type: chore
 ordinal: 13000
 ---
