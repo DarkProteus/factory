@@ -1,14 +1,24 @@
 ---
 id: TASK-3
 title: Определения контента
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-11-16T15:54:00Z'
+updated_date: '2026-11-16T16:48:00Z'
 labels: []
 dependencies:
   - TASK-1
+references:
+  - content
 documentation:
   - docs/design.md
+modified_files:
+  - packages/content/src/content.test.ts
+  - packages/content/src/types.ts
+  - packages/content/src/items.ts
+  - packages/content/src/recipes.ts
+  - packages/content/src/buildings.ts
+  - packages/content/src/index.ts
 type: feature
 ordinal: 3000
 ---
@@ -21,10 +31,10 @@ ordinal: 3000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 В `content` экспортируются типы `ItemDef`, `RecipeDef`, `BuildingDef`
-- [ ] #2 В таблицах есть три предмета и один рецепт, проверенные через `satisfies`
-- [ ] #3 Тест-валидатор проходит на настоящем контенте
-- [ ] #4 Тест-валидатор ловит рецепт со ссылкой на несуществующий предмет (вход или выход)
-- [ ] #5 Тест-валидатор ловит рецепт с `madeIn`, указывающим на несуществующее здание
-- [ ] #6 В `content` нет логики и импортов из других пакетов
+- [x] #1 В `content` экспортируются типы `ItemDef`, `RecipeDef`, `BuildingDef`
+- [x] #2 В таблицах есть три предмета и один рецепт, проверенные через `satisfies`
+- [x] #3 Тест-валидатор проходит на настоящем контенте
+- [x] #4 Тест-валидатор ловит рецепт со ссылкой на несуществующий предмет (вход или выход)
+- [x] #5 Тест-валидатор ловит рецепт с `madeIn`, указывающим на несуществующее здание
+- [x] #6 В `content` нет логики и импортов из других пакетов
 <!-- AC:END -->
