@@ -32,6 +32,8 @@ groma:
     - scanner: typescript
       file: packages/sim/src/miner.ts
       symbol: runMiner
+    - scanner: typescript
+      file: packages/sim/src/belt.ts
   technology: TypeScript
 description: Хранит состояние мира и обновляет его раз в тик
 ---

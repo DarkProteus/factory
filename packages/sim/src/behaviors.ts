@@ -1,9 +1,13 @@
 import { buildings as contentBuildings } from '@factory/content';
 import type { BuildingDefs } from './buildings';
+import { runBelts } from './belt';
 import { runMiner } from './miner';
 import type { SimState } from './state';
 
-/** Шаг поведений: здания по возрастанию id, поведение выбирается по BuildingDef.behavior. */
+/**
+ * Шаг поведений: здания по возрастанию id, поведение выбирается по BuildingDef.behavior.
+ * Конвейеры идут последними, в порядке от низа по течению (см. belt.ts).
+ */
 export function runBehaviors(state: SimState, defs: BuildingDefs = contentBuildings): void {
   for (const b of Object.values(state.buildings)) {
     const def = defs[b.type];
@@ -17,4 +21,5 @@ export function runBehaviors(state: SimState, defs: BuildingDefs = contentBuildi
         break;
     }
   }
+  runBelts(state, defs);
 }

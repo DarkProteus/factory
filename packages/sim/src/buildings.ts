@@ -1,4 +1,5 @@
 import { buildings as contentBuildings, type BuildingDef } from '@factory/content';
+import type { BeltItem } from './belt';
 import { cellIndex, inBounds, type GameMap } from './grid';
 
 /** Направление: 0 — N, 1 — E, 2 — S, 3 — W. */
@@ -16,6 +17,8 @@ export interface PlacedBuilding {
   progress: number;
   /** Выходной буфер: один вид предмета или пусто. */
   output: ItemStack | null;
+  /** Предметы на конвейере (только у поведения belt), см. belt.ts. */
+  belt?: BeltItem[];
 }
 
 /** Стопка одного предмета. */

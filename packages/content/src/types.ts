@@ -35,6 +35,8 @@ export interface BuildingDef {
   miningTicks?: number;
   /** Вместимость выходного буфера, шт. */
   buffer?: number;
+  /** Скорость конвейера: единиц пути за тик; клетка конвейера — 256 единиц (BELT_CELL в sim). */
+  beltSpeed?: number;
   /** id предмета-боеприпаса (турели). */
   ammo?: string;
   range?: number;
