@@ -1,0 +1,18 @@
+{
+  "name": "factory",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "lint": "eslint .",
+    "typecheck": "pnpm -r typecheck",
+    "build": "pnpm typecheck && pnpm --filter @factory/app build",
+    "dev": "pnpm --filter @factory/app dev"
+  },
+  "devDependencies": {
+    "eslint": "^10.15.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.2",
+    "vitest": "^5.1.0"
+  }
+}

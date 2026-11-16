@@ -1,24 +1,57 @@
+# Правила проекта
 
-<!-- BACKLOG.MD GUIDELINES START -->
-<!-- backlog.md-instructions-version: 1.55.3 -->
-<CRITICAL_INSTRUCTION>
+Браузерная игра про завод с обороной. Дизайн-док: `docs/design.md`.
 
-## Backlog.md Workflow
+## Пакеты
 
-This project uses Backlog.md for task and project management.
+- `packages/sim` — ядро симуляции. Чистый TypeScript, без DOM и рендера.
+- `packages/content` — предметы, рецепты, здания, враги. Только данные.
+- `packages/render` — отрисовка на PixiJS. Только читает состояние.
+- `packages/app` — интерфейс на React, превращает ввод в команды для `sim`.
+- `packages/save` — сохранения.
 
-**At the beginning of each conversation in this project, run `backlog instructions overview` before answering or taking action. Re-read it only if you have not read it yet in the current conversation.**
+## Жёсткие границы
 
-Use the overview to decide whether to search, read, create, or update Backlog tasks.
+- `sim` импортирует только `content`. Никаких `render`, `app`, DOM.
+- В `sim` нет `Math.random` и `Date.now`. Только генератор с зерном и счётчик тиков.
+- Новые предметы, рецепты, здания и враги добавляются в `content`.
+  Код ядра меняется, только если не хватает механики (`behavior`).
 
-Before task lifecycle actions, read the matching detailed guide:
-- `backlog instructions task-creation` before creating or splitting tasks
-- `backlog instructions task-execution` before planning, changing status or assignee, adding a plan or implementation notes, or implementing task work
-- `backlog instructions task-finalization` before checking acceptance criteria, writing final summaries, or moving tasks to terminal statuses
+## Как работать
 
-Use `backlog <command> --help` before running unfamiliar commands. Help shows options, fields, and examples.
+1. Взять одну задачу из Backlog (`backlog task list`), прочитать критерии приёмки.
+2. Работать только по ней. Код вне задачи не трогать.
+   Если найдена другая проблема, завести новую задачу, а не чинить по пути.
+3. Сначала тест по критерию приёмки, потом реализация.
+4. Задача закрыта, когда `pnpm test` зелёный. Отметить её выполненной в Backlog.
 
-Do not edit Backlog task, draft, document, decision, or milestone markdown files directly. Use the `backlog` CLI so metadata, relationships, and history stay consistent.
+## Разделение работы
 
-</CRITICAL_INSTRUCTION>
-<!-- BACKLOG.MD GUIDELINES END -->
+- Основная сессия: архитектура, нарезка задач в Backlog, ревью результата.
+- Реализация задачи из Backlog с готовыми критериями приёмки отдаётся
+  сабагенту `implementer` (Sonnet), по одной задаче на запуск.
+- Мелкие правки на несколько строк делать самому, без сабагента.
+- После отчёта сабагента проверить diff и `pnpm test`, только потом коммит.
+
+## Инструменты
+
+- **Backlog.md** — задачи лежат в `backlog/`. Вся работа идёт через них.
+- **codebase-memory-mcp** — граф кода. Чтобы найти, где что определено
+  и кто что вызывает, сначала спрашивать граф, а не читать файлы подряд.
+- **ast-grep** — поиск и массовые правки по синтаксису:
+  `ast-grep --pattern 'ШАБЛОН' --lang ts`. Использовать вместо grep по тексту.
+- **groma.md** — C4-карта архитектуры в `groma/`. Обновлять в конце каждой вехи
+  и при добавлении нового пакета или крупного модуля.
+
+## Экономия токенов
+
+- Править точечно: менять строки, а не переписывать файлы целиком.
+- Файл держать в пределах 300 строк, иначе делить.
+- Не пересказывать код в ответе и не печатать файлы целиком.
+- Читать файл полностью только перед правкой в нём.
+
+## Команды
+
+- `pnpm test` — тесты (Vitest)
+- `pnpm dev` — локальный запуск
+- `pnpm build` — сборка

@@ -1,0 +1,19 @@
+{
+  "name": "@factory/render",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@factory/content": "workspace:*",
+    "@factory/sim": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "^8.3.8"
+  }
+}
