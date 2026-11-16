@@ -31,6 +31,10 @@ export interface BuildingDef {
   power: number;
   behavior: Behavior;
   hp: number;
+  /** Тиков на единицу руды (бур). */
+  miningTicks?: number;
+  /** Вместимость выходного буфера, шт. */
+  buffer?: number;
   /** id предмета-боеприпаса (турели). */
   ammo?: string;
   range?: number;

@@ -54,7 +54,7 @@ describe('постройка', () => {
     const state = small();
     tick(state, [build(2, 1)]);
     const b = state.buildings[1];
-    expect(b).toEqual({ id: 1, type: 'drill', x: 2, y: 1, dir: 0 });
+    expect(b).toMatchObject({ id: 1, type: 'drill', x: 2, y: 1, dir: 0 });
     expect(state.nextId).toBe(2);
     for (const [x, y] of [[2, 1], [3, 1], [2, 2], [3, 2]] as const) expect(buildingAt(state, x, y)).toBe(b);
     for (const [x, y] of [[1, 1], [4, 1], [2, 0], [2, 3], [4, 3]] as const) expect(buildingAt(state, x, y)).toBeNull();
@@ -116,7 +116,7 @@ describe('снос', () => {
     expect(state.buildings).toEqual({});
     expect(state.map.occupancy.every((id) => id === 0)).toBe(true);
     applyCommand(state, build(3, 2, 2));
-    expect(state.buildings[2]).toEqual({ id: 2, type: 'drill', x: 3, y: 2, dir: 2 });
+    expect(state.buildings[2]).toMatchObject({ id: 2, type: 'drill', x: 3, y: 2, dir: 2 });
   });
 
   it('сносит только одно здание', () => {

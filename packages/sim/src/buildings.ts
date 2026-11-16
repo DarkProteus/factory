@@ -12,6 +12,17 @@ export interface PlacedBuilding {
   x: number;
   y: number;
   dir: Dir;
+  /** Накопленные тики текущего рабочего цикла. */
+  progress: number;
+  /** Выходной буфер: один вид предмета или пусто. */
+  output: ItemStack | null;
+}
+
+/** Стопка одного предмета. */
+export interface ItemStack {
+  /** id из content.items. */
+  item: string;
+  count: number;
 }
 
 /** Таблица определений зданий; по умолчанию берётся из content. */
@@ -62,7 +73,7 @@ export function placeBuilding(
       if (state.map.occupancy[cellIndex(state.map, x + dx, y + dy)] !== 0) return;
     }
   }
-  const building: PlacedBuilding = { id: state.nextId, type, x, y, dir };
+  const building: PlacedBuilding = { id: state.nextId, type, x, y, dir, progress: 0, output: null };
   state.nextId += 1;
   state.buildings[building.id] = building;
   setOccupancy(state.map, building, size, building.id);

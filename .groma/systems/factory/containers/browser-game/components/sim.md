@@ -26,6 +26,12 @@ groma:
       file: packages/sim/src/grid.ts
     - scanner: typescript
       file: packages/sim/src/buildings.ts
+    - scanner: typescript
+      file: packages/sim/src/behaviors.ts
+      symbol: runBehaviors
+    - scanner: typescript
+      file: packages/sim/src/miner.ts
+      symbol: runMiner
   technology: TypeScript
 description: Хранит состояние мира и обновляет его раз в тик
 ---
