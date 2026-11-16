@@ -4,10 +4,11 @@ title: Интерфейс строительства
 status: To Do
 assignee: []
 created_date: '2026-11-16T15:55:00Z'
-updated_date: '2026-11-16T16:58:00Z'
+updated_date: '2026-11-16T17:19:00Z'
 labels: []
 dependencies:
   - TASK-9
+  - TASK-14
 references:
   - ui
   - render
