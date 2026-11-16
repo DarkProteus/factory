@@ -1,11 +1,11 @@
 ---
 id: TASK-1
 title: Каркас монорепо
-status: In Progress
+status: Done
 assignee:
   - '@claude'
 created_date: '2026-11-16T15:54:00Z'
-updated_date: '2026-11-16T16:03:00Z'
+updated_date: '2026-11-16T16:12:00Z'
 labels: []
 dependencies: []
 documentation:
@@ -22,11 +22,11 @@ ordinal: 1000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 В `packages/` есть пакеты `sim`, `content`, `render`, `app`, `save`, подключённые через pnpm workspaces
-- [ ] #2 `pnpm test` проходит (в каждом пакете есть хотя бы один тест Vitest)
-- [ ] #3 `pnpm build` проходит
-- [ ] #4 Линтер падает с ошибкой на импорте `render` или `app` из `sim`; это проверено пробным импортом
-- [ ] #5 `pnpm dev` открывает страницу приложения локально
+- [x] #1 В `packages/` есть пакеты `sim`, `content`, `render`, `app`, `save`, подключённые через pnpm workspaces
+- [x] #2 `pnpm test` проходит (в каждом пакете есть хотя бы один тест Vitest)
+- [x] #3 `pnpm build` проходит
+- [x] #4 Линтер падает с ошибкой на импорте `render` или `app` из `sim`; это проверено пробным импортом
+- [x] #5 `pnpm dev` открывает страницу приложения локально
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -39,3 +39,9 @@ ordinal: 1000
 5. app: Vite + React, минимальная страница; build = typecheck всех пакетов + vite build.
 6. Проверить pnpm test, pnpm build, pnpm lint, pnpm dev.
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Проверено: pnpm test (6 файлов, 14 тестов), pnpm build, pnpm lint зелёные; пробный import '@factory/render' в packages/sim даёт no-restricted-imports; pnpm dev отдаёт страницу.
+<!-- SECTION:NOTES:END -->
