@@ -1,4 +1,5 @@
 import { demolishAt, placeBuilding, type BuildingDefs, type Dir } from './buildings';
+import { startMining, stopMining } from './mining';
 import { nextRandom } from './rng';
 import type { SimState } from './state';
 
@@ -11,7 +12,11 @@ export type Command =
   /** Ставит здание с левой верхней клеткой (x, y). */
   | { type: 'build'; building: string; x: number; y: number; dir: Dir }
   /** Сносит здание, которому принадлежит клетка (x, y). */
-  | { type: 'demolish'; x: number; y: number };
+  | { type: 'demolish'; x: number; y: number }
+  /** Начинает ручную добычу на клетке (x, y), пока не придёт stopMining. */
+  | { type: 'startMining'; x: number; y: number }
+  /** Прекращает ручную добычу. */
+  | { type: 'stopMining' };
 
 /** `defs` — таблица зданий; по умолчанию content.buildings (параметр нужен тестам). */
 export function applyCommand(state: SimState, command: Command, defs?: BuildingDefs): void {
@@ -27,6 +32,12 @@ export function applyCommand(state: SimState, command: Command, defs?: BuildingD
       return;
     case 'demolish':
       demolishAt(state, command.x, command.y, defs);
+      return;
+    case 'startMining':
+      startMining(state, command.x, command.y);
+      return;
+    case 'stopMining':
+      stopMining(state);
       return;
   }
 }

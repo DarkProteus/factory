@@ -17,8 +17,18 @@ export interface SimState {
   nextId: number;
   /** Инвентарь игрока: ячейки (непустые стеки), см. inventory.ts; не длиннее INVENTORY_SLOTS. */
   inventory: ItemStack[];
+  /** Ручная добыча: клетка залежи и прогресс текущего цикла в тиках; null, если игрок не добывает. */
+  mining: MiningState | null;
+}
+
+/** Состояние ручной добычи (см. mining.ts). */
+export interface MiningState {
+  x: number;
+  y: number;
+  /** Тиков текущего цикла; при достижении MINING_TICKS руда уходит в инвентарь. */
+  progress: number;
 }
 
 export function createState(seed: number, map?: MapParams): SimState {
-  return { tick: 0, rng: seed | 0, counters: {}, map: createMap(map), buildings: {}, nextId: 1, inventory: [] };
+  return { tick: 0, rng: seed | 0, counters: {}, map: createMap(map), buildings: {}, nextId: 1, inventory: [], mining: null };
 }

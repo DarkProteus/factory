@@ -73,6 +73,14 @@ function checkBuilding(key: string, b: unknown): void {
   }
 }
 
+function checkMining(mining: unknown): void {
+  if (mining === null) return;
+  if (!isObject(mining)) fail('добыча', 'ожидался объект или null');
+  for (const f of ['x', 'y', 'progress'] as const) {
+    if (!Number.isInteger(mining[f]) || (mining[f] as number) < 0) fail('добыча', `неверное поле ${f}`);
+  }
+}
+
 /** Проверяет форму разобранного JSON и ссылки на content; при ошибке бросает SaveError. */
 export function validateState(state: unknown): SimState {
   if (!isObject(state)) fail('состояние', 'ожидался объект');
@@ -84,5 +92,6 @@ export function validateState(state: unknown): SimState {
   if (!isObject(state.buildings)) fail('состояние', 'неверное поле buildings');
   for (const [key, b] of Object.entries(state.buildings)) checkBuilding(key, b);
   checkStacks(state.inventory, 'инвентарь');
+  checkMining(state.mining);
   return state as unknown as SimState;
 }

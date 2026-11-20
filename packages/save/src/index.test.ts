@@ -160,6 +160,17 @@ describe('битые сохранения', () => {
     expect(() => deserialize(bad(1))).toThrow(SaveError);
   });
 
+  it('состояние ручной добычи валидируется и переживает сохранение', () => {
+    const state = factory();
+    state.mining = { x: 0, y: 0, progress: 7 };
+    expect(roundtrip(state).mining).toEqual({ x: 0, y: 0, progress: 7 });
+    const bad = (mining: unknown) => tamper((s) => (s.mining = mining));
+    expect(() => deserialize(bad(undefined))).toThrow(/добыча/);
+    expect(() => deserialize(bad('да'))).toThrow(SaveError);
+    expect(() => deserialize(bad({ x: 1, y: 'a', progress: 0 }))).toThrow(SaveError);
+    expect(() => deserialize(bad({ x: 1, y: 1, progress: -1 }))).toThrow(SaveError);
+  });
+
   it('усечённые массивы карты и пропавшие поля', () => {
     expect(() => deserialize(tamper((s) => s.map.tiles.pop()))).toThrow(SaveError);
     expect(() => deserialize(tamper((s) => delete s.map))).toThrow(SaveError);

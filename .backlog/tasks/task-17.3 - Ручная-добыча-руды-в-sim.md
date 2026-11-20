@@ -4,13 +4,22 @@ title: Ручная добыча руды в sim
 status: In Progress
 assignee: []
 created_date: '2026-11-20T18:38:00Z'
-updated_date: '2026-11-20T18:49:00Z'
+updated_date: '2026-11-20T18:52:00Z'
 labels:
   - m2
 dependencies:
   - TASK-25
 references:
   - sim
+modified_files:
+  - packages/sim/src/mining.ts
+  - packages/sim/src/mining.test.ts
+  - packages/sim/src/state.ts
+  - packages/sim/src/commands.ts
+  - packages/sim/src/tick.ts
+  - packages/sim/src/index.ts
+  - packages/save/src/validate.ts
+  - packages/save/src/index.test.ts
 parent_task_id: TASK-17
 type: feature
 ordinal: 27000
