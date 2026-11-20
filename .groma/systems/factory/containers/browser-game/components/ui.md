@@ -39,9 +39,7 @@ groma:
 description: Превращает ввод игрока в команды для ядра
 ---
 
-Монтирует React-приложение в страницу и собирает остальные пакеты вместе. По замыслу переводит мышь и клавиатуру в команды Ядра симуляции и показывает панели строительства.
-
-Сейчас выводит заголовок и список подключённых пакетов.
+Точка входа приложения. Игровой цикл (game.ts) крутит Ядро симуляции с фиксированным шагом 60 тиков в секунду и после каждого кадра вызывает Рендер. Ввод мыши и клавиатуры превращается в команды build и demolish: они копятся в очереди и уходят в ядро на ближайшем тике, напрямую состояние интерфейс не меняет. Перед кликом интерфейс проверяет место через canPlace и передаёт Рендеру оверлей с призраком. Панели (строительство, снос, номер тика) — React-компоненты поверх canvas, оформлены по docs/style.md. Пока нет стартового меню, игра начинается с демо-сцены.
 
 ## Relationships
 
@@ -51,3 +49,5 @@ description: Превращает ввод игрока в команды для
 | [packages/app/src/App.tsx](../../../../../../packages/app/src/App.tsx) | [packages/content/src/index.ts](../../../../../../packages/content/src/index.ts) | Подключает контент | TypeScript import |
 | [packages/app/src/App.tsx](../../../../../../packages/app/src/App.tsx) | [packages/render/src/index.ts](../../../../../../packages/render/src/index.ts) | Подключает рендер | TypeScript import |
 | [packages/app/src/App.tsx](../../../../../../packages/app/src/App.tsx) | [packages/save/src/index.ts](../../../../../../packages/save/src/index.ts) | Подключает сохранения | TypeScript import |
+| [packages/app/src/game.ts](../../../../../../packages/app/src/game.ts) | [packages/sim/src/index.ts](../../../../../../packages/sim/src/index.ts) | Отправляет команды, тикает | Вызов функций, 60 тиков/с |
+| [packages/app/src/game.ts](../../../../../../packages/app/src/game.ts) | [packages/render/src/index.ts](../../../../../../packages/render/src/index.ts) | Рисует кадр | Вызов функций, requestAnimationFrame |

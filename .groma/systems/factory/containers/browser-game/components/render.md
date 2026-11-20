@@ -39,12 +39,10 @@ groma:
 description: Рисует состояние мира, ничего в нём не меняя
 ---
 
-Читает состояние Ядра симуляции и рисует его, интерполируя между тиками. В состояние не пишет.
+Читает состояние Ядра симуляции и рисует его на PixiJS строго по docs/style.md: земля и залежи, здания в своей ориентации, предметы на конвейерах, анимации бура, манипулятора и печи. Всё рисуется кодом, без спрайтов; износ (ржавчина, камни) детерминирован хешем координат. Между тиками позиции интерполируются: перед каждым тиком сцена снимает снимок конвейеров. Сюда же входят камера (панорама, зум 0.5–3) и её управление мышью и клавиатурой, оверлей стройки (призрак здания, сетка, подсветка) и иконки зданий для панели. Состояние принимается как DeepReadonly и не меняется.
 
-Сейчас пакет — заглушка, экспортирует только имя; PixiJS ещё не подключён.
-
-## Derived relationships
+## Relationships
 
 | Source | Target | Description | Technology |
 | --- | --- | --- | --- |
-| [packages/render/src/draw/buildings.ts](../../../../../../packages/render/src/draw/buildings.ts) | [packages/render/src/overlay.ts](../../../../../../packages/render/src/overlay.ts) | Invokes supplied callback: armAngle | typescript |
+| [packages/render/src/scene.ts](../../../../../../packages/render/src/scene.ts) | [packages/sim/src/index.ts](../../../../../../packages/sim/src/index.ts) | Читает состояние | DeepReadonly<SimState> |
