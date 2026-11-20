@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { FUEL_UNITS_PER_KJ } from './fuel';
 import { applyCommand, buildingAt, createState, hash, tick, type Command, type PlacedBuilding, type SimState } from './index';
 import { accept, canAccept, takeFrom } from './transfer';
-import { stocked } from './testKit';
+import { electrify, stocked } from './testKit';
 
 const T = recipes.smeltIron.ticks;
 const COAL_UNITS = items.coal.fuel * FUEL_UNITS_PER_KJ;
@@ -19,6 +19,7 @@ function furnaceWorld(): { state: SimState; f: PlacedBuilding } {
 }
 
 function run(state: SimState, ticks: number): void {
+  electrify(state);
   for (let i = 0; i < ticks; i++) tick(state, []);
 }
 
@@ -211,6 +212,7 @@ describe('100 + 100 руды с углём', () => {
       { item: 'copperOre', count: 100 },
     ];
     coal.slots = [{ item: 'coal', count: 20 }];
+    electrify(state);
     const sum = (item: string): number => (out.slots ?? []).reduce((n, s) => n + (s.item === item ? s.count : 0), 0);
     const limit = 200 * T * 2;
     let t = 0;

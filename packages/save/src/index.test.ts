@@ -17,6 +17,10 @@ const BUILD: ScheduledCommand[] = [
   { tick: 0, command: build('furnace', 6, 0) },
   { tick: 0, command: build('inserter', 8, 0) },
   { tick: 0, command: build('chest', 9, 0) },
+  // Электросеть для буров и манипуляторов: столбы и генератор (уголь кладётся отдельно).
+  { tick: 0, command: build('pole', 3, 2) },
+  { tick: 0, command: build('pole', 8, 2) },
+  { tick: 0, command: build('generator', 3, 4) },
   { tick: 0, command: { type: 'setCounter', key: 'score', value: 7 } },
 ];
 
@@ -40,10 +44,13 @@ function factory(): SimState {
     { item: 'inserter', count: 2 },
     { item: 'furnace', count: 1 },
     { item: 'chest', count: 1 },
+    { item: 'pole', count: 2 },
+    { item: 'generator', count: 1 },
   ];
   runTicks(state, BUILD, 1);
   // Печь жжёт уголь: кладём топливо, чтобы цикл шёл и остаток энергии попал в сохранение.
   Object.values(state.buildings).find((b) => b.type === 'furnace')!.fuel = { item: 'coal', count: 10 };
+  Object.values(state.buildings).find((b) => b.type === 'generator')!.fuel = { item: 'coal', count: 10 };
   runTicks(state, BUILD, 399);
   state.inventory = [
     { item: 'ironPlate', count: 40 },
@@ -214,9 +221,15 @@ describe('битые сохранения', () => {
 
   it('рецепт сборщика сохраняется; рецепт чужого здания не принимается', () => {
     const state = createState(3, { width: 8, height: 8 });
-    state.inventory = [{ item: 'assembler', count: 1 }];
-    runTicks(state, [{ tick: 0, command: build('assembler', 0, 0) }], 1);
+    state.inventory = [
+      { item: 'assembler', count: 1 },
+      { item: 'pole', count: 1 },
+      { item: 'generator', count: 1 },
+    ];
+    const layout = [build('assembler', 0, 0), build('pole', 3, 1), build('generator', 4, 0)];
+    runTicks(state, layout.map((command) => ({ tick: 0, command })), 1);
     const asm = Object.values(state.buildings)[0]!;
+    Object.values(state.buildings).find((b) => b.type === 'generator')!.fuel = { item: 'coal', count: 5 };
     runTicks(state, [{ tick: 1, command: { type: 'setRecipe', building: asm.id, recipe: 'circuit' } }], 1);
     asm.input = [
       { item: 'ironPlate', count: 1 },

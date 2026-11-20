@@ -48,3 +48,24 @@ export function burnTick(b: PlacedBuilding, def: BuildingDef, defs: ItemDefs = c
   b.burn = burn - cost;
   return true;
 }
+
+/**
+ * Списывает до cost единиц энергии (Вт·тик) из остатка b.burn и ячейки топлива (генератор).
+ * Возвращает, сколько списано: меньше cost, только если топливо кончилось.
+ */
+export function burnEnergy(b: PlacedBuilding, cost: number, defs: ItemDefs = contentItems): number {
+  let burn = b.burn ?? 0;
+  while (burn < cost && b.fuel) {
+    burn += (defs[b.fuel.item]?.fuel ?? 0) * FUEL_UNITS_PER_KJ;
+    b.fuel.count -= 1;
+    if (b.fuel.count <= 0) delete b.fuel;
+  }
+  const spent = Math.min(burn, cost);
+  b.burn = burn - spent;
+  return spent;
+}
+
+/** Может ли генератор выдавать энергию: есть остаток сожжённого или топливо в ячейке. */
+export function hasEnergy(b: PlacedBuilding): boolean {
+  return (b.burn ?? 0) > 0 || b.fuel !== undefined;
+}

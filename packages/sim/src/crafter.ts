@@ -1,6 +1,7 @@
 import { recipes as contentRecipes, type BuildingDef, type RecipeDef } from '@factory/content';
 import type { ItemStack, PlacedBuilding } from './buildings';
-import { burnTick, fuelAccept, fuelCanAccept, isFuel } from './fuel';
+import { fuelAccept, fuelCanAccept, isFuel } from './fuel';
+import { energyTick } from './power';
 
 type Recipes = Readonly<Record<string, RecipeDef>>;
 
@@ -60,9 +61,14 @@ function canStart(b: PlacedBuilding, recipe: RecipeDef, buffer: number): boolean
 /**
  * Поведение crafter: на старте цикла списывает ингредиенты, через ticks тиков
  * добавляет результат в выход. Выход полон — новый цикл не стартует.
- * Здание с energy 'fuel' тратит энергию за каждый тик цикла (fuel.ts), без неё стоит.
+ * Энергия (energyTick, power.ts) тратится за каждый тик цикла: топливо — fuel.ts, сеть — со скоростью × удовлетворённость.
  */
-export function runCrafter(b: PlacedBuilding, def: BuildingDef, recipes: Recipes = contentRecipes): void {
+export function runCrafter(
+  b: PlacedBuilding,
+  def: BuildingDef,
+  satisfaction: number | undefined,
+  recipes: Recipes = contentRecipes,
+): void {
   const recipe = b.recipe === undefined ? undefined : recipes[b.recipe];
   if (!recipe) return;
   if (b.progress === 0) {
@@ -74,13 +80,13 @@ export function runCrafter(b: PlacedBuilding, def: BuildingDef, recipes: Recipes
       }
       return;
     }
-    // Печь без топлива цикл не начинает: руда остаётся во входе.
-    if (!burnTick(b, def)) return;
+    // Без энергии (топлива или сети) цикл не начинается: руда остаётся во входе.
+    if (!energyTick(b, def, satisfaction)) return;
     for (const [item, n] of Object.entries(recipe.in)) stackFor(b, item)!.count -= n;
     b.progress = 1;
   } else {
-    // Идущий цикл без топлива стоит на месте и продолжится, когда топливо появится.
-    if (!burnTick(b, def)) return;
+    // Идущий цикл без энергии стоит на месте и продолжится, когда топливо появится.
+    if (!energyTick(b, def, satisfaction)) return;
     b.progress += 1;
   }
   if (b.progress < recipe.ticks) return;

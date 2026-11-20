@@ -1,12 +1,13 @@
 import { buildings, INVENTORY_SLOTS, items } from '@factory/content';
 import { describe, expect, it } from 'vitest';
 import { applyCommand, buildingAt, createState, hash, tick, type Command, type PlacedBuilding, type SimState } from './index';
-import { give, stocked } from './testKit';
+import { electrify, give, stocked } from './testKit';
 import { canAccept } from './transfer';
 
 const build = (building: string, x: number, y: number, dir: 0 | 1 | 2 | 3 = 1): Command => ({ type: 'build', building, x, y, dir });
 
 const run = (state: SimState, ticks: number): void => {
+  electrify(state);
   for (let i = 0; i < ticks; i++) tick(state, []);
 };
 

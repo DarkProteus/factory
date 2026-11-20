@@ -1,19 +1,27 @@
 import { buildings } from '@factory/content';
 import { describe, expect, it } from 'vitest';
 import { buildingAt, createState, depositAt, tick, type Command, type Dir, type SimState } from './index';
-import { stocked } from './testKit';
+import { electrify, stocked } from './testKit';
 
 const drill = buildings.drill;
 const T = drill.miningTicks;
 
 function run(state: SimState, ticks: number): void {
+  electrify(state);
   for (let i = 0; i < ticks; i++) tick(state, []);
+}
+
+/** В тик постройки бур ещё вне сети: подключаем и делаем один тик — он первый тик цикла добычи. */
+function powerUp(state: SimState): SimState {
+  electrify(state);
+  tick(state, []);
+  return state;
 }
 
 function withDrill(deposits: { x: number; y: number; item: string; amount: number }[]): SimState {
   const state = stocked(createState(1, { width: 8, height: 8, deposits }));
   tick(state, [{ type: 'build', building: 'drill', x: 2, y: 2, dir: 0 }]);
-  return state;
+  return powerUp(state);
 }
 
 describe('бур', () => {
@@ -26,7 +34,7 @@ describe('бур', () => {
   it('выдаёт одну руду за miningTicks тиков, несколько циклов подряд', () => {
     const state = withDrill([{ x: 2, y: 2, item: 'ironOre', amount: 100 }]);
     const b = buildingAt(state, 2, 2)!;
-    // Тик постройки уже прошёл и засчитан как первый тик цикла.
+    // Первый тик цикла уже прошёл (см. powerUp).
     run(state, T - 2);
     expect(b.output).toBeNull();
     for (let cycle = 1; cycle <= 3; cycle++) {
@@ -74,7 +82,7 @@ describe('бур', () => {
     function drillWith(cmds: Command[], dir: Dir = 1): SimState {
       const state = stocked(createState(1, { width: 8, height: 8, deposits: ore }));
       tick(state, [{ type: 'build', building: 'drill', x: 2, y: 2, dir }, ...cmds]);
-      return state;
+      return powerUp(state);
     }
     const put = (building: string, x: number, y: number, dir: Dir = 1): Command => ({
       type: 'build',

@@ -9,7 +9,7 @@ import {
   type PlacedBuilding,
   type SimState,
 } from './index';
-import { stocked } from './testKit';
+import { electrify, stocked } from './testKit';
 
 const ORE = 100;
 const E = 1;
@@ -29,7 +29,7 @@ function plant(): SimState {
   ]);
   // Печи нужно топливо: уголя хватает на всю плавку (100 циклов ~ 7 штук).
   buildingAt(state, 4, 0)!.fuel = { item: 'coal', count: 20 };
-  return state;
+  return electrify(state);
 }
 
 /** Сколько предметов данного вида лежит во всех зданиях. */
@@ -74,6 +74,7 @@ describe('руда -> пластины', () => {
     const furnace = buildingAt(state, 3, 0)!;
     furnace.fuel = { item: 'coal', count: 1 };
     chest.slots = [{ item: 'ironOre', count: 10 }];
+    electrify(state);
     const cap = recipes.smeltIron.in.ironOre! * buildings.furnace.inputBuffer;
     for (let i = 0; i < 150; i++) {
       tick(state, []);

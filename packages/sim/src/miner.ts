@@ -2,6 +2,7 @@ import type { BuildingDef } from '@factory/content';
 import { buildingAt, footprintSize, type BuildingDefs, type PlacedBuilding } from './buildings';
 import { cellIndex, type Deposit, type GameMap } from './grid';
 import type { SimState } from './state';
+import { electricTick } from './power';
 import { accept, canAccept } from './transfer';
 
 /** Первая непустая залежь под отпечатком бура, по строкам сверху вниз и слева направо. */
@@ -52,20 +53,29 @@ function emit(state: SimState, b: PlacedBuilding, def: BuildingDef, defs: Buildi
 /**
  * Поведение miner: раз в miningTicks тиков переносит единицу руды из залежи
  * в выходной буфер, затем выкладывает не больше одной единицы в клетку перед
- * собой (см. emit). Без залежи или с полным буфером цикл добычи не идёт.
+ * собой (см. emit). Без залежи или с полным буфером цикл добычи не идёт (и энергию не берёт).
+ * Выдача из буфера энергии не требует.
  */
-export function runMiner(state: SimState, b: PlacedBuilding, def: BuildingDef, defs: BuildingDefs): void {
-  mine(state.map, b, def);
+export function runMiner(
+  state: SimState,
+  b: PlacedBuilding,
+  def: BuildingDef,
+  defs: BuildingDefs,
+  satisfaction: number | undefined,
+): void {
+  mine(state.map, b, def, satisfaction);
   emit(state, b, def, defs);
 }
 
-function mine(map: GameMap, b: PlacedBuilding, def: BuildingDef): void {
+function mine(map: GameMap, b: PlacedBuilding, def: BuildingDef, satisfaction: number | undefined): void {
   const ticks = def.miningTicks ?? 0;
   if (ticks <= 0) return;
   const at = depositUnder(map, b, def);
   if (at < 0) return;
   const deposit = map.deposits[at] as Deposit;
   if (!canStore(b, deposit.item, def.buffer ?? 0)) return;
+  // Шаг добычи идёт со скоростью × удовлетворённость сети; вне сети бур стоит.
+  if (def.energy?.kind === 'electric' && !electricTick(b, satisfaction)) return;
   b.progress += 1;
   if (b.progress < ticks) return;
   b.progress = 0;

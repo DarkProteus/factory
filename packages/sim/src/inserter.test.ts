@@ -10,12 +10,13 @@ import {
   type PlacedBuilding,
   type SimState,
 } from './index';
-import { stocked } from './testKit';
+import { electrify, stocked } from './testKit';
 
 const SWING = buildings.inserter.swingTicks;
 const SLOTS = buildings.chest.slots;
 
 function run(state: SimState, ticks: number): void {
+  electrify(state);
   for (let i = 0; i < ticks; i++) tick(state, []);
 }
 

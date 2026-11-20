@@ -20,7 +20,7 @@ function factory(): SimState {
   for (let y = 0; y < 2; y++) for (let x = 0; x < 2; x++) deposits.push({ x, y, item: 'ironOre', amount: 100 });
   const state = createState(1, { width: 16, height: 8, deposits });
   // Постройка тратит предмет-здание.
-  for (const [item, count] of [['drill', 1], ['belt', 3], ['inserter', 2], ['furnace', 1], ['chest', 1]] as const) {
+  for (const [item, count] of [['drill', 1], ['belt', 3], ['inserter', 2], ['furnace', 1], ['chest', 1], ['pole', 2], ['generator', 1]] as const) {
     state.inventory.push({ item, count });
   }
   const cmds: Command[] = [
@@ -30,8 +30,13 @@ function factory(): SimState {
     { type: 'build', building: 'furnace', x: 6, y: 0, dir: 1 },
     { type: 'build', building: 'inserter', x: 8, y: 0, dir: 1 },
     { type: 'build', building: 'chest', x: 9, y: 0, dir: 1 },
+    // Электросеть для бура и манипуляторов.
+    { type: 'build', building: 'pole', x: 3, y: 2, dir: 0 },
+    { type: 'build', building: 'pole', x: 8, y: 2, dir: 0 },
+    { type: 'build', building: 'generator', x: 0, y: 3, dir: 0 },
   ];
   for (const c of cmds) applyCommand(state, c);
+  Object.values(state.buildings).find((b) => b.type === 'generator')!.fuel = { item: 'coal', count: 10 };
   return state;
 }
 

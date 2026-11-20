@@ -65,6 +65,10 @@ groma:
       file: packages/sim/src/splitter.ts
     - scanner: typescript
       file: packages/sim/src/manual.ts
+    - scanner: typescript
+      file: packages/sim/src/network.ts
+    - scanner: typescript
+      file: packages/sim/src/power.ts
   technology: TypeScript
 description: Хранит состояние мира и обновляет его раз в тик
 ---
