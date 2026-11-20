@@ -35,6 +35,13 @@ groma:
       file: packages/render/src/draw/buildings.ts
     - scanner: typescript
       file: packages/render/src/overlay.ts
+    - scanner: typescript
+      file: packages/render/src/draw/buildingIcon.ts
+      symbol: drawBuildingIcon
+    - scanner: typescript
+      file: packages/render/src/draw/buildingsM2.ts
+    - scanner: typescript
+      file: packages/render/src/draw/rocks.ts
   technology: TypeScript, PixiJS
 description: Рисует состояние мира, ничего в нём не меняя
 ---
@@ -45,4 +52,10 @@ description: Рисует состояние мира, ничего в нём н
 
 | Source | Target | Description | Technology |
 | --- | --- | --- | --- |
-| [packages/render/src/scene.ts](../../../../../../packages/render/src/scene.ts) | [packages/sim/src/index.ts](../../../../../../packages/sim/src/index.ts) | Читает состояние | DeepReadonly<SimState> |
+| [packages/render/src/scene.ts](../../../../../../packages/render/src/scene.ts) | [packages/sim/src/index.ts](../../../../../../packages/sim/src/index.ts) | Читает состояние | DeepReadonly |
+
+## Derived relationships
+
+| Source | Target | Description | Technology |
+| --- | --- | --- | --- |
+| [packages/render/src/draw/buildings.ts](../../../../../../packages/render/src/draw/buildings.ts) | [packages/render/src/draw/buildingIcon.ts](../../../../../../packages/render/src/draw/buildingIcon.ts) | Invokes supplied callback: armAngle | typescript |

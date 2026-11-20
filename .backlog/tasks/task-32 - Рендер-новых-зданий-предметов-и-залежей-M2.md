@@ -1,10 +1,10 @@
 ---
 id: TASK-32
 title: Рендер новых зданий, предметов и залежей M2
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-11-20T18:38:00Z'
-updated_date: '2026-11-20T19:17:00Z'
+updated_date: '2026-11-20T19:19:00Z'
 labels:
   - m2
 dependencies:
@@ -39,7 +39,7 @@ ordinal: 35000
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [x] #1 style.md описывает новые здания, предметы и залежи
-- [ ] #2 Все здания и предметы M2 рисуются по style.md; скриншот проверен
+- [x] #2 Все здания и предметы M2 рисуются по style.md; скриншот проверен
 <!-- AC:END -->
 
 ## Implementation Notes
