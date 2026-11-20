@@ -1,6 +1,8 @@
 import type { BuildingDef } from '@factory/content';
-import { footprintSize, type PlacedBuilding } from './buildings';
+import { buildingAt, footprintSize, type BuildingDefs, type PlacedBuilding } from './buildings';
 import { cellIndex, type Deposit, type GameMap } from './grid';
+import type { SimState } from './state';
+import { accept, canAccept } from './transfer';
 
 /** Первая непустая залежь под отпечатком бура, по строкам сверху вниз и слева направо. */
 function depositUnder(map: GameMap, b: PlacedBuilding, def: BuildingDef): number {
@@ -20,10 +22,44 @@ function canStore(b: PlacedBuilding, item: string, capacity: number): boolean {
 }
 
 /**
- * Поведение miner: раз в miningTicks тиков переносит единицу руды из залежи
- * в выходной буфер. Без залежи или с полным буфером цикл не идёт.
+ * Клетка выдачи: первая клетка вдоль переднего края отпечатка, считая от левого
+ * верхнего угла. N: (x, y-1); E: (x+w, y); S: (x, y+h); W: (x-1, y).
  */
-export function runMiner(map: GameMap, b: PlacedBuilding, def: BuildingDef): void {
+function frontCell(b: PlacedBuilding, def: BuildingDef): [number, number] {
+  const [w, h] = footprintSize(def.size, b.dir);
+  switch (b.dir) {
+    case 0:
+      return [b.x, b.y - 1];
+    case 1:
+      return [b.x + w, b.y];
+    case 2:
+      return [b.x, b.y + h];
+    default:
+      return [b.x - 1, b.y];
+  }
+}
+
+/** Выкладывает не больше одной единицы из буфера в здание перед буром, если оно принимает. */
+function emit(state: SimState, b: PlacedBuilding, def: BuildingDef, defs: BuildingDefs): void {
+  if (!b.output) return;
+  const to = buildingAt(state, ...frontCell(b, def));
+  if (!to || !canAccept(to, b.output.item, defs)) return;
+  accept(to, b.output.item, defs);
+  b.output.count -= 1;
+  if (b.output.count <= 0) b.output = null;
+}
+
+/**
+ * Поведение miner: раз в miningTicks тиков переносит единицу руды из залежи
+ * в выходной буфер, затем выкладывает не больше одной единицы в клетку перед
+ * собой (см. emit). Без залежи или с полным буфером цикл добычи не идёт.
+ */
+export function runMiner(state: SimState, b: PlacedBuilding, def: BuildingDef, defs: BuildingDefs): void {
+  mine(state.map, b, def);
+  emit(state, b, def, defs);
+}
+
+function mine(map: GameMap, b: PlacedBuilding, def: BuildingDef): void {
   const ticks = def.miningTicks ?? 0;
   if (ticks <= 0) return;
   const at = depositUnder(map, b, def);

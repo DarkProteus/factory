@@ -16,7 +16,7 @@ export function runBehaviors(state: SimState, defs: BuildingDefs = contentBuildi
     if (!def) continue;
     switch (def.behavior) {
       case 'miner':
-        runMiner(state.map, b, def);
+        runMiner(state, b, def, defs);
         break;
       case 'inserter':
         runInserter(state, b, def, defs);
