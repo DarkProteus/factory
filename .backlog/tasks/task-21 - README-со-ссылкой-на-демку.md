@@ -1,9 +1,10 @@
 ---
 id: TASK-21
 title: README со ссылкой на демку
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-11-20T16:36:00Z'
+updated_date: '2026-11-20T16:37:00Z'
 labels: []
 dependencies: []
 references:
@@ -20,7 +21,7 @@ ordinal: 20000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 В корне есть README.md: описание игры, ссылка на демку на GitHub Pages, команды pnpm dev/test/build
-- [ ] #2 Описаны пакеты и границы между ними (коротко, по CLAUDE.md)
-- [ ] #3 Ссылка на демку соответствует адресу из deploy.yml
+- [x] #1 В корне есть README.md: описание игры, ссылка на демку на GitHub Pages, команды pnpm dev/test/build
+- [x] #2 Описаны пакеты и границы между ними (коротко, по CLAUDE.md)
+- [x] #3 Ссылка на демку соответствует адресу из deploy.yml
 <!-- AC:END -->
