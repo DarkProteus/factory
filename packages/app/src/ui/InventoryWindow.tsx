@@ -1,36 +1,12 @@
-import type { RecipeDef } from '@factory/content';
-import { canCraft, countItem, craftCommand, inventoryCells, manualRecipes, recipeSeconds } from '../craftUi';
+import { canCraft, craftCommand, inventoryCells, manualRecipes } from '../craftUi';
 import type { Game } from '../game';
 import { Panel } from './BuildPanel';
 import { ItemSlot } from './ItemSlot';
-import { itemName } from './names';
+import { RecipeTip } from './RecipeTip';
 import { useTick } from './useTick';
 import './inventory.css';
 
 const RECIPES = manualRecipes();
-
-/** Подсказка рецепта: продукт, ингредиенты «имеется / нужно» (нехватка красным), время. */
-function RecipeTip({ game, def }: { game: Game; def: RecipeDef }) {
-  const inventory = game.getInventory();
-  const product = Object.keys(def.out)[0]!;
-  return (
-    <span className="tip recipe-tip">
-      <span className="rt-name">{itemName(product)}</span>
-      {Object.entries(def.in).map(([item, need]) => {
-        const have = countItem(inventory, item);
-        return (
-          <span key={item} className={`rt-row${have < need ? ' short' : ''}`}>
-            <img src={game.itemIcon(item)} alt="" />
-            <span>
-              {have} / {need}
-            </span>
-          </span>
-        );
-      })}
-      <span className="rt-time">{String(recipeSeconds(def)).replace('.', ',')} с</span>
-    </span>
-  );
-}
 
 /** Окно инвентаря (E): слева ячейки, справа рецепты ручного крафта. Рисуется, только пока открыто. */
 export function InventoryWindow({ game }: { game: Game }) {

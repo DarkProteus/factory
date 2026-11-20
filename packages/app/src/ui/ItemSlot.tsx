@@ -12,10 +12,14 @@ interface Props {
   /** Подсказка при наведении. */
   tip?: ReactNode;
   onClick?: () => void;
+  /** Перекладка между инвентарём и зданием: под курсором фон `ui-hover`, а не рамка отмены. */
+  move?: boolean;
+  /** Здание не примет предмет: под курсором рамка `bad`. */
+  reject?: boolean;
 }
 
 /** Ячейка предмета: общий элемент окна инвентаря, очереди крафта и окна здания. */
-export function ItemSlot({ game, item, count = 1, progress, tip, onClick }: Props) {
+export function ItemSlot({ game, item, count = 1, progress, tip, onClick, move, reject }: Props) {
   const body = (
     <>
       {item && <img src={game.itemIcon(item)} alt={itemName(item)} draggable={false} />}
@@ -25,7 +29,7 @@ export function ItemSlot({ game, item, count = 1, progress, tip, onClick }: Prop
     </>
   );
   return onClick ? (
-    <button type="button" className="slot clickable" onClick={onClick}>
+    <button type="button" className={`slot clickable${move ? ' move' : ''}${reject ? ' reject' : ''}`} onClick={onClick}>
       {body}
     </button>
   ) : (

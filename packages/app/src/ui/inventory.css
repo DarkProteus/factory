@@ -125,3 +125,18 @@
   font: 500 12px 'IBM Plex Mono', monospace;
   color: var(--text-dim);
 }
+
+/* Окно здания: перекладка. Под курсором фон ui-hover; предмет, который здание не примет, — рамка bad. */
+.slot.clickable.move:hover {
+  background: var(--ui-hover);
+  border-color: var(--outline);
+}
+.slot.clickable.move.reject:hover {
+  border-color: var(--bad);
+}
+.recipe-tip .rt-note {
+  display: block;
+  margin-top: 4px;
+  font: 500 12px 'IBM Plex Mono', monospace;
+  color: var(--bad);
+}

@@ -1,0 +1,59 @@
+/* Окно здания по docs/style-ui.md, «Окно здания». Раскладка окна общая с инвентарём (inventory.css). */
+.bw-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 308px;
+}
+.bw-col h3 {
+  margin: 0 0 4px;
+  font: 500 12px 'Oswald', sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.bw-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 400 14px 'IBM Plex Sans', sans-serif;
+  color: var(--text);
+}
+.bw-status .lamp {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--lamp-off);
+}
+.bw-status .lamp.work { background: var(--lamp-work); }
+.bw-status .lamp.wait { background: var(--lamp-wait); }
+.bw-bar {
+  height: 6px;
+  background: var(--ui-pressed);
+}
+.bw-bar i {
+  display: block;
+  height: 100%;
+  background: var(--hazard);
+}
+.bw-energy {
+  display: flex;
+  gap: 16px;
+  font: 500 12px 'IBM Plex Mono', monospace;
+  color: var(--text);
+}
+.bw-energy .label {
+  color: var(--text-dim);
+}
+.bw-energy .bad {
+  color: var(--bad);
+}
+.bw-cells {
+  display: flex;
+  gap: 4px;
+}
+.bw-chest {
+  display: grid;
+  grid-template-columns: repeat(8, 40px);
+  gap: 4px;
+}

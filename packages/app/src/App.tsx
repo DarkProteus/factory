@@ -4,6 +4,7 @@ import { PACKAGE as save } from '@factory/save';
 import { PACKAGE as sim } from '@factory/sim';
 import { useEffect, useRef, useState } from 'react';
 import { startGame, type Game } from './game';
+import { BuildingWindow } from './ui/BuildingWindow';
 import { BuildPanel } from './ui/BuildPanel';
 import { CraftQueue } from './ui/CraftQueue';
 import { Hud } from './ui/Hud';
@@ -47,6 +48,7 @@ export function App() {
           </div>
           <InventoryWindow game={game} />
           <NetSummaryTip game={game} />
+          <BuildingWindow game={game} />
         </div>
       )}
     </>

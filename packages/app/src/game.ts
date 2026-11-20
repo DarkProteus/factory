@@ -2,7 +2,7 @@
 // только tick(state, commands); ввод превращается в команды через CommandQueue.
 import { startMap } from '@factory/content';
 import { createRenderer } from '@factory/render';
-import { createState, tick, type Command, type CraftJob, type ItemStack } from '@factory/sim';
+import { createState, tick, type Command, type CraftJob, type ItemStack, type SimState } from '@factory/sim';
 import {
   applyKey,
   cellAt,
@@ -19,7 +19,7 @@ import {
   type Cell,
   type ToolState,
 } from './input';
-import { applyUiKey } from './craftUi';
+import { applyWindowKey, windowTarget } from './buildingUi';
 import { netSummaryAt, type NetSummary } from './powerSummary';
 import { clearSave, loadGame, saveGame, shouldAutosave, type KeyValueStorage } from './persist';
 
@@ -71,6 +71,11 @@ export interface Game {
   /** Окно инвентаря (клавиша E). */
   isInventoryOpen(): boolean;
   setInventoryOpen(open: boolean): void;
+  /** Состояние sim только для чтения: окно здания перечитывает его каждый кадр. */
+  getState(): Readonly<SimState>;
+  /** id здания с открытым окном или null; окно здания и окно инвентаря не открыты вместе. */
+  getOpenBuilding(): number | null;
+  closeBuilding(): void;
   destroy(): void;
 }
 
@@ -97,6 +102,7 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
   const listeners = new Set<() => void>();
   let tools: ToolState = { tool: NO_TOOL, dir: 0 };
   let inventoryOpen = false;
+  let openBuilding: number | null = null;
   /** Положение курсора в px канваса; null, если курсор вне канваса. */
   let pointer: { x: number; y: number } | null = null;
   /** Левая кнопка мыши зажата на канвасе (нужна кирке). */
@@ -125,11 +131,14 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
   };
 
   const owned = (id: string) => itemCount(state.inventory, id);
-  const setInventoryOpen = (open: boolean) => {
-    if (open === inventoryOpen) return;
-    inventoryOpen = open;
+  /** Окна взаимоисключающие: открытие одного закрывает другое. */
+  const setWindows = (inventory: boolean, building: number | null) => {
+    if (inventory === inventoryOpen && building === openBuilding) return;
+    inventoryOpen = inventory;
+    openBuilding = building;
     listeners.forEach((l) => l());
   };
+  const setInventoryOpen = (open: boolean) => setWindows(open, open ? null : openBuilding);
 
   const cellUnderPointer = (): Cell | null => {
     if (!pointer) return null;
@@ -151,14 +160,18 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
     const cell = cellUnderPointer();
     const command = cell && clickCommand(state, tools, cell);
     if (command) queue.push(command);
+    // Без инструмента клик по зданию открывает его окно.
+    const target = cell && windowTarget(state, tools.tool, cell);
+    if (target) setWindows(false, target);
   };
   const onUp = () => (pressed = false);
   const onKey = (e: KeyboardEvent) => {
     if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-    // Esc сначала закрывает окно инвентаря, инструмент при этом остаётся.
-    const closing = e.code === 'Escape' && inventoryOpen;
-    setInventoryOpen(applyUiKey(inventoryOpen, e.code));
+    // Esc сначала закрывает окно (инвентаря или здания), инструмент при этом остаётся.
+    const closing = e.code === 'Escape' && (inventoryOpen || openBuilding !== null);
+    const next = applyWindowKey({ inventory: inventoryOpen, building: openBuilding }, e.code);
+    setWindows(next.inventory, next.building);
     if (!closing) setTools(applyKey(tools, e.code, undefined, owned));
   };
   const onHidden = () => {
@@ -189,6 +202,8 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
       tick(state, queue.drain());
       acc -= TICK_MS;
     }
+    // Снесённое здание закрывает своё окно.
+    if (openBuilding !== null && !state.buildings[openBuilding]) setWindows(inventoryOpen, null);
     // Последний экземпляр построен: режим стройки сбрасывается.
     setTools(dropEmptyTool(state, tools));
     if (shouldAutosave(state.tick, lastSavedTick)) save();
@@ -226,6 +241,9 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
     },
     isInventoryOpen: () => inventoryOpen,
     setInventoryOpen,
+    getState: () => state,
+    getOpenBuilding: () => openBuilding,
+    closeBuilding: () => setWindows(inventoryOpen, null),
     destroy() {
       cancelAnimationFrame(frame);
       clearTimeout(messageTimer);
