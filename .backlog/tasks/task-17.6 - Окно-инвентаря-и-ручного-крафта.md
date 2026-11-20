@@ -1,10 +1,10 @@
 ---
 id: TASK-17.6
 title: Окно инвентаря и ручного крафта
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-20T18:38:00Z'
-updated_date: '2026-11-20T18:38:00Z'
+updated_date: '2026-11-20T19:33:00Z'
 labels:
   - m2
 dependencies:

@@ -1,10 +1,10 @@
 ---
 id: TASK-17.7
 title: Инструмент «кирка»
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-20T18:38:00Z'
-updated_date: '2026-11-20T18:38:00Z'
+updated_date: '2026-11-20T19:33:00Z'
 labels:
   - m2
 dependencies:
