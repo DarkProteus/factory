@@ -99,6 +99,7 @@ describe('бур', () => {
       expect(buildingAt(withChest, 2, 2)!.output).toBeNull();
 
       const withFurnace = drillWith([put('furnace', 4, 2)]);
+      buildingAt(withFurnace, 4, 2)!.fuel = { item: 'coal', count: 1 };
       run(withFurnace, T - 1);
       // Печь сразу списывает руду в цикл плавки: принятая руда видна по прогрессу.
       expect(buildingAt(withFurnace, 4, 2)!.progress).toBeGreaterThan(0);

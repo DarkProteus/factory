@@ -1,6 +1,7 @@
 import { BELT_GAP, pushToBelt } from './belt';
 import type { BuildingDefs, PlacedBuilding } from './buildings';
 import { crafterAccept, crafterCanAccept } from './crafter';
+import { fuelAccept, fuelCanAccept } from './fuel';
 import { add, canAdd, takeFirst } from './inventory';
 
 /** Принимает ли здание предмет прямо сейчас. Бур и манипулятор не принимают ничего. */
@@ -16,6 +17,8 @@ export function canAccept(b: PlacedBuilding, item: string, defs: BuildingDefs): 
       return crafterCanAccept(b, def, item);
     case 'container':
       return canAdd(b.slots ?? [], def.slots ?? 0, item);
+    case 'generator':
+      return fuelCanAccept(b, def, item);
     default:
       return false;
   }
@@ -29,10 +32,13 @@ export function accept(b: PlacedBuilding, item: string, defs: BuildingDefs): voi
       pushToBelt(b, item);
       break;
     case 'crafter':
-      crafterAccept(b, item);
+      crafterAccept(b, def, item);
       break;
     case 'container':
       add((b.slots ??= []), def.slots ?? 0, item);
+      break;
+    case 'generator':
+      fuelAccept(b, item);
       break;
   }
 }

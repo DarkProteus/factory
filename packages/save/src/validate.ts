@@ -61,6 +61,8 @@ function checkBuilding(key: string, b: unknown): void {
   if (b.output !== null) checkStack(b.output, `${where}.output`);
   if (b.input !== undefined) checkStacks(b.input, `${where}.input`);
   if (b.slots !== undefined) checkStacks(b.slots, `${where}.slots`);
+  if (b.fuel !== undefined) checkStack(b.fuel, `${where}.fuel`);
+  if (b.burn !== undefined && (!Number.isInteger(b.burn) || (b.burn as number) < 0)) fail(where, 'неверное поле burn');
   if (b.recipe !== undefined && (typeof b.recipe !== 'string' || !Object.hasOwn(recipes, b.recipe))) {
     fail(where, `неизвестный рецепт «${String(b.recipe)}»`);
   }

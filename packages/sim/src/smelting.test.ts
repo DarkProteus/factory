@@ -27,6 +27,8 @@ function plant(): SimState {
     cmd('inserter', 6, 0),
     cmd('chest', 7, 0),
   ]);
+  // Печи нужно топливо: уголя хватает на всю плавку (100 циклов ~ 7 штук).
+  buildingAt(state, 4, 0)!.fuel = { item: 'coal', count: 20 };
   return state;
 }
 
@@ -70,6 +72,7 @@ describe('руда -> пластины', () => {
     const chest = buildingAt(state, 1, 0)!;
     const hand = buildingAt(state, 2, 0)!;
     const furnace = buildingAt(state, 3, 0)!;
+    furnace.fuel = { item: 'coal', count: 1 };
     chest.slots = [{ item: 'ironOre', count: 10 }];
     const cap = recipes.smeltIron.in.ironOre! * buildings.furnace.inputBuffer;
     for (let i = 0; i < 150; i++) {

@@ -41,7 +41,10 @@ function factory(): SimState {
     { item: 'furnace', count: 1 },
     { item: 'chest', count: 1 },
   ];
-  runTicks(state, BUILD, 400);
+  runTicks(state, BUILD, 1);
+  // Печь жжёт уголь: кладём топливо, чтобы цикл шёл и остаток энергии попал в сохранение.
+  Object.values(state.buildings).find((b) => b.type === 'furnace')!.fuel = { item: 'coal', count: 10 };
+  runTicks(state, BUILD, 399);
   state.inventory = [
     { item: 'ironPlate', count: 40 },
     { item: 'ammo', count: 3 },
@@ -59,6 +62,8 @@ describe('сохранение завода', () => {
     expect(b.some((x) => x.type === 'belt' && (x.belt?.length ?? 0) > 0)).toBe(true);
     expect(b.some((x) => x.type === 'drill' && x.output)).toBe(true);
     expect(b.some((x) => x.type === 'furnace' && (x.input?.length || x.output || x.progress > 0))).toBe(true);
+    // Топливо в ячейке печи и остаток энергии сгоревшего угля.
+    expect(b.some((x) => x.type === 'furnace' && x.fuel && x.burn)).toBe(true);
     expect(b.some((x) => x.type === 'chest' && x.slots?.length)).toBe(true);
     expect(state.inventory.length).toBe(2);
     expect(state.map.deposits[0]?.item).toBe('ironOre');
@@ -157,6 +162,16 @@ describe('битые сохранения', () => {
       furnace.recipe = 'nope';
     });
     expect(() => deserialize(text)).toThrow(/неизвестный рецепт «nope»/);
+  });
+
+  it('ячейка топлива и остаток энергии валидируются', () => {
+    const furnace = (s: any) => Object.values<any>(s.buildings).find((b) => b.type === 'furnace');
+    expect(() => deserialize(tamper((s) => (furnace(s).fuel = { item: 'unobtainium', count: 1 })))).toThrow(/предмет «unobtainium»/);
+    expect(() => deserialize(tamper((s) => (furnace(s).fuel = { item: 'coal', count: 0 })))).toThrow(SaveError);
+    expect(() => deserialize(tamper((s) => (furnace(s).fuel = 'уголь')))).toThrow(SaveError);
+    expect(() => deserialize(tamper((s) => (furnace(s).burn = -1)))).toThrow(/burn/);
+    expect(() => deserialize(tamper((s) => (furnace(s).burn = 1.5)))).toThrow(SaveError);
+    expect(() => deserialize(tamper((s) => (furnace(s).burn = 'много')))).toThrow(SaveError);
   });
 
   it('исходный запас залежи валидируется', () => {

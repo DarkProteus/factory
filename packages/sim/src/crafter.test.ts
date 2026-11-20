@@ -1,4 +1,4 @@
-import { buildings, recipes } from '@factory/content';
+import { buildings, items, recipes } from '@factory/content';
 import { describe, expect, it } from 'vitest';
 import { crafterCanAccept } from './crafter';
 import { buildingAt, createState, tick, type Command, type PlacedBuilding, type SimState } from './index';
@@ -15,7 +15,10 @@ function run(state: SimState, ticks: number): void {
 function withFurnace(): { state: SimState; f: PlacedBuilding } {
   const state = stocked(createState(1, { width: 8, height: 8 }));
   tick(state, [{ type: 'build', building: 'furnace', x: 2, y: 2, dir: 0 } as Command]);
-  return { state, f: buildingAt(state, 2, 2)! };
+  const f = buildingAt(state, 2, 2)!;
+  // Печи нужно топливо: полная стопка угля хватает на все тесты.
+  f.fuel = { item: 'coal', count: items.coal.stack };
+  return { state, f };
 }
 
 function load(f: PlacedBuilding, count: number): void {

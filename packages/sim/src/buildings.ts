@@ -26,6 +26,10 @@ export interface PlacedBuilding {
   recipe?: string;
   /** Ячейки контейнера: только непустые стеки. */
   slots?: ItemStack[];
+  /** Ячейка топлива (fuelSlot): одна стопка; пустой не бывает, при нуле поле удаляется. См. fuel.ts. */
+  fuel?: ItemStack;
+  /** Остаток энергии уже сожжённого топлива, Вт·тик (целое); появляется после первого предмета топлива. */
+  burn?: number;
 }
 
 /** Стопка одного предмета. */
@@ -123,7 +127,7 @@ export function placeBuilding(
 }
 
 /**
- * Всё, что лежит в здании: конвейер, выход, вход крафтера, ячейки контейнера
+ * Всё, что лежит в здании: конвейер, выход, вход крафтера, ячейки контейнера, ячейка топлива
  * и ингредиенты идущего цикла крафта (они списаны со входа на старте цикла).
  */
 function contents(b: PlacedBuilding): ItemStack[] {
@@ -136,6 +140,7 @@ function contents(b: PlacedBuilding): ItemStack[] {
   for (const it of b.belt ?? []) stacks.push({ item: it.item, count: 1 });
   if (b.output) stacks.push(b.output);
   stacks.push(...(b.input ?? []), ...(b.slots ?? []));
+  if (b.fuel) stacks.push(b.fuel);
   return stacks;
 }
 
