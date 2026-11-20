@@ -60,6 +60,13 @@ groma:
     - scanner: typescript
       file: packages/app/src/ui/useTick.ts
       symbol: useTick
+    - scanner: react
+      file: packages/app/src/ui/NetSummaryTip.tsx
+    - scanner: typescript
+      file: packages/app/src/ui/NetSummaryTip.tsx
+      symbol: NetSummaryTip
+    - scanner: typescript
+      file: packages/app/src/powerSummary.ts
   technology: React
 description: Превращает ввод игрока в команды для ядра
 ---
