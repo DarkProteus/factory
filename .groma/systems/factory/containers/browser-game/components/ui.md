@@ -67,6 +67,18 @@ groma:
       symbol: NetSummaryTip
     - scanner: typescript
       file: packages/app/src/powerSummary.ts
+    - scanner: typescript
+      file: packages/app/src/buildingUi.ts
+    - scanner: react
+      file: packages/app/src/ui/BuildingWindow.tsx
+    - scanner: typescript
+      file: packages/app/src/ui/BuildingWindow.tsx
+      symbol: BuildingWindow
+    - scanner: react
+      file: packages/app/src/ui/RecipeTip.tsx
+    - scanner: typescript
+      file: packages/app/src/ui/RecipeTip.tsx
+      symbol: RecipeTip
   technology: React
 description: Превращает ввод игрока в команды для ядра
 ---
