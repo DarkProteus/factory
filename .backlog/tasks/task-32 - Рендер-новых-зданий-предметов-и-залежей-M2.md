@@ -4,7 +4,7 @@ title: Рендер новых зданий, предметов и залеже�
 status: In Progress
 assignee: []
 created_date: '2026-11-20T18:38:00Z'
-updated_date: '2026-11-20T19:08:00Z'
+updated_date: '2026-11-20T19:17:00Z'
 labels:
   - m2
 dependencies:
@@ -13,6 +13,19 @@ references:
   - render
 modified_files:
   - docs/style.md
+  - packages/render/src/palette.ts
+  - packages/render/src/scene.ts
+  - packages/render/src/overlay.ts
+  - packages/render/src/draw/buildings.ts
+  - packages/render/src/draw/buildingsM2.ts
+  - packages/render/src/draw/buildingIcon.ts
+  - packages/render/src/draw/ground.ts
+  - packages/render/src/draw/items.ts
+  - packages/render/src/draw/rocks.ts
+  - packages/render/src/draw/lamps.test.ts
+  - packages/render/src/scene.test.ts
+  - packages/app/src/ui/theme.css
+  - packages/app/src/ui/names.ts
 type: feature
 ordinal: 35000
 ---

@@ -6,6 +6,10 @@ const NAMES: Record<string, string> = {
   furnace: 'Печь',
   inserter: 'Манипулятор',
   chest: 'Сундук',
+  splitter: 'Разделитель',
+  assembler: 'Сборщик',
+  pole: 'Столб',
+  generator: 'Генератор',
 };
 
 export const buildingName = (id: string): string => NAMES[id] ?? id;

@@ -1,6 +1,9 @@
+import { items as contentItems, buildings as contentBuildings } from '@factory/content';
+import { Graphics } from 'pixi.js';
 import { applyCommand, createState, hash, tick, type Command, type SimState } from '@factory/sim';
 import { describe, expect, it } from 'vitest';
 import { Camera } from './camera';
+import { drawItem } from './draw/items';
 import { Scene } from './scene';
 
 function deepFreeze<T>(value: T): T {
@@ -51,5 +54,48 @@ describe('сцена', () => {
       expect(hash(state)).toBe(before);
     }
     expect(Object.values(state.buildings).some((b) => (b.belt?.length ?? 0) > 0)).toBe(true);
+  });
+
+  it('рисует здания, залежи и предметы M2 без исключений, включая нехватку топлива', () => {
+    const deposits = ['copperOre', 'coal', 'stone', 'ironOre'].map((item, x) => ({ x, y: 0, item, amount: 100 }));
+    const state = createState(1, { width: 24, height: 12, deposits });
+    const place = (building: string, x: number, y: number, dir: 0 | 1 | 2 | 3 = 0) => {
+      state.inventory.push({ item: building, count: 1 });
+      applyCommand(state, { type: 'build', building, x, y, dir });
+    };
+    place('splitter', 0, 2, 1);
+    place('assembler', 2, 2);
+    place('pole', 6, 2, 2);
+    place('generator', 8, 2);
+    place('furnace', 12, 2);
+    place('furnace', 15, 2);
+    for (const b of Object.values(state.buildings)) {
+      if (b.type === 'assembler') b.recipe = 'circuit';
+      if (b.type === 'splitter') b.output = { item: 'ironPlate', count: 1 };
+    }
+    // Генератор с топливом и сожжённым остатком, вторая печь с топливом и циклом, первая — без топлива.
+    const [gen, f1, f2] = Object.values(state.buildings).filter((b) => ['generator', 'furnace'].includes(b.type));
+    gen!.fuel = { item: 'coal', count: 3 };
+    gen!.burn = 1000;
+    f2!.fuel = { item: 'coal', count: 1 };
+    f2!.progress = 10;
+    f1!.progress = 5;
+    const scene = new Scene();
+    const camera = new Camera();
+    camera.resize(800, 600);
+    for (const zoom of [1, 0.6]) {
+      camera.setZoom(zoom);
+      scene.update(deepFreeze(structuredClone(state)), 0.5, camera);
+    }
+    scene.setOverlay({ ghost: { building: 'pole', x: 3, y: 6, dir: 1, valid: true }, grid: true });
+    expect(() => scene.update(state, 0, camera)).not.toThrow();
+  });
+
+  it('все предметы content рисуются, в том числе предметы-здания и кругом при мелком зуме', () => {
+    const g = new Graphics();
+    for (const id of [...Object.keys(contentItems), 'unknownItem']) {
+      for (const lod of [false, true]) expect(() => drawItem(g, id, 10, 10, 12, lod)).not.toThrow();
+    }
+    expect(Object.keys(contentBuildings).every((id) => id in contentItems)).toBe(true);
   });
 });

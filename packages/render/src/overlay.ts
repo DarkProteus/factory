@@ -81,7 +81,7 @@ export class OverlayLayer {
   private drawGhost(g: NonNullable<Overlay['ghost']>, def: BuildingDef, state: ViewState): void {
     const [cx, cy] = placement(def, g.x, g.y, g.dir);
     this.ghost.position.set(cx, cy);
-    this.ghost.rotation = (g.dir * Math.PI) / 2;
+    this.ghost.rotation = def.behavior === 'pole' ? 0 : (g.dir * Math.PI) / 2;
     drawPreview(this.ghost, g.building, def, state, g.dir, g.valid ? 'ok' : 'bad');
   }
 

@@ -4,6 +4,7 @@ import type { BuildingDef } from '@factory/content';
 import type { Graphics } from 'pixi.js';
 import type { ViewState } from '../interp';
 import { CELL, palette, SHADOW_ALPHA } from '../palette';
+import { drawAssembler, drawGenerator, drawPole, drawSplitter, outOfFuel } from './buildingsM2';
 import { body, fill, hazardStripes, lamp, line, OUTLINE, OUTLINE_THIN, rectPts, rivets, rust, type LampState } from './shapes';
 
 export type BuildingView = ViewState['buildings'][number];
@@ -39,7 +40,13 @@ export function drawBuilding(g: Graphics, b: BuildingView, def: BuildingDef, ctx
     case 'inserter':
       return drawInserter(g, b, def, ctx);
     case 'crafter':
-      return drawFurnace(g, b, ctx, w, h);
+      return def.recipeMode === 'chosen' ? drawAssembler(g, b, ctx, w, h) : drawFurnace(g, b, def, ctx, w, h);
+    case 'splitter':
+      return drawSplitter(g, b, w, h);
+    case 'pole':
+      return drawPole(g);
+    case 'generator':
+      return drawGenerator(g, b, ctx, w, h);
     case 'container':
       return drawChest(g, b);
     default:
@@ -129,13 +136,21 @@ export function armTip(angle: number): [number, number] {
   return [Math.sin(angle) * 13, -Math.cos(angle) * 13];
 }
 
-export function furnaceLamp(b: BuildingView): LampState {
+/** Стоимость одного тика работы печи в единицах burn (Вт·тик): kw × 1000, см. sim/fuel.ts. */
+function fuelCost(def: BuildingDef): number {
+  return (def.energy?.kw ?? 0) * 1000;
+}
+
+export function furnaceLamp(b: BuildingView, def: BuildingDef): LampState {
+  // Нет топлива: цикл не может ни начаться, ни продолжиться.
+  if (def.fuelSlot && outOfFuel(b, fuelCost(def))) return 'off';
   if (b.progress > 0) return 'work';
   const empty = (b.input ?? []).every((s) => s.count === 0);
   return b.recipe === undefined && empty ? 'off' : 'wait';
 }
 
-function drawFurnace(g: Graphics, b: BuildingView, ctx: FrameCtx, w: number, h: number): void {
+function drawFurnace(g: Graphics, b: BuildingView, def: BuildingDef, ctx: FrameCtx, w: number, h: number): void {
+  const state = furnaceLamp(b, def);
   body(g, w, h, 'rust-dark');
   const x0 = -w / 2 + 2;
   const y0 = -h / 2 + 2;
@@ -146,14 +161,14 @@ function drawFurnace(g: Graphics, b: BuildingView, ctx: FrameCtx, w: number, h: 
   g.stroke(line('rust', 1));
   g.rect(-w / 2 + 2, -h / 2 + 2, w - 4, h - 4).stroke(OUTLINE);
   g.rect(-13, -13, 26, 26).fill(fill('hazard-dark')).stroke(line('steel', 3));
-  if (b.progress > 0) {
+  if (state === 'work') {
     g.rect(-10, -10, 20, 20).fill(fill('heat-1'));
     g.rect(-6, -6, 12, 12).fill(fill('heat-2', 0.75 + 0.25 * Math.sin((ctx.tick + ctx.alpha) * 0.2)));
   }
   g.rect(w / 2 - 16, h / 2 - 16, 10, 10).fill(fill('steel')).stroke(OUTLINE_THIN);
   g.rect(w / 2 - 14, h / 2 - 14, 6, 6).fill(fill('hazard-dark'));
   g.rect(-w / 2 + 2, -h / 2 + 2, w - 4, 4).fill(fill('hazard')).stroke(OUTLINE_THIN);
-  lamp(g, w, h, furnaceLamp(b));
+  lamp(g, w, h, state);
 }
 
 function drawChest(g: Graphics, b: BuildingView): void {
@@ -169,7 +184,13 @@ function drawChest(g: Graphics, b: BuildingView): void {
 export function drawShadow(g: Graphics, def: BuildingDef, cx: number, cy: number, w: number, h: number): void {
   const color = { color: palette.shadow, alpha: SHADOW_ALPHA };
   if (def.behavior === 'belt') return;
-  if (def.behavior === 'inserter') g.circle(cx + 3, cy + 3, 10).fill(color);
+  if (def.behavior === 'splitter') {
+    const d = 8 * Math.SQRT2;
+    g.poly([cx + 3, cy - d + 3, cx + d + 3, cy + 3, cx + 3, cy + d + 3, cx - d + 3, cy + 3]).fill(color);
+  } else if (def.behavior === 'pole') {
+    g.rect(cx - 5 + 3, cy - 5 + 3, 10, 10).fill(color);
+    g.rect(cx - 11 + 3, cy - 2 + 3, 22, 4).fill(color);
+  } else if (def.behavior === 'inserter') g.circle(cx + 3, cy + 3, 10).fill(color);
   else if (def.behavior === 'container') g.rect(cx - 10, cy - 10, 26, 26).fill(color);
   else g.rect(cx - w / 2 + 5, cy - h / 2 + 5, w - 4, h - 4).fill(color);
 }

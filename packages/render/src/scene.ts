@@ -2,6 +2,7 @@
 import { buildings as contentBuildings, type BuildingDef } from '@factory/content';
 import { Container, Graphics } from 'pixi.js';
 import type { Camera } from './camera';
+import { assemblerProduct } from './draw/buildingsM2';
 import { drawBuilding, drawShadow, placement, type BuildingView, type FrameCtx, armTip } from './draw/buildings';
 import { DepositLayer, drawGround } from './draw/ground';
 import { drawItem } from './draw/items';
@@ -74,7 +75,8 @@ export class Scene {
       const g = this.graphicsFor(b.id);
       g.position.set(cx, cy);
       g.zIndex = def.behavior === 'belt' ? 0 : 1;
-      g.rotation = (b.dir * Math.PI) / 2;
+      // Столб направления не имеет и не поворачивается.
+      g.rotation = def.behavior === 'pole' ? 0 : (b.dir * Math.PI) / 2;
       g.clear();
       drawBuilding(g, b, def, ctx);
       this.drawContents(b, def, ctx, cx, cy, lod);
@@ -133,6 +135,12 @@ export class Scene {
       drawItem(this.items, b.output.item, ...rot(...armTip(ctx.armAngle(b, def))), 10, lod);
     } else if (def.behavior === 'container' && b.slots?.[0]) {
       drawItem(this.items, b.slots[0].item, cx, cy, 10, lod);
+    } else if (def.behavior === 'splitter' && b.output) {
+      drawItem(this.items, b.output.item, cx, cy, 8, lod);
+    } else if (def.behavior === 'crafter' && def.recipeMode === 'chosen') {
+      // Продукт рецепта в окне сборщика: иконка 24 px не поворачивается со зданием и не уменьшается до круга.
+      const product = assemblerProduct(b);
+      if (product) drawItem(this.items, product, cx, cy, 24);
     }
   }
 }
