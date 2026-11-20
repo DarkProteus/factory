@@ -14,8 +14,6 @@ groma:
       file: packages/app/src/main.tsx
     - scanner: typescript
       file: packages/app/src/main.tsx
-    - scanner: typescript
-      file: packages/app/src/demo.ts
     - scanner: react
       file: packages/app/src/ui/BuildPanel.tsx
     - scanner: typescript

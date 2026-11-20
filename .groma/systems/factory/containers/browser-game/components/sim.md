@@ -53,6 +53,8 @@ groma:
       file: packages/sim/src/testKit.ts
     - scanner: typescript
       file: packages/sim/src/fuel.ts
+    - scanner: typescript
+      file: packages/sim/src/start.ts
   technology: TypeScript
 description: Хранит состояние мира и обновляет его раз в тик
 ---
