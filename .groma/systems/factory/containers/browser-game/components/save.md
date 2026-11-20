@@ -9,6 +9,12 @@ groma:
     - scanner: typescript
       file: packages/save/src/index.ts
       symbol: PACKAGE
+    - scanner: typescript
+      file: packages/save/src/errors.ts
+      symbol: SaveError
+    - scanner: typescript
+      file: packages/save/src/validate.ts
+      symbol: validateState
   technology: TypeScript
 description: Сохраняет и загружает состояние партии
 ---

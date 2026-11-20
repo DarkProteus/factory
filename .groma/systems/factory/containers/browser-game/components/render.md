@@ -40,9 +40,3 @@ description: Рисует состояние мира, ничего в нём н
 Читает состояние Ядра симуляции и рисует его, интерполируя между тиками. В состояние не пишет.
 
 Сейчас пакет — заглушка, экспортирует только имя; PixiJS ещё не подключён.
-
-## Derived relationships
-
-| Source | Target | Description | Technology |
-| --- | --- | --- | --- |
-| [packages/render/src/draw/buildings.ts](../../../../../../packages/render/src/draw/buildings.ts) | [packages/render/src/scene.ts](../../../../../../packages/render/src/scene.ts) | Invokes supplied callback: armAngle | typescript |
