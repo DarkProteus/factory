@@ -35,6 +35,8 @@ groma:
     - scanner: typescript
       file: packages/app/src/ui/names.ts
       symbol: buildingName
+    - scanner: typescript
+      file: packages/app/src/persist.ts
   technology: React
 description: Превращает ввод игрока в команды для ядра
 ---

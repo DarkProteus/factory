@@ -17,15 +17,16 @@ export function App() {
   const [game, setGame] = useState<Game | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
+    const abort = new AbortController();
     let started: Game | null = null;
-    void startGame(host.current!).then((g) => {
-      if (cancelled) return g.destroy();
+    void startGame(host.current!, abort.signal).then((g) => {
+      if (!g) return;
+      if (abort.signal.aborted) return g.destroy();
       started = g;
       setGame(g);
     });
     return () => {
-      cancelled = true;
+      abort.abort();
       started?.destroy();
       setGame(null);
     };
