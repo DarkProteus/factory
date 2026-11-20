@@ -42,6 +42,8 @@ function checkMap(map: unknown): void {
     if (!isObject(d)) fail(`залежь ${i}`, 'ожидался объект или null');
     checkItem(d.item, `залежь ${i}`);
     if (!Number.isFinite(d.amount)) fail(`залежь ${i}`, 'неверное количество');
+    if (!Number.isFinite(d.initial) || (d.initial as number) <= 0) fail(`залежь ${i}`, 'неверный исходный запас');
+    if ((d.amount as number) > (d.initial as number)) fail(`залежь ${i}`, 'остаток больше исходного запаса');
   });
 }
 

@@ -57,7 +57,7 @@ describe('бур', () => {
     run(state, T * (drill.buffer + 5));
     const b = buildingAt(state, 2, 2)!;
     expect(b.output).toEqual({ item: 'ironOre', count: drill.buffer });
-    expect(depositAt(state, 2, 2)).toEqual({ item: 'ironOre', amount: 100 - drill.buffer });
+    expect(depositAt(state, 2, 2)).toEqual({ item: 'ironOre', amount: 100 - drill.buffer, initial: 100 });
   });
 
   it('добыча детерминирована и состояние сериализуется', () => {
@@ -121,7 +121,7 @@ describe('бур', () => {
       const nothing = drillWith([]);
       run(nothing, T * (drill.buffer + 5));
       expect(buildingAt(nothing, 2, 2)!.output).toEqual({ item: 'ironOre', count: drill.buffer });
-      expect(depositAt(nothing, 2, 2)).toEqual({ item: 'ironOre', amount: 100 - drill.buffer });
+      expect(depositAt(nothing, 2, 2)).toEqual({ item: 'ironOre', amount: 100 - drill.buffer, initial: 100 });
 
       // Манипулятор руду не принимает.
       const wrong = drillWith([put('inserter', 4, 2)]);

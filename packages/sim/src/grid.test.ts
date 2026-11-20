@@ -16,7 +16,7 @@ describe('карта', () => {
 
   it('залежь читается по координатам клетки', () => {
     const state = small();
-    expect(depositAt(state, 3, 2)).toEqual({ item: 'ironOre', amount: 500 });
+    expect(depositAt(state, 3, 2)).toEqual({ item: 'ironOre', amount: 500, initial: 500 });
     expect(depositAt(state, 2, 3)).toBeNull();
     expect(depositAt(state, -1, 0)).toBeNull();
     expect(depositAt(state, 8, 0)).toBeNull();

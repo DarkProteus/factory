@@ -60,7 +60,7 @@ describe('сохранение завода', () => {
     const state = factory();
     const loaded = roundtrip(state);
     expect(loaded).toEqual(state);
-    expect(loaded.map.deposits[0]).toEqual({ item: 'ironOre', amount: expect.any(Number) });
+    expect(loaded.map.deposits[0]).toEqual({ item: 'ironOre', amount: expect.any(Number), initial: 5000 });
     expect(loaded.inventory).toEqual(state.inventory);
   });
 
@@ -99,7 +99,16 @@ describe('версия формата', () => {
   it('неизвестная версия даёт понятную ошибку', () => {
     const text = JSON.stringify({ version: SAVE_VERSION + 1, state: createState(1) });
     expect(() => deserialize(text)).toThrow(SaveError);
-    expect(() => deserialize(text)).toThrow(/Неизвестная версия сохранения: 2/);
+    expect(() => deserialize(text)).toThrow(/Неизвестная версия сохранения: 3/);
+  });
+
+  it('сохранение версии 1 без исходного запаса читается: initial берётся из amount', () => {
+    const file = JSON.parse(serialize(factory()));
+    file.version = 1;
+    for (const d of file.state.map.deposits) if (d) delete d.initial;
+    const loaded = deserialize(JSON.stringify(file));
+    const d = loaded.map.deposits[0]!;
+    expect(d.initial).toBe(d.amount);
   });
 
   it('нет номера версии', () => {
@@ -140,6 +149,15 @@ describe('битые сохранения', () => {
       furnace.recipe = 'nope';
     });
     expect(() => deserialize(text)).toThrow(/неизвестный рецепт «nope»/);
+  });
+
+  it('исходный запас залежи валидируется', () => {
+    const bad = (initial: unknown) => tamper((s) => (s.map.deposits[0].initial = initial));
+    expect(() => deserialize(bad(undefined))).toThrow(/исходный запас/);
+    expect(() => deserialize(bad('много'))).toThrow(SaveError);
+    expect(() => deserialize(bad(0))).toThrow(SaveError);
+    // Остаток не может превышать исходный запас.
+    expect(() => deserialize(bad(1))).toThrow(SaveError);
   });
 
   it('усечённые массивы карты и пропавшие поля', () => {

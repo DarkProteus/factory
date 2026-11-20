@@ -6,7 +6,10 @@ export type Tile = 'ground';
 export interface Deposit {
   /** id предмета из content.items. */
   item: string;
+  /** Текущий остаток. */
   amount: number;
+  /** Исходный запас: по нему render считает долю остатка. Не меняется после createMap. */
+  initial: number;
 }
 
 /** Карта: плоские массивы длиной width*height, индекс клетки — y*width + x. */
@@ -50,7 +53,7 @@ export function createMap({ width, height, deposits = [] }: MapParams = DEFAULT_
   for (const { x, y, item, amount } of deposits) {
     if (!inBounds(map, x, y)) throw new RangeError(`Залежь вне карты: ${x},${y}`);
     if (!Object.hasOwn(items, item)) throw new Error(`Неизвестный предмет залежи: ${item}`);
-    map.deposits[cellIndex(map, x, y)] = { item, amount };
+    map.deposits[cellIndex(map, x, y)] = { item, amount, initial: amount };
   }
   return map;
 }

@@ -24,9 +24,8 @@ export function stoneCount(amount: number, initial: number): number {
   return f >= 0.75 ? 5 : f >= 0.5 ? 4 : f >= 0.25 ? 3 : 2;
 }
 
-/** Залежи: помнит исходный запас каждой клетки и перерисовывает слой при смене числа камней. */
+/** Залежи: перерисовывает слой при смене числа камней; исходный запас берёт из состояния. */
 export class DepositLayer {
-  private initial = new Map<number, number>();
   private counts: number[] = [];
 
   constructor(readonly graphics: Graphics) {}
@@ -35,8 +34,7 @@ export class DepositLayer {
     let changed = this.counts.length !== map.deposits.length;
     const counts = map.deposits.map((d, i) => {
       if (!d) return 0;
-      if (!this.initial.has(i)) this.initial.set(i, d.amount);
-      const n = stoneCount(d.amount, this.initial.get(i)!);
+      const n = stoneCount(d.amount, d.initial);
       if (n !== this.counts[i]) changed = true;
       return n;
     });

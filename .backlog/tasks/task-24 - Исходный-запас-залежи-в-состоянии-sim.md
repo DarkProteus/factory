@@ -1,14 +1,24 @@
 ---
 id: TASK-24
 title: Исходный запас залежи в состоянии sim
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-11-20T17:06:00Z'
-updated_date: '2026-11-20T18:41:00Z'
+updated_date: '2026-11-20T18:45:00Z'
 labels: []
 dependencies: []
 references:
   - sim
+modified_files:
+  - packages/sim/src/grid.ts
+  - packages/sim/src/grid.test.ts
+  - packages/sim/src/miner.test.ts
+  - packages/save/src/index.ts
+  - packages/save/src/validate.ts
+  - packages/save/src/index.test.ts
+  - packages/render/src/draw/ground.ts
+  - packages/render/src/index.ts
+  - packages/app/src/deposits.test.ts
 type: bug
 ordinal: 23000
 ---
@@ -21,8 +31,8 @@ render считает число камней на залежи от исход�
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 У Deposit в sim есть исходный запас; createMap заполняет его из amount
-- [ ] #2 Сохранение и загрузка переносят исходный запас; save валидирует поле
-- [ ] #3 render берёт исходный запас из состояния, свой кеш DepositLayer.initial убран
-- [ ] #4 Тест: после save/load число камней частично выработанной залежи то же, что до сохранения
+- [x] #1 У Deposit в sim есть исходный запас; createMap заполняет его из amount
+- [x] #2 Сохранение и загрузка переносят исходный запас; save валидирует поле
+- [x] #3 render берёт исходный запас из состояния, свой кеш DepositLayer.initial убран
+- [x] #4 Тест: после save/load число камней частично выработанной залежи то же, что до сохранения
 <!-- AC:END -->
