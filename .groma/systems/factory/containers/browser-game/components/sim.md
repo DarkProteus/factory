@@ -63,6 +63,8 @@ groma:
       symbol: runBelts
     - scanner: typescript
       file: packages/sim/src/splitter.ts
+    - scanner: typescript
+      file: packages/sim/src/manual.ts
   technology: TypeScript
 description: Хранит состояние мира и обновляет его раз в тик
 ---
