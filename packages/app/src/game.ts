@@ -2,7 +2,7 @@
 // только tick(state, commands); ввод превращается в команды через CommandQueue.
 import { startMap } from '@factory/content';
 import { createRenderer } from '@factory/render';
-import { createState, tick } from '@factory/sim';
+import { createState, tick, type Command, type CraftJob, type ItemStack } from '@factory/sim';
 import {
   applyKey,
   cellAt,
@@ -19,6 +19,7 @@ import {
   type Cell,
   type ToolState,
 } from './input';
+import { applyUiKey } from './craftUi';
 import { clearSave, loadGame, saveGame, shouldAutosave, type KeyValueStorage } from './persist';
 
 /** Шаг симуляции: 60 тиков в секунду. */
@@ -57,6 +58,16 @@ export interface Game {
   newGame(): void;
   /** Иконка здания 24 px как data URL. */
   icon(id: string): string;
+  /** Иконка предмета 24 px как data URL (та же отрисовка, что на карте). */
+  itemIcon(id: string): string;
+  /** Команда игрока: выполнится на ближайшем тике. */
+  command(command: Command): void;
+  /** Инвентарь и очередь ручного крафта; только для чтения, массивы меняются на тиках. */
+  getInventory(): readonly ItemStack[];
+  getCraftQueue(): readonly CraftJob[];
+  /** Окно инвентаря (клавиша E). */
+  isInventoryOpen(): boolean;
+  setInventoryOpen(open: boolean): void;
   destroy(): void;
 }
 
@@ -82,6 +93,7 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
   const queue = new CommandQueue();
   const listeners = new Set<() => void>();
   let tools: ToolState = { tool: NO_TOOL, dir: 0 };
+  let inventoryOpen = false;
   /** Положение курсора в px канваса; null, если курсор вне канваса. */
   let pointer: { x: number; y: number } | null = null;
   /** Левая кнопка мыши зажата на канвасе (нужна кирке). */
@@ -110,6 +122,11 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
   };
 
   const owned = (id: string) => itemCount(state.inventory, id);
+  const setInventoryOpen = (open: boolean) => {
+    if (open === inventoryOpen) return;
+    inventoryOpen = open;
+    listeners.forEach((l) => l());
+  };
 
   const cellUnderPointer = (): Cell | null => {
     if (!pointer) return null;
@@ -136,7 +153,10 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
   const onKey = (e: KeyboardEvent) => {
     if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-    setTools(applyKey(tools, e.code, undefined, owned));
+    // Esc сначала закрывает окно инвентаря, инструмент при этом остаётся.
+    const closing = e.code === 'Escape' && inventoryOpen;
+    setInventoryOpen(applyUiKey(inventoryOpen, e.code));
+    if (!closing) setTools(applyKey(tools, e.code, undefined, owned));
   };
   const onHidden = () => {
     if (document.visibilityState === 'hidden') save();
@@ -193,6 +213,12 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
       location.reload();
     },
     icon: (id) => renderer.buildingIcon(id, 24),
+    itemIcon: (id) => renderer.itemIcon(id, 24),
+    command: (command) => queue.push(command),
+    getInventory: () => state.inventory,
+    getCraftQueue: () => state.craftQueue,
+    isInventoryOpen: () => inventoryOpen,
+    setInventoryOpen,
     destroy() {
       cancelAnimationFrame(frame);
       clearTimeout(messageTimer);

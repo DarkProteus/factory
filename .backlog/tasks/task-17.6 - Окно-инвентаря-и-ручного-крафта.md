@@ -4,13 +4,26 @@ title: Окно инвентаря и ручного крафта
 status: In Progress
 assignee: []
 created_date: '2026-11-20T18:38:00Z'
-updated_date: '2026-11-20T19:33:00Z'
+updated_date: '2026-11-20T19:43:00Z'
 labels:
   - m2
 dependencies:
   - TASK-17.4
 references:
   - ui
+modified_files:
+  - packages/app/src/App.tsx
+  - packages/app/src/game.ts
+  - packages/app/src/craftUi.ts
+  - packages/app/src/craftUi.test.ts
+  - packages/app/src/ui/BuildPanel.tsx
+  - packages/app/src/ui/names.ts
+  - packages/app/src/ui/CraftQueue.tsx
+  - packages/app/src/ui/InventoryWindow.tsx
+  - packages/app/src/ui/ItemSlot.tsx
+  - packages/app/src/ui/inventory.css
+  - packages/app/src/ui/useTick.ts
+  - packages/render/src/renderer.ts
 parent_task_id: TASK-17
 type: feature
 ordinal: 38000

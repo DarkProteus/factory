@@ -2,6 +2,7 @@
 import { buildings as contentBuildings } from '@factory/content';
 import { Application, Graphics } from 'pixi.js';
 import { Camera } from './camera';
+import { drawItem } from './draw/items';
 import { attachControls } from './controls';
 import type { ViewState } from './interp';
 import { CELL, palette } from './palette';
@@ -19,6 +20,8 @@ export interface Renderer {
   setOverlay(overlay: Overlay | null): void;
   /** Иконка здания в ориентации N, вписанная в size px, как data URL (кэшируется). */
   buildingIcon(id: string, size?: number): string;
+  /** Иконка предмета (та же форма, что на карте), вписанная в size px, как data URL (кэшируется). */
+  itemIcon(id: string, size?: number): string;
   /** Ставит камеру в центр клетки (x, y). */
   lookAt(x: number, y: number, zoom?: number): void;
   destroy(): void;
@@ -53,6 +56,12 @@ export async function createRenderer(host: HTMLElement): Promise<Renderer> {
       if (url === undefined) icons.set(key, (url = renderIcon(app, id, size)));
       return url;
     },
+    itemIcon(id, size = 24) {
+      const key = `item:${id}:${size}`;
+      let url = icons.get(key);
+      if (url === undefined) icons.set(key, (url = renderItemIcon(app, id, size)));
+      return url;
+    },
     draw(state, alpha) {
       const now = performance.now();
       controls.update(now - last);
@@ -81,6 +90,18 @@ function renderIcon(app: Application, id: string, size: number): string {
   // Иконке нужна только форма: пустая карта 1×1 делает лампы «выкл».
   const empty = { map: { width: 1, height: 1, deposits: [null] } } as unknown as Parameters<typeof drawPreview>[3];
   drawPreview(g, id, def, empty, 0, null);
+  return snapshot(app, g, size);
+}
+
+/** Рисует предмет формой с карты и вписывает в квадрат size px. */
+function renderItemIcon(app: Application, id: string, size: number): string {
+  const g = new Graphics();
+  drawItem(g, id, 0, 0, 12);
+  return snapshot(app, g, size);
+}
+
+/** Снимает рисунок в канвас, вписывает в квадрат size px по центру (с запасом ×2) и уничтожает g. */
+function snapshot(app: Application, g: Graphics, size: number): string {
   const src = app.renderer.extract.canvas({ target: g, resolution: 2 });
   g.destroy();
   const px = size * 2;

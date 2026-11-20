@@ -1,0 +1,127 @@
+/* Окно инвентаря и очередь крафта по docs/style-ui.md: «Ячейка предмета», «Окно инвентаря», «Очередь ручного крафта». */
+.slot {
+  position: relative;
+  box-sizing: border-box;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ui-pressed);
+  border: 1px solid var(--outline);
+  color: var(--text);
+}
+.slot img {
+  width: 24px;
+  height: 24px;
+}
+.slot .count {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  font: 500 10px 'IBM Plex Mono', monospace;
+  line-height: 1;
+  color: var(--text);
+  text-shadow: 1px 1px 0 var(--outline), -1px 1px 0 var(--outline), 1px -1px 0 var(--outline), -1px -1px 0 var(--outline);
+}
+.slot .progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--hazard);
+}
+.slot.clickable {
+  cursor: pointer;
+}
+.slot.clickable:hover {
+  border-color: var(--bad);
+}
+.slot:hover > .tip {
+  display: block;
+}
+
+.dock-stack {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.dock-stack > .dock {
+  position: static;
+  transform: none;
+}
+.craft-queue {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.inventory-window {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.inv-columns {
+  display: flex;
+  gap: 16px;
+}
+.inv-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 40px);
+  gap: 4px;
+  align-content: start;
+}
+.recipe-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 48px);
+  gap: 4px;
+}
+.inv-columns h3 {
+  margin: 0 0 8px;
+  font: 500 12px 'Oswald', sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.btn.off {
+  cursor: default;
+}
+.btn.off img {
+  opacity: 0.4;
+}
+
+.recipe-tip {
+  text-align: left;
+}
+.recipe-tip .rt-name {
+  display: block;
+  margin-bottom: 4px;
+  font: 400 14px 'IBM Plex Sans', sans-serif;
+  color: var(--text);
+}
+.recipe-tip .rt-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: 500 12px 'IBM Plex Mono', monospace;
+  color: var(--text);
+}
+.recipe-tip .rt-row.short {
+  color: var(--bad);
+}
+.recipe-tip .rt-row img {
+  width: 16px;
+  height: 16px;
+}
+.recipe-tip .rt-time {
+  display: block;
+  margin-top: 4px;
+  font: 500 12px 'IBM Plex Mono', monospace;
+  color: var(--text-dim);
+}

@@ -5,7 +5,9 @@ import { PACKAGE as sim } from '@factory/sim';
 import { useEffect, useRef, useState } from 'react';
 import { startGame, type Game } from './game';
 import { BuildPanel } from './ui/BuildPanel';
+import { CraftQueue } from './ui/CraftQueue';
 import { Hud } from './ui/Hud';
+import { InventoryWindow } from './ui/InventoryWindow';
 import './ui/fonts';
 import './ui/theme.css';
 import './ui/ui.css';
@@ -38,7 +40,11 @@ export function App() {
       {game && (
         <div className="hud">
           <Hud game={game} />
-          <BuildPanel game={game} />
+          <div className="dock-stack">
+            <CraftQueue game={game} />
+            <BuildPanel game={game} />
+          </div>
+          <InventoryWindow game={game} />
         </div>
       )}
     </>

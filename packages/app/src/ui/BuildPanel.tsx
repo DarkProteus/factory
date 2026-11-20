@@ -10,7 +10,7 @@ import { buildingIds } from "../input";
 import { MineButton } from "./MineButton";
 import { buildingName } from "./names";
 
-function Panel({ title, children }: { title?: string; children: ReactNode }) {
+export function Panel({ title, children }: { title?: string; children: ReactNode }) {
   return (
     <div className="panel">
       {["tl", "tr", "bl", "br"].map((c) => (
