@@ -12,6 +12,8 @@ import { BELT_CELL } from '@factory/sim';
 
 /** Зум, ниже которого предметы рисуются кругами. */
 const ITEM_LOD_ZOOM = 0.75;
+/** Иконка предмета на конвейере: шаг BELT_GAP = 8 px, крупнее — перекрытие (style.md). */
+const BELT_ICON = 8;
 /** Возврат руки манипулятора после укладки, тиков (только анимация). */
 const ARM_RETURN_TICKS = 6;
 
@@ -125,7 +127,7 @@ export class Scene {
       const prev = this.snapshot.get(b.id);
       for (const it of b.belt) {
         const p = beltItemPos(prev, it.item, it.pos, def.beltSpeed ?? 0, ctx.alpha);
-        drawItem(this.items, it.item, ...rot(0, CELL / 2 - (p / BELT_CELL) * CELL), 12, lod);
+        drawItem(this.items, it.item, ...rot(0, CELL / 2 - (p / BELT_CELL) * CELL), BELT_ICON, lod);
       }
     } else if (def.behavior === 'inserter' && b.output) {
       drawItem(this.items, b.output.item, ...rot(...armTip(ctx.armAngle(b, def))), 10, lod);

@@ -1,14 +1,18 @@
 ---
 id: TASK-35
 title: Иконка предмета на ленте меньше
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-11-20T18:38:00Z'
+updated_date: '2026-11-20T18:44:00Z'
 labels:
   - m2
 dependencies: []
 references:
   - render
+modified_files:
+  - docs/style.md
+  - packages/render/src/scene.ts
 type: feature
 ordinal: 41000
 ---
@@ -21,6 +25,6 @@ ordinal: 41000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 style.md задаёт размер иконки предмета на ленте ~8 px
-- [ ] #2 Плотный поток на ленте не перекрывается; скриншот проверен
+- [x] #1 style.md задаёт размер иконки предмета на ленте ~8 px
+- [x] #2 Плотный поток на ленте не перекрывается; скриншот проверен
 <!-- AC:END -->

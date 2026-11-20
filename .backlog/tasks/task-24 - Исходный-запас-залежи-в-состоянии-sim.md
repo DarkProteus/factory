@@ -1,9 +1,10 @@
 ---
 id: TASK-24
 title: Исходный запас залежи в состоянии sim
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-20T17:06:00Z'
+updated_date: '2026-11-20T18:41:00Z'
 labels: []
 dependencies: []
 references:
