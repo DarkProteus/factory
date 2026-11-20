@@ -4,7 +4,7 @@ title: Разделитель
 status: In Progress
 assignee: []
 created_date: '2026-11-20T18:38:00Z'
-updated_date: '2026-11-20T19:07:00Z'
+updated_date: '2026-11-20T19:19:00Z'
 labels:
   - m2
 dependencies:
@@ -12,6 +12,14 @@ dependencies:
   - TASK-15
 references:
   - sim
+modified_files:
+  - packages/sim/src/belt.ts
+  - packages/sim/src/segments.ts
+  - packages/sim/src/splitter.ts
+  - packages/sim/src/splitter.test.ts
+  - packages/sim/src/behaviors.ts
+  - packages/sim/src/buildings.ts
+  - packages/sim/src/belt.bench.test.ts
 type: feature
 ordinal: 32000
 ---

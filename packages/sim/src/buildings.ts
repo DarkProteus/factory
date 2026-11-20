@@ -14,11 +14,11 @@ export interface PlacedBuilding {
   x: number;
   y: number;
   dir: Dir;
-  /** Накопленные тики текущего рабочего цикла. */
+  /** Накопленные тики текущего рабочего цикла; у splitter — индекс следующего выхода по кругу (0..2), см. splitter.ts. */
   progress: number;
   /** Выходной буфер: один вид предмета или пусто. */
   output: ItemStack | null;
-  /** Предметы на конвейере (только у поведения belt), см. belt.ts. */
+  /** Предметы на конвейере (belt, см. belt.ts); у splitter — буфер на один предмет. */
   belt?: BeltItem[];
   /** Вход крафтера: по стеку на ингредиент рецепта. */
   input?: ItemStack[];
