@@ -40,6 +40,26 @@ groma:
     - scanner: typescript
       file: packages/app/src/ui/MineButton.tsx
       symbol: MineButton
+    - scanner: react
+      file: packages/app/src/ui/CraftQueue.tsx
+    - scanner: typescript
+      file: packages/app/src/ui/CraftQueue.tsx
+      symbol: CraftQueue
+    - scanner: typescript
+      file: packages/app/src/craftUi.ts
+    - scanner: react
+      file: packages/app/src/ui/InventoryWindow.tsx
+    - scanner: typescript
+      file: packages/app/src/ui/InventoryWindow.tsx
+      symbol: InventoryWindow
+    - scanner: react
+      file: packages/app/src/ui/ItemSlot.tsx
+    - scanner: typescript
+      file: packages/app/src/ui/ItemSlot.tsx
+      symbol: ItemSlot
+    - scanner: typescript
+      file: packages/app/src/ui/useTick.ts
+      symbol: useTick
   technology: React
 description: Превращает ввод игрока в команды для ядра
 ---

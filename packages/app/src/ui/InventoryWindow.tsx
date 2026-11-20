@@ -57,7 +57,7 @@ export function InventoryWindow({ game }: { game: Game }) {
                     type="button"
                     className={`btn${ok ? '' : ' off'}`}
                     aria-disabled={!ok}
-                    onClick={(e) => ok && game.command(craftCommand(id, e.shiftKey))}
+                    onClick={(e) => ok && game.command(craftCommand(game.getInventory(), id, e.shiftKey))}
                   >
                     <img src={game.itemIcon(Object.keys(def.out)[0]!)} alt={id} />
                     <RecipeTip game={game} def={def} />
