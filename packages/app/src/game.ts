@@ -8,6 +8,8 @@ import {
   cellAt,
   clickCommand,
   CommandQueue,
+  dropEmptyTool,
+  itemCount,
   NO_TOOL,
   overlayFor,
   selectBuilding,
@@ -43,6 +45,8 @@ export interface Game {
   subscribe(listener: () => void): () => void;
   chooseBuilding(id: string): void;
   chooseDemolish(): void;
+  /** Сколько предметов с этим id (в том числе зданий) лежит в инвентаре. */
+  itemCount(id: string): number;
   getTick(): number;
   /** Сообщение об ошибке сохранения или null; пропадает само через 10 с. */
   getMessage(): string | null;
@@ -98,6 +102,8 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
     listeners.forEach((l) => l());
   };
 
+  const owned = (id: string) => itemCount(state.inventory, id);
+
   const cellUnderPointer = (): Cell | null => {
     if (!pointer) return null;
     const [wx, wy] = renderer.camera.screenToWorld(pointer.x, pointer.y);
@@ -121,7 +127,7 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
   const onKey = (e: KeyboardEvent) => {
     if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-    setTools(applyKey(tools, e.code));
+    setTools(applyKey(tools, e.code, undefined, owned));
   };
   const onHidden = () => {
     if (document.visibilityState === 'hidden') save();
@@ -146,6 +152,8 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
       tick(state, queue.drain());
       acc -= TICK_MS;
     }
+    // Последний экземпляр построен: режим стройки сбрасывается.
+    setTools(dropEmptyTool(state, tools));
     if (shouldAutosave(state.tick, lastSavedTick)) save();
     renderer.setOverlay(overlayFor(state, tools, cellUnderPointer()));
     renderer.draw(state, acc / TICK_MS);
@@ -159,8 +167,9 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
       listeners.add(listener);
       return () => listeners.delete(listener);
     },
-    chooseBuilding: (id) => setTools(selectBuilding(tools, id)),
+    chooseBuilding: (id) => setTools(selectBuilding(tools, id, owned)),
     chooseDemolish: () => setTools(selectDemolish(tools)),
+    itemCount: owned,
     getTick: () => state.tick,
     getMessage: () => message,
     newGame() {

@@ -3,7 +3,7 @@
 // Менять состояние можно лишь командами через CommandQueue -> tick(state, commands).
 import { buildings, type BuildingDef } from '@factory/content';
 import { CELL, type Overlay } from '@factory/render';
-import { canPlace, footprintSize, type Command, type Dir, type SimState } from '@factory/sim';
+import { canPlace, footprintSize, type Command, type Dir, type ItemStack, type SimState } from '@factory/sim';
 
 export type Tool = { kind: 'none' } | { kind: 'build'; building: string } | { kind: 'demolish' };
 
@@ -58,8 +58,24 @@ export interface ToolState {
 /** Id зданий для клавиш 1–9 — по порядку content.buildings. */
 export const buildingIds = (defs: Readonly<Record<string, BuildingDef>> = buildings): string[] => Object.keys(defs);
 
-/** Выбор здания: повторный выбор того же снимает инструмент. */
-export function selectBuilding(s: ToolState, building: string): ToolState {
+/** Сколько предметов с этим id в инвентаре (предмет-здание имеет id здания). */
+export function itemCount(inventory: readonly ItemStack[], item: string): number {
+  return inventory.reduce((sum, st) => (st.item === item ? sum + st.count : sum), 0);
+}
+
+/** Сколько экземпляров здания у игрока; по умолчанию без ограничения (для тестов раскладки клавиш). */
+export type Owned = (building: string) => number;
+const unlimited: Owned = () => Infinity;
+
+/** Если выбранное для стройки здание кончилось, режим стройки сбрасывается. */
+export function dropEmptyTool(state: SimState, s: ToolState): ToolState {
+  if (s.tool.kind !== 'build' || itemCount(state.inventory, s.tool.building) > 0) return s;
+  return { ...s, tool: NO_TOOL };
+}
+
+/** Выбор здания: повторный выбор того же снимает инструмент; здание без предметов не выбирается. */
+export function selectBuilding(s: ToolState, building: string, owned: Owned = unlimited): ToolState {
+  if (owned(building) <= 0) return s;
   const same = s.tool.kind === 'build' && s.tool.building === building;
   return { ...s, tool: same ? NO_TOOL : { kind: 'build', building } };
 }
@@ -69,11 +85,16 @@ export function selectDemolish(s: ToolState): ToolState {
 }
 
 /** Горячие клавиши по KeyboardEvent.code; неизвестная клавиша состояние не меняет. */
-export function applyKey(s: ToolState, code: string, ids: readonly string[] = buildingIds()): ToolState {
+export function applyKey(
+  s: ToolState,
+  code: string,
+  ids: readonly string[] = buildingIds(),
+  owned: Owned = unlimited,
+): ToolState {
   const digit = /^(?:Digit|Numpad)([1-9])$/.exec(code);
   if (digit) {
     const id = ids[Number(digit[1]) - 1];
-    return id === undefined ? s : selectBuilding(s, id);
+    return id === undefined ? s : selectBuilding(s, id, owned);
   }
   if (code === 'KeyX') return selectDemolish(s);
   if (code === 'KeyR') return { ...s, dir: rotateDir(s.dir) };
@@ -86,7 +107,7 @@ export function clickCommand(state: SimState, s: ToolState, cell: Cell): Command
   if (s.tool.kind === 'demolish') return { type: 'demolish', x: cell.x, y: cell.y };
   if (s.tool.kind !== 'build') return null;
   const def = buildings[s.tool.building as keyof typeof buildings];
-  if (!def) return null;
+  if (!def || itemCount(state.inventory, s.tool.building) <= 0) return null;
   const a = ghostAnchor(cell, def.size, s.dir);
   if (!canPlace(state, s.tool.building, a.x, a.y, s.dir)) return null;
   return { type: 'build', building: s.tool.building, x: a.x, y: a.y, dir: s.dir };

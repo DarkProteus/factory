@@ -6,10 +6,13 @@ import {
   cellAt,
   clickCommand,
   CommandQueue,
+  dropEmptyTool,
   ghostAnchor,
+  itemCount,
   NO_TOOL,
   overlayFor,
   rotateDir,
+  selectBuilding,
   type ToolState,
 } from './input';
 import themeCss from './ui/theme.css?raw';
@@ -74,6 +77,45 @@ describe('клавиши', () => {
 
   it('чужие клавиши не меняют состояние', () => {
     expect(applyKey(drill, 'KeyW', ids)).toBe(drill);
+  });
+});
+
+describe('предметы-здания в инвентаре', () => {
+  it('itemCount суммирует стеки предмета и даёт 0 для отсутствующего', () => {
+    const inv = [
+      { item: 'drill', count: 3 },
+      { item: 'chest', count: 1 },
+      { item: 'drill', count: 2 },
+    ];
+    expect(itemCount(inv, 'drill')).toBe(5);
+    expect(itemCount(inv, 'belt')).toBe(0);
+  });
+
+  it('здание с нулём предметов не выбирается ни кнопкой, ни клавишей', () => {
+    const owned = (id: string) => (id === 'belt' ? 0 : 4);
+    expect(selectBuilding(idle, 'belt', owned)).toBe(idle);
+    expect(selectBuilding(idle, 'drill', owned).tool).toEqual({ kind: 'build', building: 'drill' });
+    const ids = ['drill', 'belt'];
+    expect(applyKey(idle, 'Digit2', ids, owned)).toBe(idle);
+    expect(applyKey(idle, 'Digit1', ids, owned).tool).toEqual({ kind: 'build', building: 'drill' });
+  });
+
+  it('после последнего экземпляра режим стройки сбрасывается, остальные режимы и направление целы', () => {
+    const state = world();
+    const s: ToolState = { tool: { kind: 'build', building: 'drill' }, dir: 2 };
+    expect(dropEmptyTool(state, s)).toBe(s);
+    applyCommand(state, { type: 'build', building: 'drill', x: 2, y: 2, dir: 0 });
+    expect(dropEmptyTool(state, s)).toBe(s);
+    applyCommand(state, { type: 'build', building: 'drill', x: 5, y: 5, dir: 0 });
+    expect(dropEmptyTool(state, s)).toEqual({ tool: NO_TOOL, dir: 2 });
+    const demolish: ToolState = { tool: { kind: 'demolish' }, dir: 1 };
+    expect(dropEmptyTool(state, demolish)).toBe(demolish);
+  });
+
+  it('клик при нуле предметов команды не даёт', () => {
+    const state = world();
+    state.inventory = [];
+    expect(clickCommand(state, drill, { x: 5, y: 5 })).toBeNull();
   });
 });
 

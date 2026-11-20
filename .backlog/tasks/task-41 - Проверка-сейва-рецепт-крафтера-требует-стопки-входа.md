@@ -1,0 +1,24 @@
+---
+id: TASK-41
+title: 'Проверка сейва: рецепт крафтера требует стопки входа'
+status: To Do
+assignee: []
+created_date: '2026-11-20T19:27:00Z'
+labels: []
+dependencies: []
+references:
+  - save
+ordinal: 47000
+---
+
+## Description
+
+<!-- SECTION:DESCRIPTION:BEGIN -->
+validate.ts пропускает крафтер с recipe, у которого нет input или нет стопки для какого-то ингредиента. Такой сейв роняет тик: crafterAccept и runCrafter обращаются к stackFor(...)! и b.input!. Видели на старом сейве из dev-вкладки и во временных состояниях агента TASK-32.
+<!-- SECTION:DESCRIPTION:END -->
+
+## Acceptance Criteria
+<!-- AC:BEGIN -->
+- [ ] #1 Сейв, где у крафтера задан recipe, но input отсутствует или в нём нет стопки для ингредиента рецепта, отклоняется с понятным сообщением
+- [ ] #2 Сейв, где у крафтера есть input без recipe или со стопкой не из рецепта, тоже отклоняется
+<!-- AC:END -->

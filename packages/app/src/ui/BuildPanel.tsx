@@ -1,5 +1,5 @@
 import { buildings } from '@factory/content';
-import { useSyncExternalStore, type ReactNode } from 'react';
+import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react';
 import type { Game } from '../game';
 import { buildingIds } from '../input';
 import { buildingName } from './names';
@@ -19,6 +19,12 @@ function Panel({ title, children }: { title?: string; children: ReactNode }) {
 /** Панель зданий снизу по центру и кнопка сноса справа от неё. */
 export function BuildPanel({ game }: { game: Game }) {
   const { tool } = useSyncExternalStore(game.subscribe, game.getTools);
+  // Число предметов меняется на тиках, а не по действиям игрока: перечитываем по таймеру.
+  const [, refresh] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => refresh((n) => n + 1), 100);
+    return () => clearInterval(id);
+  }, []);
   return (
     <div className="dock">
       <Panel title="Строительство">
@@ -26,9 +32,16 @@ export function BuildPanel({ game }: { game: Game }) {
           {buildingIds().map((id, i) => {
             const def = buildings[id as keyof typeof buildings];
             const active = tool.kind === 'build' && tool.building === id;
+            const count = game.itemCount(id);
             return (
-              <button key={id} className={`btn${active ? ' active' : ''}`} onClick={() => game.chooseBuilding(id)}>
+              <button
+                key={id}
+                className={`btn${active ? ' active' : ''}`}
+                disabled={count <= 0}
+                onClick={() => game.chooseBuilding(id)}
+              >
                 <img src={game.icon(id)} alt={buildingName(id)} />
+                <span className="count">{count}</span>
                 {i < 9 && <span className="key">{i + 1}</span>}
                 <span className="tip">
                   <b>{buildingName(id)}</b>

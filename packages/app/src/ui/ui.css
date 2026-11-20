@@ -132,6 +132,17 @@ body,
   font: 500 10px 'IBM Plex Mono', monospace;
   color: var(--text-dim);
 }
+.btn .count {
+  position: absolute;
+  right: 3px;
+  top: 3px;
+  font: 500 10px 'IBM Plex Mono', monospace;
+  color: var(--text);
+}
+.btn:disabled { background: var(--ui-pressed); border-color: var(--steel-dark); }
+.btn:disabled:hover { background: var(--ui-pressed); }
+.btn:disabled .count,
+.btn:disabled .key { color: var(--text-off); }
 .btn .cross { position: relative; width: 24px; height: 24px; }
 .btn .cross::before,
 .btn .cross::after {

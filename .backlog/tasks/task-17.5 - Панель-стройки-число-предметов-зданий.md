@@ -1,16 +1,22 @@
 ---
 id: TASK-17.5
 title: 'Панель стройки: число предметов-зданий'
-status: In Progress
+status: To Do
 assignee: []
 created_date: '2026-11-20T18:38:00Z'
-updated_date: '2026-11-20T19:33:00Z'
+updated_date: '2026-11-20T19:38:00Z'
 labels:
   - m2
 dependencies:
   - TASK-17.1
 references:
   - ui
+modified_files:
+  - packages/app/src/input.ts
+  - packages/app/src/input.test.ts
+  - packages/app/src/game.ts
+  - packages/app/src/ui/BuildPanel.tsx
+  - packages/app/src/ui/ui.css
 parent_task_id: TASK-17
 type: feature
 ordinal: 37000
