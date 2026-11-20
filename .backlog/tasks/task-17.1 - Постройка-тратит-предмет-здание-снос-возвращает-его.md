@@ -1,9 +1,10 @@
 ---
 id: TASK-17.1
 title: Постройка тратит предмет-здание, снос возвращает его
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-20T18:38:00Z'
+updated_date: '2026-11-20T18:49:00Z'
 labels:
   - m2
 dependencies:
