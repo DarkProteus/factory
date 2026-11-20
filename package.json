@@ -4,7 +4,8 @@
   "type": "module",
   "packageManager": "pnpm@11.26.0",
   "scripts": {
-    "test": "vitest run --exclude '**/*.bench.test.ts' && vitest run bench.test",
+    "test": "vitest run --exclude '**/*.bench.test.ts' && pnpm bench",
+    "bench": "vitest run bench.test",
     "lint": "eslint .",
     "typecheck": "pnpm -r typecheck",
     "build": "pnpm typecheck && pnpm --filter @factory/app build",
