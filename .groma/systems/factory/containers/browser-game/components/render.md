@@ -53,9 +53,3 @@ description: Рисует состояние мира, ничего в нём н
 | Source | Target | Description | Technology |
 | --- | --- | --- | --- |
 | [packages/render/src/scene.ts](../../../../../../packages/render/src/scene.ts) | [packages/sim/src/index.ts](../../../../../../packages/sim/src/index.ts) | Читает состояние | DeepReadonly |
-
-## Derived relationships
-
-| Source | Target | Description | Technology |
-| --- | --- | --- | --- |
-| [packages/render/src/draw/buildings.ts](../../../../../../packages/render/src/draw/buildings.ts) | [packages/render/src/draw/buildingIcon.ts](../../../../../../packages/render/src/draw/buildingIcon.ts) | Invokes supplied callback: armAngle | typescript |

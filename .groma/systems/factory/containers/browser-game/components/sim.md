@@ -58,6 +58,11 @@ groma:
     - scanner: typescript
       file: packages/sim/src/assembler.ts
       symbol: setRecipe
+    - scanner: typescript
+      file: packages/sim/src/segments.ts
+      symbol: runBelts
+    - scanner: typescript
+      file: packages/sim/src/splitter.ts
   technology: TypeScript
 description: Хранит состояние мира и обновляет его раз в тик
 ---

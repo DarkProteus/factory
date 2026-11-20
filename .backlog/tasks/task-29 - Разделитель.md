@@ -1,10 +1,10 @@
 ---
 id: TASK-29
 title: Разделитель
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-11-20T18:38:00Z'
-updated_date: '2026-11-20T19:19:00Z'
+updated_date: '2026-11-20T19:26:00Z'
 labels:
   - m2
 dependencies:
@@ -13,13 +13,7 @@ dependencies:
 references:
   - sim
 modified_files:
-  - packages/sim/src/belt.ts
-  - packages/sim/src/segments.ts
-  - packages/sim/src/splitter.ts
-  - packages/sim/src/splitter.test.ts
-  - packages/sim/src/behaviors.ts
-  - packages/sim/src/buildings.ts
-  - packages/sim/src/belt.bench.test.ts
+  - package.json
 type: feature
 ordinal: 32000
 ---
@@ -32,7 +26,13 @@ ordinal: 32000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Предметы со входа сзади раздаются по кругу на выходы вперёд, влево, вправо, где стоит принимающая лента
-- [ ] #2 Занятый или пустой выход пропускается; при заторе всех выходов предметы стоят и не теряются
-- [ ] #3 Разделитель энергии не берёт; бенчмарк TASK-15 с разделителями укладывается в бюджет
+- [x] #1 Предметы со входа сзади раздаются по кругу на выходы вперёд, влево, вправо, где стоит принимающая лента
+- [x] #2 Занятый или пустой выход пропускается; при заторе всех выходов предметы стоят и не теряются
+- [x] #3 Разделитель энергии не берёт; бенчмарк TASK-15 с разделителями укладывается в бюджет
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Ревью (основная сессия): вариант бенчмарка с разделителями дороже не из-за разделителей. Без них после прогрева стоят все 40 000 предметов (затор), с ними за тик едет ~15 600 из ~42 000. Отдельно ~5 мс при бюджете 8 мс, но в общем прогоне pnpm test замер падал из-за соседних воркеров (даже при 10 мс). Решение: pnpm test запускает *.bench.test.ts отдельным вторым шагом vitest. То, что основной бенчмарк TASK-15 меряет затор, вынесено в отдельную задачу.
+<!-- SECTION:NOTES:END -->
