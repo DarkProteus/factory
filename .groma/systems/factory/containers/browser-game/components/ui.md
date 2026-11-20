@@ -16,6 +16,25 @@ groma:
       file: packages/app/src/main.tsx
     - scanner: typescript
       file: packages/app/src/demo.ts
+    - scanner: react
+      file: packages/app/src/ui/BuildPanel.tsx
+    - scanner: typescript
+      file: packages/app/src/ui/BuildPanel.tsx
+      symbol: BuildPanel
+    - scanner: typescript
+      file: packages/app/src/ui/fonts.ts
+    - scanner: typescript
+      file: packages/app/src/game.ts
+    - scanner: react
+      file: packages/app/src/ui/Hud.tsx
+    - scanner: typescript
+      file: packages/app/src/ui/Hud.tsx
+      symbol: Hud
+    - scanner: typescript
+      file: packages/app/src/input.ts
+    - scanner: typescript
+      file: packages/app/src/ui/names.ts
+      symbol: buildingName
   technology: React
 description: Превращает ввод игрока в команды для ядра
 ---
