@@ -1,9 +1,10 @@
 ---
 id: TASK-19
 title: 'Хук: проверка типов и линтер по окончании работы агента'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-11-20T16:35:00Z'
+updated_date: '2026-11-20T16:38:00Z'
 labels: []
 dependencies: []
 references:
@@ -20,7 +21,13 @@ ordinal: 18000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 В .claude/settings.json есть хук Stop, который запускает pnpm typecheck и pnpm lint
-- [ ] #2 При ошибке типов агент получает её текст и не может завершить работу, пока не исправит
-- [ ] #3 При зелёных проверках хук молчит
+- [x] #1 В .claude/settings.json есть хук Stop, который запускает pnpm typecheck и pnpm lint
+- [x] #2 При ошибке типов агент получает её текст и не может завершить работу, пока не исправит
+- [x] #3 При зелёных проверках хук молчит
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Скрипт .claude/hooks/check.sh, хуки Stop и SubagentStop. Каталог берётся из поля cwd входа хука (сабагенты в worktree проверяют свой каталог). Защита от зацикливания: при stop_hook_active хук не блокирует, а показывает ошибку пользователю.
+<!-- SECTION:NOTES:END -->
