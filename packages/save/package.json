@@ -5,5 +5,5 @@
   "type": "module",
   "exports": { ".": "./src/index.ts" },
   "scripts": { "typecheck": "tsc --noEmit" },
-  "dependencies": { "@factory/sim": "workspace:*" }
+  "dependencies": { "@factory/content": "workspace:*", "@factory/sim": "workspace:*" }
 }

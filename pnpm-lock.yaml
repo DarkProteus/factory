@@ -75,6 +75,9 @@ importers:
 
   packages/save:
     dependencies:
+      '@factory/content':
+        specifier: workspace:*
+        version: link:../content
       '@factory/sim':
         specifier: workspace:*
         version: link:../sim

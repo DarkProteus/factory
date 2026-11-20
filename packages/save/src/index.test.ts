@@ -1,6 +1,151 @@
-import { expect, it } from 'vitest';
-import { PACKAGE } from './index';
+import { describe, expect, it } from 'vitest';
+import { createState, hash, runTicks, type Command, type PlacedBuilding, type ScheduledCommand, type SimState } from '@factory/sim';
+import { deserialize, SAVE_VERSION, SaveError, serialize } from './index';
 
-it('пакет save подключён', () => {
-  expect(PACKAGE).toBe('@factory/save');
+const E = 1;
+const build = (building: string, x: number, y: number): Command => ({ type: 'build', building, x, y, dir: E });
+
+/** Бур -> конвейеры -> манипулятор -> печь -> манипулятор -> сундук. */
+const BUILD: ScheduledCommand[] = [
+  { tick: 0, command: build('drill', 0, 0) },
+  // Второй бур упирается в пустую клетку: его выходной буфер заполняется.
+  { tick: 0, command: build('drill', 0, 4) },
+  { tick: 0, command: build('belt', 2, 0) },
+  { tick: 0, command: build('belt', 3, 0) },
+  { tick: 0, command: build('belt', 4, 0) },
+  { tick: 0, command: build('inserter', 5, 0) },
+  { tick: 0, command: build('furnace', 6, 0) },
+  { tick: 0, command: build('inserter', 8, 0) },
+  { tick: 0, command: build('chest', 9, 0) },
+  { tick: 0, command: { type: 'setCounter', key: 'score', value: 7 } },
+];
+
+/** Команды, которые идут и до, и после сохранения: ломаем и перестраиваем часть линии. */
+const LATER: ScheduledCommand[] = [
+  { tick: 1100, command: { type: 'rollCounter', key: 'roll' } },
+  { tick: 1200, command: { type: 'demolish', x: 3, y: 0 } },
+  { tick: 1300, command: build('belt', 3, 0) },
+  { tick: 1400, command: { type: 'rollCounter', key: 'roll2' } },
+];
+
+function factory(): SimState {
+  const state = createState(12345, { width: 16, height: 16, deposits: [
+      { x: 0, y: 0, item: 'ironOre', amount: 5000 },
+      { x: 0, y: 4, item: 'ironOre', amount: 5000 },
+    ] });
+  runTicks(state, BUILD, 400);
+  state.inventory = [
+    { item: 'ironPlate', count: 40 },
+    { item: 'ammo', count: 3 },
+  ];
+  return state;
+}
+
+const roundtrip = (state: SimState): SimState => deserialize(serialize(state));
+const all = (state: SimState): PlacedBuilding[] => Object.values(state.buildings);
+
+describe('сохранение завода', () => {
+  it('в проверяемом состоянии есть предметы на конвейерах, в буферах, печи и сундуке', () => {
+    const state = factory();
+    const b = all(state);
+    expect(b.some((x) => x.type === 'belt' && (x.belt?.length ?? 0) > 0)).toBe(true);
+    expect(b.some((x) => x.type === 'drill' && x.output)).toBe(true);
+    expect(b.some((x) => x.type === 'furnace' && (x.input?.length || x.output || x.progress > 0))).toBe(true);
+    expect(b.some((x) => x.type === 'chest' && x.slots?.length)).toBe(true);
+    expect(state.inventory.length).toBe(2);
+    expect(state.map.deposits[0]?.item).toBe('ironOre');
+  });
+
+  it('состояние после загрузки равно исходному, включая карту и инвентарь', () => {
+    const state = factory();
+    const loaded = roundtrip(state);
+    expect(loaded).toEqual(state);
+    expect(loaded.map.deposits[0]).toEqual({ item: 'ironOre', amount: expect.any(Number) });
+    expect(loaded.inventory).toEqual(state.inventory);
+  });
+
+  it('хеш после сохранения и загрузки совпадает, в том числе для пустого состояния', () => {
+    const state = factory();
+    expect(hash(roundtrip(state))).toBe(hash(state));
+    const empty = createState(99);
+    expect(hash(roundtrip(empty))).toBe(hash(empty));
+  });
+
+  it('сохранение не меняет исходное состояние', () => {
+    const state = factory();
+    const before = hash(state);
+    serialize(state);
+    expect(hash(state)).toBe(before);
+  });
+
+  it('загруженная и исходная партии через 1000 тиков с теми же командами дают один хеш', () => {
+    const original = factory();
+    const loaded = roundtrip(original);
+    runTicks(original, LATER, 1000);
+    runTicks(loaded, LATER, 1000);
+    expect(loaded.tick).toBe(1400);
+    expect(Object.keys(original.counters)).toContain('roll');
+    expect(hash(loaded)).toBe(hash(original));
+    expect(loaded.rng).toBe(original.rng);
+  });
+});
+
+describe('версия формата', () => {
+  it('сохранение содержит номер версии', () => {
+    const file = JSON.parse(serialize(createState(1))) as { version: number };
+    expect(file.version).toBe(SAVE_VERSION);
+  });
+
+  it('неизвестная версия даёт понятную ошибку', () => {
+    const text = JSON.stringify({ version: SAVE_VERSION + 1, state: createState(1) });
+    expect(() => deserialize(text)).toThrow(SaveError);
+    expect(() => deserialize(text)).toThrow(/Неизвестная версия сохранения: 2/);
+  });
+
+  it('нет номера версии', () => {
+    expect(() => deserialize('{"state":{}}')).toThrow(/номер версии/);
+  });
+});
+
+describe('битые сохранения', () => {
+  it('невалидный JSON', () => {
+    expect(() => deserialize('{не json')).toThrow(SaveError);
+    expect(() => deserialize('{не json')).toThrow(/не является корректным JSON/);
+  });
+
+  const tamper = (change: (s: any) => void): string => {
+    const file = JSON.parse(serialize(factory()));
+    change(file.state);
+    return JSON.stringify(file);
+  };
+
+  it('здание, которого нет в content, даёт понятную ошибку, а не падение', () => {
+    const text = tamper((s) => {
+      s.buildings[1].type = 'teleporter';
+    });
+    expect(() => deserialize(text)).toThrow(SaveError);
+    expect(() => deserialize(text)).toThrow(/здание «teleporter», которого нет в игре/);
+  });
+
+  it('предмет, которого нет в content', () => {
+    const text = tamper((s) => {
+      s.inventory[0].item = 'unobtainium';
+    });
+    expect(() => deserialize(text)).toThrow(/предмет «unobtainium», которого нет в игре/);
+  });
+
+  it('рецепт, которого нет в content', () => {
+    const text = tamper((s) => {
+      const furnace = Object.values<any>(s.buildings).find((b) => b.type === 'furnace');
+      furnace.recipe = 'nope';
+    });
+    expect(() => deserialize(text)).toThrow(/неизвестный рецепт «nope»/);
+  });
+
+  it('усечённые массивы карты и пропавшие поля', () => {
+    expect(() => deserialize(tamper((s) => s.map.tiles.pop()))).toThrow(SaveError);
+    expect(() => deserialize(tamper((s) => delete s.map))).toThrow(SaveError);
+    expect(() => deserialize(tamper((s) => delete s.inventory))).toThrow(SaveError);
+    expect(() => deserialize('{"version":1,"state":null}')).toThrow(SaveError);
+  });
 });
