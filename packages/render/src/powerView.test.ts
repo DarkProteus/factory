@@ -141,8 +141,9 @@ describe('значок «нет топлива»', () => {
 });
 
 describe('мигание значка', () => {
-  it('α = 0.55 + 0.45 × sin(тик × 0.15)', () => {
-    expect(badgeAlpha(0)).toBeCloseTo(0.55);
+  it('α = 0.775 + 0.225 × sin(тик × 0.15): от 0.55 до 1', () => {
+    expect(badgeAlpha(0)).toBeCloseTo(0.775);
     expect(badgeAlpha(Math.PI / 2 / 0.15)).toBeCloseTo(1);
+    expect(badgeAlpha((3 * Math.PI) / 2 / 0.15)).toBeCloseTo(0.55);
   });
 });

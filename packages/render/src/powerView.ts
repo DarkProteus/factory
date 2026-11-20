@@ -115,4 +115,4 @@ export function badges(state: ViewState, defs: Defs = contentBuildings): Badge[]
 }
 
 /** Прозрачность мигающего значка в момент time (тики, дробные между тиками). */
-export const badgeAlpha = (time: number): number => 0.55 + 0.45 * Math.sin(time * 0.15);
+export const badgeAlpha = (time: number): number => 0.775 + 0.225 * Math.sin(time * 0.15);

@@ -78,9 +78,9 @@ function dashed(g: Graphics, x1: number, y1: number, x2: number, y2: number): vo
   }
 }
 
-/** Значок ⌀16 px: подложка `hazard-dark` с рамкой `bad` и молния либо перечёркнутый уголь. */
+/** Значок ⌀18 px: подложка `bad` с контуром `outline` и молния `hazard` либо уголь, перечёркнутый `plate-light`. */
 function drawBadge(g: Graphics, b: Badge): void {
-  g.circle(b.x, b.y, 8).fill({ color: palette['hazard-dark'] }).stroke({ width: 1.5, color: palette.bad });
+  g.circle(b.x, b.y, 9).fill({ color: palette.bad }).stroke({ width: 1.5, color: palette.outline });
   if (b.kind === 'power') {
     // Молния: ломаная из 6 вершин, высота 10 px.
     const pts = [1.5, -5, -3, 1, -0.3, 1, -1.5, 5, 3, -1, 0.3, -1];
@@ -88,5 +88,5 @@ function drawBadge(g: Graphics, b: Badge): void {
     return;
   }
   drawItem(g, 'coal', b.x, b.y, 9);
-  g.moveTo(b.x - 5, b.y + 5).lineTo(b.x + 5, b.y - 5).stroke({ width: 1.5, color: palette.bad });
+  g.moveTo(b.x - 5, b.y + 5).lineTo(b.x + 5, b.y - 5).stroke({ width: 1.5, color: palette['plate-light'] });
 }
