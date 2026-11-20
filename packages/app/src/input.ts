@@ -3,9 +3,9 @@
 // Менять состояние можно лишь командами через CommandQueue -> tick(state, commands).
 import { buildings, type BuildingDef } from '@factory/content';
 import { CELL, type Overlay } from '@factory/render';
-import { canPlace, footprintSize, type Command, type Dir, type ItemStack, type SimState } from '@factory/sim';
+import { canPlace, depositAt, footprintSize, type Command, type Dir, type ItemStack, type SimState } from '@factory/sim';
 
-export type Tool = { kind: 'none' } | { kind: 'build'; building: string } | { kind: 'demolish' };
+export type Tool = { kind: 'none' } | { kind: 'build'; building: string } | { kind: 'demolish' } | { kind: 'mine' };
 
 export interface Cell {
   x: number;
@@ -84,6 +84,11 @@ export function selectDemolish(s: ToolState): ToolState {
   return { ...s, tool: s.tool.kind === 'demolish' ? NO_TOOL : { kind: 'demolish' } };
 }
 
+/** Кирка: повторный выбор снимает инструмент; стройка и снос вытесняются, как при выборе здания. */
+export function selectMine(s: ToolState): ToolState {
+  return { ...s, tool: s.tool.kind === 'mine' ? NO_TOOL : { kind: 'mine' } };
+}
+
 /** Горячие клавиши по KeyboardEvent.code; неизвестная клавиша состояние не меняет. */
 export function applyKey(
   s: ToolState,
@@ -97,6 +102,7 @@ export function applyKey(
     return id === undefined ? s : selectBuilding(s, id, owned);
   }
   if (code === 'KeyX') return selectDemolish(s);
+  if (code === 'KeyM') return selectMine(s);
   if (code === 'KeyR') return { ...s, dir: rotateDir(s.dir) };
   if (code === 'Escape') return { ...s, tool: NO_TOOL };
   return s;
@@ -111,6 +117,25 @@ export function clickCommand(state: SimState, s: ToolState, cell: Cell): Command
   const a = ghostAnchor(cell, def.size, s.dir);
   if (!canPlace(state, s.tool.building, a.x, a.y, s.dir)) return null;
   return { type: 'build', building: s.tool.building, x: a.x, y: a.y, dir: s.dir };
+}
+
+/**
+ * Шаг ручной добычи; вызывается каждый кадр. `mined` — клетка, на которой уже
+ * послан startMining. Добыча идёт, пока выбрана кирка, кнопка зажата и курсор
+ * стоит на клетке с залежью; в остальных случаях шлётся stopMining.
+ * Смена клетки на другую залежь шлёт startMining заново.
+ */
+export function miningStep(
+  state: SimState,
+  s: ToolState,
+  mined: Cell | null,
+  down: boolean,
+  cell: Cell | null,
+): { mined: Cell | null; command: Command | null } {
+  const target = s.tool.kind === 'mine' && down && cell && depositAt(state, cell.x, cell.y) ? cell : null;
+  if (!target) return { mined: null, command: mined ? { type: 'stopMining' } : null };
+  if (mined && mined.x === target.x && mined.y === target.y) return { mined, command: null };
+  return { mined: target, command: { type: 'startMining', x: target.x, y: target.y } };
 }
 
 /** Оверлей для рендера: призрак со сеткой при стройке, рамка под курсором иначе. */

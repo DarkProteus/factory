@@ -157,6 +157,16 @@ body,
 .btn .cross::before { transform: rotate(45deg); }
 .btn .cross::after { transform: rotate(-45deg); }
 
+.btn .pickaxe {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.btn .pickaxe .handle { stroke: var(--steel-light); }
+.btn .pickaxe .head { stroke: var(--steel); }
+
 .tip {
   display: none;
   position: absolute;

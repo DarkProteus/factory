@@ -11,9 +11,11 @@ import {
   dropEmptyTool,
   itemCount,
   NO_TOOL,
+  miningStep,
   overlayFor,
   selectBuilding,
   selectDemolish,
+  selectMine,
   type Cell,
   type ToolState,
 } from './input';
@@ -47,6 +49,7 @@ export interface Game {
   chooseDemolish(): void;
   /** Сколько предметов с этим id (в том числе зданий) лежит в инвентаре. */
   itemCount(id: string): number;
+  chooseMine(): void;
   getTick(): number;
   /** Сообщение об ошибке сохранения или null; пропадает само через 10 с. */
   getMessage(): string | null;
@@ -81,6 +84,10 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
   let tools: ToolState = { tool: NO_TOOL, dir: 0 };
   /** Положение курсора в px канваса; null, если курсор вне канваса. */
   let pointer: { x: number; y: number } | null = null;
+  /** Левая кнопка мыши зажата на канвасе (нужна кирке). */
+  let pressed = false;
+  /** Клетка, на которой уже послан startMining. */
+  let mined: Cell | null = null;
 
   const showMessage = (text: string | null) => {
     message = text;
@@ -119,11 +126,13 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
   const onLeave = () => (pointer = null);
   const onDown = (e: PointerEvent) => {
     if (e.button !== 0) return;
+    pressed = true;
     locate(e);
     const cell = cellUnderPointer();
     const command = cell && clickCommand(state, tools, cell);
     if (command) queue.push(command);
   };
+  const onUp = () => (pressed = false);
   const onKey = (e: KeyboardEvent) => {
     if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
@@ -138,6 +147,8 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
   canvas.addEventListener('pointerdown', onDown);
   canvas.addEventListener('pointerleave', onLeave);
   window.addEventListener('keydown', onKey);
+  window.addEventListener('pointerup', onUp);
+  window.addEventListener('blur', onUp);
 
   // Камера новой партии стоит в центре стартовой карты.
   renderer.lookAt(startMap.width / 2, startMap.height / 2, 1.5);
@@ -147,6 +158,9 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
   const loop = (now: number) => {
     acc = Math.min(acc + now - last, TICK_MS * MAX_TICKS_PER_FRAME);
     last = now;
+    const step = miningStep(state, tools, mined, pressed, cellUnderPointer());
+    mined = step.mined;
+    if (step.command) queue.push(step.command);
     while (acc >= TICK_MS) {
       renderer.beforeTick(state);
       tick(state, queue.drain());
@@ -170,6 +184,7 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
     chooseBuilding: (id) => setTools(selectBuilding(tools, id, owned)),
     chooseDemolish: () => setTools(selectDemolish(tools)),
     itemCount: owned,
+    chooseMine: () => setTools(selectMine(tools)),
     getTick: () => state.tick,
     getMessage: () => message,
     newGame() {
@@ -187,6 +202,8 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
       canvas.removeEventListener('pointerdown', onDown);
       canvas.removeEventListener('pointerleave', onLeave);
       window.removeEventListener('keydown', onKey);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('blur', onUp);
       renderer.destroy();
     },
   };

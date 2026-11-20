@@ -1,13 +1,19 @@
-import { buildings } from '@factory/content';
-import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react';
-import type { Game } from '../game';
-import { buildingIds } from '../input';
-import { buildingName } from './names';
+import { buildings } from "@factory/content";
+import {
+  useEffect,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
+import type { Game } from "../game";
+import { buildingIds } from "../input";
+import { MineButton } from "./MineButton";
+import { buildingName } from "./names";
 
 function Panel({ title, children }: { title?: string; children: ReactNode }) {
   return (
     <div className="panel">
-      {['tl', 'tr', 'bl', 'br'].map((c) => (
+      {["tl", "tr", "bl", "br"].map((c) => (
         <i key={c} className={`rivet ${c}`} />
       ))}
       {title && <h2>{title}</h2>}
@@ -31,12 +37,12 @@ export function BuildPanel({ game }: { game: Game }) {
         <div className="row">
           {buildingIds().map((id, i) => {
             const def = buildings[id as keyof typeof buildings];
-            const active = tool.kind === 'build' && tool.building === id;
+            const active = tool.kind === "build" && tool.building === id;
             const count = game.itemCount(id);
             return (
               <button
                 key={id}
-                className={`btn${active ? ' active' : ''}`}
+                className={`btn${active ? " active" : ""}`}
                 disabled={count <= 0}
                 onClick={() => game.chooseBuilding(id)}
               >
@@ -55,13 +61,19 @@ export function BuildPanel({ game }: { game: Game }) {
         </div>
       </Panel>
       <Panel>
-        <button className={`btn${tool.kind === 'demolish' ? ' active' : ''}`} onClick={() => game.chooseDemolish()}>
-          <span className="cross" />
-          <span className="key">X</span>
-          <span className="tip">
-            <b>Снос</b>
-          </span>
-        </button>
+        <div className="row">
+          <button
+            className={`btn${tool.kind === "demolish" ? " active" : ""}`}
+            onClick={() => game.chooseDemolish()}
+          >
+            <span className="cross" />
+            <span className="key">X</span>
+            <span className="tip">
+              <b>Снос</b>
+            </span>
+          </button>
+          <MineButton game={game} />
+        </div>
       </Panel>
     </div>
   );
