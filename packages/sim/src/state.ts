@@ -1,4 +1,4 @@
-import type { PlacedBuilding } from './buildings';
+import type { ItemStack, PlacedBuilding } from './buildings';
 import { createMap, type GameMap, type MapParams } from './grid';
 
 /** Состояние симуляции: только простые данные, сериализуется в JSON без потерь. */
@@ -15,8 +15,10 @@ export interface SimState {
   buildings: Record<number, PlacedBuilding>;
   /** id для следующего здания; начинается с 1. */
   nextId: number;
+  /** Инвентарь игрока: ячейки (непустые стеки), см. inventory.ts; не длиннее INVENTORY_SLOTS. */
+  inventory: ItemStack[];
 }
 
 export function createState(seed: number, map?: MapParams): SimState {
-  return { tick: 0, rng: seed | 0, counters: {}, map: createMap(map), buildings: {}, nextId: 1 };
+  return { tick: 0, rng: seed | 0, counters: {}, map: createMap(map), buildings: {}, nextId: 1, inventory: [] };
 }

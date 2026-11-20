@@ -1,6 +1,7 @@
-import { buildings as contentBuildings, type BuildingDef } from '@factory/content';
+import { buildings as contentBuildings, INVENTORY_SLOTS, type BuildingDef } from '@factory/content';
 import type { BeltItem } from './belt';
 import { cellIndex, inBounds, type GameMap } from './grid';
+import { add } from './inventory';
 
 /** Направление: 0 — N, 1 — E, 2 — S, 3 — W. */
 export type Dir = 0 | 1 | 2 | 3;
@@ -41,6 +42,7 @@ interface BuildingsState {
   map: GameMap;
   buildings: Record<number, PlacedBuilding>;
   nextId: number;
+  inventory: ItemStack[];
 }
 
 /** Ширина и высота отпечатка: при E и W размеры меняются местами. */
@@ -88,10 +90,40 @@ export function placeBuilding(
   setOccupancy(state.map, building, size, building.id);
 }
 
-/** Сносит здание, которому принадлежит клетка; пустая клетка — без эффекта. */
-export function demolishAt(state: BuildingsState, x: number, y: number, defs: BuildingDefs = contentBuildings): void {
+/** Всё, что лежит в здании: конвейер, выход, вход крафтера, ячейки контейнера. */
+function contents(b: PlacedBuilding): ItemStack[] {
+  const stacks: ItemStack[] = [];
+  for (const it of b.belt ?? []) stacks.push({ item: it.item, count: 1 });
+  if (b.output) stacks.push(b.output);
+  stacks.push(...(b.input ?? []), ...(b.slots ?? []));
+  return stacks;
+}
+
+/** Кладёт все стеки в слоты; при неудаче возвращает false (слоты тогда не определены). */
+function addAll(slots: ItemStack[], slotCount: number, stacks: readonly ItemStack[]): boolean {
+  for (const s of stacks) {
+    for (let i = 0; i < s.count; i++) if (!add(slots, slotCount, s.item)) return false;
+  }
+  return true;
+}
+
+/**
+ * Сносит здание, которому принадлежит клетка; пустая клетка — без эффекта.
+ * Содержимое уходит в инвентарь игрока; если оно не помещается целиком, снос не выполняется.
+ */
+export function demolishAt(
+  state: BuildingsState,
+  x: number,
+  y: number,
+  defs: BuildingDefs = contentBuildings,
+  slotCount: number = INVENTORY_SLOTS,
+): void {
   const building = buildingAt(state, x, y);
   if (!building) return;
+  const trial = state.inventory.map((s) => ({ ...s }));
+  const stacks = contents(building);
+  if (!addAll(trial, slotCount, stacks)) return;
+  state.inventory = trial;
   setOccupancy(state.map, building, defs[building.type]!.size, 0);
   delete state.buildings[building.id];
 }

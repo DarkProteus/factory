@@ -3,3 +3,4 @@ export type { Behavior, BuildingDef, ItemDef, RecipeDef } from './types';
 export { items } from './items';
 export { recipes } from './recipes';
 export { buildings } from './buildings';
+export { INVENTORY_SLOTS } from './player';
