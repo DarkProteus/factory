@@ -250,6 +250,68 @@ describe('битые сохранения', () => {
     expect(() => deserialize(text)).toThrow(SaveError);
   });
 
+  describe('рецепт и вход крафтера', () => {
+    // Печь приводится к известному состоянию: рецепт и по стопке на ингредиент.
+    const furnace = (s: any) => Object.values<any>(s.buildings).find((b) => b.type === 'furnace');
+    const withFurnace = (change: (f: any) => void): string =>
+      tamper((s) => {
+        const f = furnace(s);
+        f.recipe = 'smeltIron';
+        f.input = [{ item: 'ironOre', count: 1 }];
+        change(f);
+      });
+
+    it('согласованные рецепт и вход проходят, в том числе пустая стопка', () => {
+      expect(() => deserialize(withFurnace(() => {}))).not.toThrow();
+      expect(() => deserialize(withFurnace((f) => (f.input[0].count = 0)))).not.toThrow();
+      // Печь без цикла: ни рецепта, ни входа.
+      expect(() => deserialize(tamper((s) => { delete furnace(s).recipe; delete furnace(s).input; }))).not.toThrow();
+    });
+
+    it('рецепт без входа отклоняется', () => {
+      const text = withFurnace((f) => delete f.input);
+      expect(() => deserialize(text)).toThrow(SaveError);
+      expect(() => deserialize(text)).toThrow(/нет входа для рецепта «smeltIron»/);
+    });
+
+    it('рецепт с пустым списком входа или без стопки ингредиента отклоняется', () => {
+      expect(() => deserialize(withFurnace((f) => (f.input = [])))).toThrow(/нет стопки для «ironOre»/);
+      expect(() => deserialize(withFurnace((f) => (f.input = [{ item: 'coal', count: 0 }])))).toThrow(SaveError);
+    });
+
+    it('у сборщика должна быть стопка на каждый ингредиент рецепта', () => {
+      const state = createState(3, { width: 8, height: 8 });
+      state.inventory = [{ item: 'assembler', count: 1 }];
+      runTicks(state, [{ tick: 0, command: build('assembler', 0, 0) }], 1);
+      const asm = Object.values(state.buildings)[0]!;
+      // Сборщик без рецепта: ни recipe, ни input — это нормальное состояние.
+      expect(() => roundtrip(state)).not.toThrow();
+      runTicks(state, [{ tick: 1, command: { type: 'setRecipe', building: asm.id, recipe: 'circuit' } }], 1);
+      expect(asm.input).toEqual([{ item: 'ironPlate', count: 0 }, { item: 'copperCable', count: 0 }]);
+      expect(() => roundtrip(state)).not.toThrow();
+      asm.input = [{ item: 'ironPlate', count: 0 }];
+      expect(() => roundtrip(state)).toThrow(/нет стопки для «copperCable»/);
+    });
+
+    it('вход без рецепта отклоняется', () => {
+      const text = tamper((s) => {
+        delete furnace(s).recipe;
+        furnace(s).input = [{ item: 'ironOre', count: 0 }];
+      });
+      expect(() => deserialize(text)).toThrow(SaveError);
+      expect(() => deserialize(text)).toThrow(/вход без рецепта/);
+    });
+
+    it('стопка не из рецепта и дубль стопки отклоняются', () => {
+      expect(() => deserialize(withFurnace((f) => f.input.push({ item: 'coal', count: 1 })))).toThrow(
+        /стопка «coal» не из рецепта «smeltIron»/,
+      );
+      expect(() => deserialize(withFurnace((f) => f.input.push({ item: 'ironOre', count: 1 })))).toThrow(
+        /повторная стопка «ironOre»/,
+      );
+    });
+  });
+
   it('усечённые массивы карты и пропавшие поля', () => {
     expect(() => deserialize(tamper((s) => s.map.tiles.pop()))).toThrow(SaveError);
     expect(() => deserialize(tamper((s) => delete s.map))).toThrow(SaveError);

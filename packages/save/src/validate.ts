@@ -47,6 +47,30 @@ function checkMap(map: unknown): void {
   });
 }
 
+/**
+ * Рецепт и вход крафтера идут парой: у рецепта по стопке (в том числе пустой) на каждый
+ * ингредиент, без рецепта входа нет. Иначе тик падает на stackFor(...)! и b.input!.
+ * Предполагает, что форма recipe и input уже проверена.
+ */
+function checkCrafterInput(b: Record<string, unknown>, where: string): void {
+  if (b.recipe === undefined) {
+    if (b.input !== undefined) fail(where, 'вход без рецепта');
+    return;
+  }
+  const id = b.recipe as keyof typeof recipes;
+  if (b.input === undefined) fail(where, `нет входа для рецепта «${id}»`);
+  const wanted = Object.keys(recipes[id].in);
+  const seen = new Set<string>();
+  for (const s of b.input as { item: string }[]) {
+    if (!wanted.includes(s.item)) fail(where, `стопка «${s.item}» не из рецепта «${id}»`);
+    if (seen.has(s.item)) fail(where, `повторная стопка «${s.item}»`);
+    seen.add(s.item);
+  }
+  for (const item of wanted) {
+    if (!seen.has(item)) fail(where, `нет стопки для «${item}» (рецепт «${id}»)`);
+  }
+}
+
 function checkBuilding(key: string, b: unknown): void {
   const where = `здание ${key}`;
   if (!isObject(b)) fail(where, 'ожидался объект');
@@ -70,6 +94,7 @@ function checkBuilding(key: string, b: unknown): void {
   if (b.recipe !== undefined && recipes[b.recipe as keyof typeof recipes].madeIn !== b.type) {
     fail(where, `рецепт «${String(b.recipe)}» не делается в этом здании`);
   }
+  checkCrafterInput(b, where);
   if (b.belt !== undefined) {
     if (!Array.isArray(b.belt)) fail(where, 'belt: ожидался список');
     b.belt.forEach((it: unknown, i) => {
