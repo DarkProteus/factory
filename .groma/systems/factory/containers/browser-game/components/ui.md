@@ -14,6 +14,8 @@ groma:
       file: packages/app/src/main.tsx
     - scanner: typescript
       file: packages/app/src/main.tsx
+    - scanner: typescript
+      file: packages/app/src/demo.ts
   technology: React
 description: Превращает ввод игрока в команды для ядра
 ---
