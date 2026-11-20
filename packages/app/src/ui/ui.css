@@ -1,0 +1,144 @@
+/* Интерфейс строго по docs/style.md, раздел «Интерфейс». Цвета только из theme.css. */
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  background: var(--ground-0);
+  overflow: hidden;
+  font: 400 14px 'IBM Plex Sans', sans-serif;
+  color: var(--text);
+  user-select: none;
+}
+
+.hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+.hud > * {
+  pointer-events: auto;
+}
+
+.tick {
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  font: 500 12px 'IBM Plex Mono', monospace;
+  color: var(--text-dim);
+  pointer-events: none;
+}
+
+.dock {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.panel {
+  position: relative;
+  box-sizing: border-box;
+  padding: 16px 12px 12px;
+  background: var(--ui-bg);
+  border: 2px solid var(--steel);
+}
+.panel::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: repeating-linear-gradient(45deg, var(--hazard) 0 4px, var(--hazard-dark) 4px 8px);
+}
+.rivet {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--steel-light);
+}
+.rivet.tl { top: 6px; left: 6px; }
+.rivet.tr { top: 6px; right: 6px; }
+.rivet.bl { bottom: 6px; left: 6px; }
+.rivet.br { bottom: 6px; right: 6px; }
+
+.panel h2 {
+  margin: 0 0 8px;
+  font: 600 16px 'Oswald', sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.row {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  position: relative;
+  box-sizing: border-box;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ui-raised);
+  border: 1px solid var(--outline);
+  color: var(--text);
+  cursor: pointer;
+}
+.btn:hover { background: var(--ui-hover); }
+.btn:active { background: var(--ui-pressed); }
+.btn.active { border: 2px solid var(--hazard); }
+.btn:disabled { cursor: default; }
+.btn:disabled img { opacity: 0.4; }
+.btn img { width: 24px; height: 24px; }
+.btn .key {
+  position: absolute;
+  right: 4px;
+  bottom: 2px;
+  font: 500 10px 'IBM Plex Mono', monospace;
+  color: var(--text-dim);
+}
+.btn .cross { position: relative; width: 24px; height: 24px; }
+.btn .cross::before,
+.btn .cross::after {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 11px;
+  width: 20px;
+  height: 2px;
+  background: var(--bad);
+}
+.btn .cross::before { transform: rotate(45deg); }
+.btn .cross::after { transform: rotate(-45deg); }
+
+.tip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 10px;
+  white-space: nowrap;
+  background: var(--ui-bg);
+  border: 2px solid var(--steel);
+  font: 400 12px 'IBM Plex Sans', sans-serif;
+  color: var(--text-dim);
+  pointer-events: none;
+  z-index: 2;
+}
+.tip b {
+  font: 600 14px 'Oswald', sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text);
+  margin-right: 8px;
+}
+.tip span { font: 500 12px 'IBM Plex Mono', monospace; }
+.btn:hover .tip { display: block; }

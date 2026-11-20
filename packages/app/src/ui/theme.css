@@ -1,0 +1,38 @@
+/* Палитра из docs/style.md. Значения совпадают с packages/render/src/palette.ts (это проверяет тест). */
+:root {
+  --outline: #141210;
+  --shadow: #000000;
+  --ground-0: #2a2622;
+  --ground-1: #2e2924;
+  --ground-2: #27231f;
+  --grid: #3a342d;
+  --ore-iron: #7c8790;
+  --ore-iron-dark: #4e575e;
+  --steel-dark: #3b3f42;
+  --steel: #5a6064;
+  --steel-light: #8a9094;
+  --rust-dark: #5c2e1a;
+  --rust: #8b4a2b;
+  --rust-light: #b8693a;
+  --hazard: #d9a441;
+  --hazard-dark: #1c1a18;
+  --heat-1: #ff8a3d;
+  --heat-2: #ffc46b;
+  --plate: #c9ced1;
+  --plate-light: #e8ecee;
+  --brass: #c9a14a;
+  --lamp-work: #9fc26b;
+  --lamp-wait: #d9a441;
+  --lamp-off: #4a4540;
+  --ok: #7fb5a0;
+  --bad: #c2452d;
+  --text: #e6dfd3;
+
+  /* Токены интерфейса, которых нет в палитре Pixi. */
+  --ui-bg: rgba(31, 28, 25, 0.94);
+  --ui-raised: #3b3f42;
+  --ui-hover: #4a4f53;
+  --ui-pressed: #2a2d30;
+  --text-dim: #a89f92;
+  --text-off: #6b655d;
+}

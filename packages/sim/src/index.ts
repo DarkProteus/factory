@@ -1,7 +1,7 @@
 export const PACKAGE = '@factory/sim';
 
 export { depositAt, type Deposit, type GameMap, type MapParams, type Tile } from './grid';
-export { buildingAt, footprintSize, type BuildingDefs, type Dir, type ItemStack, type PlacedBuilding } from './buildings';
+export { buildingAt, canPlace, footprintSize, type BuildingDefs, type Dir, type ItemStack, type PlacedBuilding } from './buildings';
 export { BELT_CELL, BELT_GAP, pushToBelt, type BeltItem } from './belt';
 export { createState, type SimState } from './state';
 export { tick } from './tick';

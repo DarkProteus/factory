@@ -4,7 +4,7 @@ import type { BuildingDef } from '@factory/content';
 import type { Graphics } from 'pixi.js';
 import type { ViewState } from '../interp';
 import { CELL, palette, SHADOW_ALPHA } from '../palette';
-import { body, fill, hazardStripes, lamp, OUTLINE, OUTLINE_THIN, rectPts, rivets, rust, type LampState } from './shapes';
+import { body, fill, hazardStripes, lamp, line, OUTLINE, OUTLINE_THIN, rectPts, rivets, rust, type LampState } from './shapes';
 
 export type BuildingView = ViewState['buildings'][number];
 
@@ -20,6 +20,13 @@ export interface FrameCtx {
 /** Размер здания в px в ориентации N. */
 export function localSize(def: BuildingDef): [number, number] {
   return [def.size[0] * CELL, def.size[1] * CELL];
+}
+
+/** Центр отпечатка в мире и размер в ориентации N для здания с якорем (x, y) и направлением dir. */
+export function placement(def: BuildingDef, x: number, y: number, dir: number): [number, number, number, number] {
+  const [w, h] = localSize(def);
+  const [fw, fh] = dir % 2 === 1 ? [h, w] : [w, h];
+  return [x * CELL + fw / 2, y * CELL + fh / 2, w, h];
 }
 
 export function drawBuilding(g: Graphics, b: BuildingView, def: BuildingDef, ctx: FrameCtx): void {
@@ -58,7 +65,7 @@ export function drillLamp(state: ViewState, b: BuildingView, def: BuildingDef): 
 
 function drawDrill(g: Graphics, b: BuildingView, def: BuildingDef, ctx: FrameCtx, w: number, h: number): void {
   body(g, w, h, 'steel-dark');
-  g.rect(-w / 2 + 3.5, -h / 2 + 3.5, w - 7, h - 7).stroke({ width: 3, color: fill('steel').color });
+  g.rect(-w / 2 + 3.5, -h / 2 + 3.5, w - 7, h - 7).stroke(line('steel', 3));
   rust(g, b.id, w, h);
   rivets(g, w, h, 6);
   // Жёлоб над клеткой выдачи: при N и E это левая клетка переднего края, при S и W — правая.
@@ -77,7 +84,7 @@ function drawDrill(g: Graphics, b: BuildingView, def: BuildingDef, ctx: FrameCtx
     const a = turn * Math.PI * 2 + (i * Math.PI * 2) / 3;
     g.moveTo(0, 0).lineTo(Math.sin(a) * 14, -Math.cos(a) * 14);
   }
-  g.stroke({ width: 3, color: fill('steel-light').color, cap: 'round' });
+  g.stroke(line('steel-light', 3, { cap: 'round' }));
   lamp(g, w, h, state);
 }
 
@@ -97,12 +104,12 @@ function drawBelt(g: Graphics, def: BuildingDef, ctx: FrameCtx, w: number, h: nu
       g.moveTo(side * 5 * (1 - t0), tip + 5 - 5 * t0).lineTo(side * 5 * (1 - t1), tip + 5 - 5 * t1);
     }
   }
-  g.stroke({ width: 2, color: fill('rust-light').color });
+  g.stroke(line('rust-light', 2));
 }
 
 function drawInserter(g: Graphics, b: BuildingView, def: BuildingDef, ctx: FrameCtx): void {
   g.circle(0, 0, 10).fill(fill('steel-dark')).stroke(OUTLINE);
-  g.circle(0, 0, 8).stroke({ width: 2, color: fill('steel').color });
+  g.circle(0, 0, 8).stroke(line('steel', 2));
   g.poly([0, -10, -3, -5, 3, -5]).fill(fill('hazard'));
   const a = ctx.armAngle(b, def);
   const [sin, cos] = [Math.sin(a), Math.cos(a)];
@@ -136,9 +143,9 @@ function drawFurnace(g: Graphics, b: BuildingView, ctx: FrameCtx, w: number, h: 
     if (y > y0) g.moveTo(x0, y).lineTo(w / 2 - 2, y);
     for (let x = x0 + (row % 2 ? 6 : 12); x < w / 2 - 2; x += 12) g.moveTo(x, y).lineTo(x, Math.min(y + 6, h / 2 - 2));
   }
-  g.stroke({ width: 1, color: fill('rust').color });
+  g.stroke(line('rust', 1));
   g.rect(-w / 2 + 2, -h / 2 + 2, w - 4, h - 4).stroke(OUTLINE);
-  g.rect(-13, -13, 26, 26).fill(fill('hazard-dark')).stroke({ width: 3, color: fill('steel').color });
+  g.rect(-13, -13, 26, 26).fill(fill('hazard-dark')).stroke(line('steel', 3));
   if (b.progress > 0) {
     g.rect(-10, -10, 20, 20).fill(fill('heat-1'));
     g.rect(-6, -6, 12, 12).fill(fill('heat-2', 0.75 + 0.25 * Math.sin((ctx.tick + ctx.alpha) * 0.2)));
@@ -151,9 +158,9 @@ function drawFurnace(g: Graphics, b: BuildingView, ctx: FrameCtx, w: number, h: 
 
 function drawChest(g: Graphics, b: BuildingView): void {
   g.rect(-13, -13, 26, 26).fill(fill('steel')).stroke(OUTLINE);
-  g.rect(-12, -12, 24, 24).stroke({ width: 2, color: fill('steel-dark').color });
+  g.rect(-12, -12, 24, 24).stroke(line('steel-dark', 2));
   g.moveTo(-10, -10).lineTo(10, 10).moveTo(10, -10).lineTo(-10, 10);
-  g.stroke({ width: 3, color: fill('steel-light').color });
+  g.stroke(line('steel-light', 3));
   rust(g, b.id, 26, 26);
   rivets(g, 26, 26, 4);
 }

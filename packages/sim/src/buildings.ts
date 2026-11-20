@@ -66,6 +66,26 @@ function setOccupancy(map: GameMap, b: PlacedBuilding, size: readonly [number, n
   }
 }
 
+/** Можно ли поставить здание: известный тип, верное направление, отпечаток целиком на карте и свободен. */
+export function canPlace(
+  state: BuildingsState,
+  type: string,
+  x: number,
+  y: number,
+  dir: number,
+  defs: BuildingDefs = contentBuildings,
+): boolean {
+  if (!Object.hasOwn(defs, type) || !isDir(dir) || !inBounds(state.map, x, y)) return false;
+  const [w, h] = footprintSize(defs[type]!.size, dir);
+  if (!inBounds(state.map, x + w - 1, y + h - 1)) return false;
+  for (let dy = 0; dy < h; dy++) {
+    for (let dx = 0; dx < w; dx++) {
+      if (state.map.occupancy[cellIndex(state.map, x + dx, y + dy)] !== 0) return false;
+    }
+  }
+  return true;
+}
+
 /** Ставит здание; неверную команду (занято, вне карты, неизвестный тип) молча игнорирует. */
 export function placeBuilding(
   state: BuildingsState,
@@ -75,15 +95,8 @@ export function placeBuilding(
   dir: number,
   defs: BuildingDefs = contentBuildings,
 ): void {
-  if (!Object.hasOwn(defs, type) || !isDir(dir) || !inBounds(state.map, x, y)) return;
+  if (!isDir(dir) || !canPlace(state, type, x, y, dir, defs)) return;
   const size = defs[type]!.size;
-  const [w, h] = footprintSize(size, dir);
-  if (!inBounds(state.map, x + w - 1, y + h - 1)) return;
-  for (let dy = 0; dy < h; dy++) {
-    for (let dx = 0; dx < w; dx++) {
-      if (state.map.occupancy[cellIndex(state.map, x + dx, y + dy)] !== 0) return;
-    }
-  }
   const building: PlacedBuilding = { id: state.nextId, type, x, y, dir, progress: 0, output: null };
   state.nextId += 1;
   state.buildings[building.id] = building;

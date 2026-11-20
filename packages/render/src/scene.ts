@@ -2,9 +2,10 @@
 import { buildings as contentBuildings, type BuildingDef } from '@factory/content';
 import { Container, Graphics } from 'pixi.js';
 import type { Camera } from './camera';
-import { drawBuilding, drawShadow, localSize, type BuildingView, type FrameCtx, armTip } from './draw/buildings';
+import { drawBuilding, drawShadow, placement, type BuildingView, type FrameCtx, armTip } from './draw/buildings';
 import { DepositLayer, drawGround } from './draw/ground';
 import { drawItem } from './draw/items';
+import { OverlayLayer, type Overlay } from './overlay';
 import { beltItemPos, captureBelts, type BeltSnapshot, type ViewState } from './interp';
 import { CELL } from './palette';
 import { BELT_CELL } from '@factory/sim';
@@ -30,9 +31,17 @@ export class Scene {
   /** Манипуляторы: держал ли предмет на прошлом кадре и тик укладки. */
   private held = new Map<number, boolean>();
   private placedAt = new Map<number, number>();
+  private overlay: OverlayLayer;
+  private overlayState: Overlay | null = null;
 
   constructor(private defs: Defs = contentBuildings) {
-    this.world.addChild(this.ground, this.deposits.graphics, this.shadows, this.buildingLayer, this.items);
+    this.overlay = new OverlayLayer(defs);
+    this.world.addChild(this.ground, this.deposits.graphics, this.overlay.grid, this.shadows, this.buildingLayer, this.items, this.overlay.top);
+  }
+
+  /** Оверлей стройки на следующие кадры; null — убрать. */
+  setOverlay(overlay: Overlay | null): void {
+    this.overlayState = overlay;
   }
 
   /** Вызывать перед каждым tick(): запоминает позиции предметов для интерполяции. */
@@ -75,13 +84,12 @@ export class Scene {
       this.held.delete(id);
       this.placedAt.delete(id);
     }
+    this.overlay.update(this.overlayState, state);
   }
 
   /** Центр отпечатка в мире и размер в ориентации N. */
   private place(b: BuildingView, def: BuildingDef): [number, number, number, number] {
-    const [w, h] = localSize(def);
-    const [fw, fh] = b.dir % 2 === 1 ? [h, w] : [w, h];
-    return [b.x * CELL + fw / 2, b.y * CELL + fh / 2, w, h];
+    return placement(def, b.x, b.y, b.dir);
   }
 
   private graphicsFor(id: number): Graphics {

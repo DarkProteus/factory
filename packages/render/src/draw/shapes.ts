@@ -3,10 +3,56 @@ import type { Graphics } from 'pixi.js';
 import { palette, type Token } from '../palette';
 import { blob, hashInts, seeded } from '../wear';
 
-export const OUTLINE = { width: 2, color: palette.outline } as const;
-export const OUTLINE_THIN = { width: 1, color: palette.outline } as const;
+/** Режим призрака: все заливки и контуры берут цвет ok или bad (docs/style.md, «Призрак постройки»). */
+export type GhostMode = 'ok' | 'bad';
+export const GHOST_FILL_ALPHA = 0.35;
+export const GHOST_LINE_ALPHA = 0.8;
+
+let ghost: GhostMode | null = null;
+
+/** Выполняет fn в режиме призрака; снаружи режим всегда выключен. */
+export function withGhost<T>(mode: GhostMode | null, fn: () => T): T {
+  const prev = ghost;
+  ghost = mode;
+  try {
+    return fn();
+  } finally {
+    ghost = prev;
+  }
+}
+
+/** Линия толщиной width цвета token; в режиме призрака цвет и альфа заменяются. */
+export function line(token: Token, width: number, extra: { cap?: 'round' } = {}) {
+  return {
+    width,
+    color: ghost ? palette[ghost] : palette[token],
+    alpha: ghost ? GHOST_LINE_ALPHA : 1,
+    ...extra,
+  };
+}
+
+// Контур читает режим в момент рисования, поэтому сделан геттерами.
+export const OUTLINE = {
+  width: 2,
+  get color() {
+    return ghost ? palette[ghost] : palette.outline;
+  },
+  get alpha() {
+    return ghost ? GHOST_LINE_ALPHA : 1;
+  },
+};
+export const OUTLINE_THIN = {
+  width: 1,
+  get color() {
+    return OUTLINE.color;
+  },
+  get alpha() {
+    return OUTLINE.alpha;
+  },
+};
 
 export function fill(token: Token, alpha = 1) {
+  if (ghost) return { color: palette[ghost], alpha: GHOST_FILL_ALPHA };
   return { color: palette[token], alpha };
 }
 
@@ -25,6 +71,7 @@ export function rivets(g: Graphics, w: number, h: number, inset = 4, d = 3): voi
 
 /** 1–3 пятна ржавчины на корпусе w×h; всё от хеша id здания. */
 export function rust(g: Graphics, id: number, w: number, h: number): void {
+  if (ghost) return;
   const rand = seeded(hashInts(id, 7));
   const count = 1 + Math.floor(rand() * 3);
   for (let i = 0; i < count; i++) {
@@ -40,6 +87,7 @@ export type LampState = 'work' | 'wait' | 'off';
 
 /** Лампа ⌀6 в заднем левом углу корпуса (в ориентации N зад — низ). */
 export function lamp(g: Graphics, w: number, h: number, state: LampState): void {
+  if (ghost) return;
   g.circle(-w / 2 + 12, h / 2 - 12, 3).fill(fill(`lamp-${state}`)).stroke(OUTLINE_THIN);
 }
 

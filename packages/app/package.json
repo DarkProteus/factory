@@ -13,6 +13,9 @@
     "@factory/render": "workspace:*",
     "@factory/save": "workspace:*",
     "@factory/sim": "workspace:*",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/ibm-plex-sans": "^5.3.0",
+    "@fontsource/oswald": "^5.3.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
