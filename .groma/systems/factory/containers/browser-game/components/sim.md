@@ -43,6 +43,8 @@ groma:
     - scanner: typescript
       file: packages/sim/src/inserter.ts
       symbol: runInserter
+    - scanner: typescript
+      file: packages/sim/src/propKit.ts
   technology: TypeScript
 description: Хранит состояние мира и обновляет его раз в тик
 ---
