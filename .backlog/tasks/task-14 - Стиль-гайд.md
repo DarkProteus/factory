@@ -1,15 +1,17 @@
 ---
 id: TASK-14
 title: Стиль-гайд
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-11-16T17:19:00Z'
-updated_date: '2026-11-16T17:19:00Z'
+updated_date: '2026-11-20T15:43:00Z'
 labels: []
 dependencies: []
 references:
   - render
   - ui
+modified_files:
+  - docs/style.md
 type: docs
 ordinal: 8500
 ---
@@ -22,6 +24,12 @@ ordinal: 8500
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 docs/style.md создан и описывает палитру, вид всех сущностей M1 и стиль интерфейса
-- [ ] #2 TASK-9 и TASK-10 можно выполнить по гайду, не придумывая визуал
+- [x] #1 docs/style.md создан и описывает палитру, вид всех сущностей M1 и стиль интерфейса
+- [x] #2 TASK-9 и TASK-10 можно выполнить по гайду, не придумывая визуал
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Решения пользователя 2026-11-20: индустриальный стиль с ржавчиной. Вид строго сверху выбран основной сессией.
+<!-- SECTION:NOTES:END -->
