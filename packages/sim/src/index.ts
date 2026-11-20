@@ -7,6 +7,7 @@ export { createState, type MiningState, type SimState } from './state';
 export { type CraftJob } from './craftQueue';
 export { tick } from './tick';
 export { applyCommand, type Command } from './commands';
+export { type BuildingSlot } from './manual';
 export { hash } from './hash';
 export { nextRandom, rngStep, type RngStep } from './rng';
 export { runTicks, type ScheduledCommand } from './replay';

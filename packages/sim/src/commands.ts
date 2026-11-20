@@ -2,6 +2,7 @@ import { demolishAt, placeBuilding, type BuildingDefs, type Dir } from './buildi
 import { setRecipe } from './assembler';
 import { startMining, stopMining } from './mining';
 import { cancelCraft, enqueueCraft } from './craftQueue';
+import { putIntoBuilding, takeFromBuilding, type BuildingSlot } from './manual';
 import { nextRandom } from './rng';
 import type { SimState } from './state';
 
@@ -24,7 +25,11 @@ export type Command =
   /** Убирает запись очереди ручного крафта и возвращает ингредиенты. */
   | { type: 'cancelCraft'; index: number }
   /** Задаёт рецепт сборщика (id здания); содержимое при смене уходит в инвентарь, не помещается — смена запрещена. */
-  | { type: 'setRecipe'; building: number; recipe: string };
+  | { type: 'setRecipe'; building: number; recipe: string }
+  /** Переносит ячейку здания (id) в инвентарь целиком или сколько помещается. */
+  | { type: 'takeFromBuilding'; building: number; slot: BuildingSlot }
+  /** Кладёт из инвентаря в здание до count предметов туда, куда положил бы манипулятор; лишнее остаётся в инвентаре. */
+  | { type: 'putIntoBuilding'; building: number; item: string; count: number };
 
 /** `defs` — таблица зданий; по умолчанию content.buildings (параметр нужен тестам). */
 export function applyCommand(state: SimState, command: Command, defs?: BuildingDefs): void {
@@ -55,6 +60,12 @@ export function applyCommand(state: SimState, command: Command, defs?: BuildingD
       return;
     case 'setRecipe':
       setRecipe(state, command.building, command.recipe, defs);
+      return;
+    case 'takeFromBuilding':
+      takeFromBuilding(state, command.building, command.slot);
+      return;
+    case 'putIntoBuilding':
+      putIntoBuilding(state, command.building, command.item, command.count, defs);
       return;
   }
 }
