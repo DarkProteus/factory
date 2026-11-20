@@ -1,15 +1,30 @@
 ---
 id: TASK-25
 title: 'Контент M2: ресурсы, предметы, рецепты, здания'
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-11-20T18:38:00Z'
-updated_date: '2026-11-20T18:41:00Z'
+updated_date: '2026-11-20T18:49:00Z'
 labels:
   - m2
 dependencies: []
 references:
   - content
+modified_files:
+  - packages/content/src/types.ts
+  - packages/content/src/items.ts
+  - packages/content/src/recipes.ts
+  - packages/content/src/buildings.ts
+  - packages/content/src/player.ts
+  - packages/content/src/map.ts
+  - packages/content/src/index.ts
+  - packages/content/src/content.test.ts
+  - packages/content/src/map.test.ts
+  - packages/sim/src/crafter.ts
+  - packages/sim/src/crafter.test.ts
+  - packages/sim/src/grid.test.ts
+  - packages/sim/src/canplace.test.ts
+  - packages/render/src/overlay.test.ts
 type: feature
 ordinal: 24000
 ---
@@ -30,9 +45,9 @@ sim должен собираться и проходить тесты: здан
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Предметы, рецепты и здания из таблиц design.md лежат в content; рецепт патронов — 4 ironPlate
-- [ ] #2 Типы ItemDef и BuildingDef расширены по решению в описании; sim и тесты собираются
-- [ ] #3 Валидатор ловит здание без предмета-здания и предмет-здание без рецепта madeIn: assembler
-- [ ] #4 Валидатор ловит fuel-здание без fuelSlot и рецепт печи с несколькими входами
-- [ ] #5 startMap: 128×128, по пятну ironOre, copperOre, coal, stone в 10–20 клетках от центра; START_KIT по design.md
+- [x] #1 Предметы, рецепты и здания из таблиц design.md лежат в content; рецепт патронов — 4 ironPlate
+- [x] #2 Типы ItemDef и BuildingDef расширены по решению в описании; sim и тесты собираются
+- [x] #3 Валидатор ловит здание без предмета-здания и предмет-здание без рецепта madeIn: assembler
+- [x] #4 Валидатор ловит fuel-здание без fuelSlot и рецепт печи с несколькими входами
+- [x] #5 startMap: 128×128, по пятну ironOre, copperOre, coal, stone в 10–20 клетках от центра; START_KIT по design.md
 <!-- AC:END -->

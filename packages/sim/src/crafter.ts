@@ -24,6 +24,8 @@ export function crafterCanAccept(
   item: string,
   recipes: Recipes = contentRecipes,
 ): boolean {
+  // Сборщик (recipeMode 'chosen') ждёт выбора рецепта игроком, пока стоит.
+  if (def.recipeMode === 'chosen') return false;
   const id = recipeFor(b, item, recipes);
   if (id === undefined) return false;
   const cap = recipes[id]!.in[item]! * (def.inputBuffer ?? 0);

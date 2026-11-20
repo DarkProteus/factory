@@ -19,7 +19,7 @@ describe('canPlace', () => {
 
   it('отпечаток учитывает направление', () => {
     const state = world();
-    const defs: Record<string, BuildingDef> = { bar: { size: [3, 1], power: 0, behavior: 'belt', hp: 1 } };
+    const defs: Record<string, BuildingDef> = { bar: { size: [3, 1], behavior: 'belt', hp: 1 } };
     expect(canPlace(state, 'bar', 5, 7, 0, defs)).toBe(true);
     expect(canPlace(state, 'bar', 5, 7, 1, defs)).toBe(false);
     expect(canPlace(state, 'bar', 7, 5, 1, defs)).toBe(true);

@@ -4,6 +4,8 @@ export interface ItemDef {
   name: string;
   /** Сколько предметов помещается в одну ячейку. */
   stack: number;
+  /** Энергия при сжигании, кДж (топливо). */
+  fuel?: number;
 }
 
 /** id предмета -> количество; при узком I не все предметы обязательны. */
@@ -31,12 +33,24 @@ export type Behavior =
   | 'generator'
   | 'lab'
   | 'turret'
-  | 'container';
+  | 'container'
+  | 'splitter'
+  | 'pole';
+
+/** Откуда здание берёт энергию (kw — мощность в кВт). */
+export type EnergyDef =
+  /** Потребляет из электросети. */
+  | { kind: 'electric'; kw: number }
+  /** Жжёт топливо из своей ячейки. */
+  | { kind: 'fuel'; kw: number }
+  /** Выдаёт в сеть, жжёт топливо по нагрузке. */
+  | { kind: 'generator'; kw: number };
 
 export interface BuildingDef<I extends string = string> {
   /** Ширина и высота в клетках. */
   size: readonly [number, number];
-  power: number;
+  /** Без energy здание энергии не берёт. */
+  energy?: EnergyDef;
   behavior: Behavior;
   hp: number;
   /** Тиков на единицу руды (бур). */
@@ -47,6 +61,14 @@ export interface BuildingDef<I extends string = string> {
   swingTicks?: number;
   /** Вместимость входа крафтера в циклах рецепта: на ингредиент in[item] * inputBuffer шт. */
   inputBuffer?: number;
+  /** Как крафтер выбирает рецепт: по пришедшему входу (печь) или игроком (сборщик). */
+  recipeMode?: 'byInput' | 'chosen';
+  /** Есть ячейка топлива на одну стопку (печь, генератор). */
+  fuelSlot?: boolean;
+  /** Сторона квадрата покрытия сети, клеток (столб). */
+  coverage?: number;
+  /** Радиус автосоединения со столбами, клеток (столб). */
+  wireReach?: number;
   /** Число ячеек (контейнер). */
   slots?: number;
   /** Скорость конвейера: единиц пути за тик; клетка конвейера — 256 единиц (BELT_CELL в sim). */

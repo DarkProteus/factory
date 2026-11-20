@@ -1,9 +1,10 @@
 ---
 id: TASK-15
 title: Конвейеры сегментами и бенчмарк
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-16T17:48:00Z'
+updated_date: '2026-11-20T18:45:00Z'
 labels: []
 dependencies: []
 references:

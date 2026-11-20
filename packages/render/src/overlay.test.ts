@@ -81,7 +81,7 @@ describe('оверлей в сцене', () => {
   it('предпросмотр без режима рисует обычными цветами', () => {
     const g = new Graphics();
     const state = createState(1, { width: 4, height: 4 });
-    drawPreview(g, 'chest', { size: [1, 1], power: 0, behavior: 'container', hp: 1 }, state, 0, null);
+    drawPreview(g, 'chest', { size: [1, 1], behavior: 'container', hp: 1 }, state, 0, null);
     expect(g.context.instructions.length).toBeGreaterThan(0);
   });
 });

@@ -24,9 +24,23 @@ function validateContent(tables: ContentTables): string[] {
       errors.push(`рецепт ${id}: здание ${recipe.madeIn} (madeIn) не существует`);
     } else if (tables.buildings[recipe.madeIn]!.behavior === 'crafter' && Object.keys(recipe.out).length !== 1) {
       errors.push(`рецепт ${id}: крафтер ${recipe.madeIn} держит один выходной предмет`);
+    } else if (tables.buildings[recipe.madeIn]!.recipeMode === 'byInput' && Object.keys(recipe.in).length !== 1) {
+      errors.push(`рецепт ${id}: печь ${recipe.madeIn} выбирает рецепт по входу, вход должен быть один`);
     }
   }
+  const assemblerOutputs = new Set(
+    Object.values(tables.recipes)
+      .filter((r) => r.madeIn === 'assembler')
+      .flatMap((r) => Object.keys(r.out)),
+  );
+  for (const id of Object.keys(tables.buildings)) {
+    if (!(id in tables.items)) errors.push(`здание ${id}: нет предмета-здания ${id}`);
+    else if (!assemblerOutputs.has(id)) errors.push(`предмет-здание ${id}: нет рецепта madeIn assembler`);
+  }
   for (const [id, building] of Object.entries(tables.buildings)) {
+    if ((building.energy?.kind === 'fuel' || building.energy?.kind === 'generator') && !building.fuelSlot) {
+      errors.push(`здание ${id}: питается топливом, но без fuelSlot`);
+    }
     if (building.ammo !== undefined && !(building.ammo in tables.items)) {
       errors.push(`здание ${id}: предмет ${building.ammo} (ammo) не существует`);
     }
@@ -37,9 +51,51 @@ function validateContent(tables: ContentTables): string[] {
 const real: ContentTables = { items, recipes, buildings };
 
 describe('настоящий контент', () => {
-  it('содержит три предмета и один рецепт', () => {
-    expect(Object.keys(items)).toHaveLength(3);
-    expect(Object.keys(recipes)).toHaveLength(1);
+  it('содержит предметы и рецепты из таблиц design.md', () => {
+    for (const id of ['ironOre', 'copperOre', 'coal', 'stone', 'ironPlate', 'copperPlate', 'stoneBrick', 'ironGear', 'copperCable', 'circuit', 'ammo']) {
+      expect(items).toHaveProperty(id);
+    }
+    expect(Object.keys(recipes)).toHaveLength(3 + 4 + 9);
+  });
+
+  it('рецепт патронов: 4 ironPlate', () => {
+    expect(recipes.ammo.in).toEqual({ ironPlate: 4 });
+    expect(recipes.ammo.out).toEqual({ ammo: 1 });
+  });
+
+  it('рецепты зданий и крафта совпадают с design.md', () => {
+    expect(recipes.ironGear).toMatchObject({ in: { ironPlate: 2 }, out: { ironGear: 1 }, madeIn: 'assembler' });
+    expect(recipes.copperCable).toMatchObject({ in: { copperPlate: 1 }, out: { copperCable: 2 } });
+    expect(recipes.circuit).toMatchObject({ in: { ironPlate: 1, copperCable: 3 }, out: { circuit: 1 } });
+    expect(recipes.drill.in).toEqual({ ironPlate: 10, ironGear: 5, circuit: 3 });
+    expect(recipes.furnace.in).toEqual({ stone: 5 });
+    expect(recipes.inserter.in).toEqual({ ironPlate: 1, ironGear: 1, circuit: 1 });
+    expect(recipes.belt).toMatchObject({ in: { ironPlate: 1, ironGear: 1 }, out: { belt: 2 } });
+    expect(recipes.splitter.in).toEqual({ ironPlate: 5, circuit: 2, belt: 2 });
+    expect(recipes.chest.in).toEqual({ ironPlate: 8 });
+    expect(recipes.assembler.in).toEqual({ ironPlate: 9, ironGear: 5, circuit: 3 });
+    expect(recipes.pole).toMatchObject({ in: { ironPlate: 1, copperCable: 2 }, out: { pole: 2 } });
+    expect(recipes.generator.in).toEqual({ ironPlate: 10, ironGear: 5, stoneBrick: 10 });
+    expect(recipes.smeltCopper).toMatchObject({ in: { copperOre: 1 }, out: { copperPlate: 1 }, madeIn: 'furnace' });
+    expect(recipes.smeltStone).toMatchObject({ in: { stone: 1 }, out: { stoneBrick: 1 }, madeIn: 'furnace' });
+  });
+
+  it('здания: размеры, энергия и поведения из design.md', () => {
+    expect(buildings.drill).toMatchObject({ size: [2, 2], energy: { kind: 'electric', kw: 90 } });
+    expect(buildings.furnace).toMatchObject({ size: [2, 2], energy: { kind: 'fuel', kw: 90 }, fuelSlot: true, recipeMode: 'byInput' });
+    expect(buildings.inserter.energy).toEqual({ kind: 'electric', kw: 13 });
+    expect(buildings.assembler).toMatchObject({ size: [3, 3], behavior: 'crafter', recipeMode: 'chosen', energy: { kind: 'electric', kw: 75 } });
+    expect(buildings.generator).toMatchObject({ size: [3, 3], behavior: 'generator', fuelSlot: true, energy: { kind: 'generator', kw: 900 } });
+    expect(buildings.pole).toMatchObject({ behavior: 'pole', coverage: 5, wireReach: 7 });
+    expect(buildings.splitter.behavior).toBe('splitter');
+    for (const id of ['belt', 'splitter', 'chest', 'pole'] as const) expect(buildings[id]).not.toHaveProperty('energy');
+  });
+
+  it('предмет-здание: тот же id, stack 50 (belt и pole — 100); уголь даёт 4000 кДж', () => {
+    for (const id of Object.keys(buildings) as BuildingId[]) {
+      expect(items[id].stack).toBe(id === 'belt' || id === 'pole' ? 100 : 50);
+    }
+    expect(items.coal.fuel).toBe(4000);
   });
 
   it('проходит валидатор ссылок', () => {
@@ -76,7 +132,7 @@ describe('валидатор ссылок', () => {
   it('ловит рецепт крафтера с несколькими выходными предметами', () => {
     const errors = validateContent({
       ...real,
-      recipes: { bad: { in: { ironOre: 1 }, out: { ironPlate: 1, ammo: 1 }, ticks: 1, madeIn: 'furnace' } },
+      recipes: { ...recipes, bad: { in: { ironOre: 1 }, out: { ironPlate: 1, ammo: 1 }, ticks: 1, madeIn: 'furnace' } },
     });
     expect(errors).toEqual(['рецепт bad: крафтер furnace держит один выходной предмет']);
   });
@@ -84,7 +140,7 @@ describe('валидатор ссылок', () => {
   it('ловит предмет во входе рецепта, которого нет', () => {
     const errors = validateContent({
       ...real,
-      recipes: { bad: { in: { ghost: 1 }, out: { ironPlate: 1 }, ticks: 1, madeIn: 'furnace' } },
+      recipes: { ...recipes, bad: { in: { ghost: 1 }, out: { ironPlate: 1 }, ticks: 1, madeIn: 'furnace' } },
     });
     expect(errors).toEqual(['рецепт bad: предмет ghost (in) не существует']);
   });
@@ -92,7 +148,7 @@ describe('валидатор ссылок', () => {
   it('ловит предмет в выходе рецепта, которого нет', () => {
     const errors = validateContent({
       ...real,
-      recipes: { bad: { in: { ironOre: 1 }, out: { ghost: 1 }, ticks: 1, madeIn: 'furnace' } },
+      recipes: { ...recipes, bad: { in: { ironOre: 1 }, out: { ghost: 1 }, ticks: 1, madeIn: 'furnace' } },
     });
     expect(errors).toEqual(['рецепт bad: предмет ghost (out) не существует']);
   });
@@ -100,7 +156,7 @@ describe('валидатор ссылок', () => {
   it('ловит madeIn на несуществующее здание', () => {
     const errors = validateContent({
       ...real,
-      recipes: { bad: { in: { ironOre: 1 }, out: { ironPlate: 1 }, ticks: 1, madeIn: 'ghost' } },
+      recipes: { ...recipes, bad: { in: { ironOre: 1 }, out: { ironPlate: 1 }, ticks: 1, madeIn: 'ghost' } },
     });
     expect(errors).toEqual(['рецепт bad: здание ghost (madeIn) не существует']);
   });
@@ -110,10 +166,44 @@ describe('валидатор ссылок', () => {
       ...real,
       buildings: {
         ...buildings,
-        turret: { size: [2, 2], power: 10, behavior: 'turret', ammo: 'ghost', range: 8, hp: 400 },
+        turret: { size: [2, 2], energy: { kind: 'electric', kw: 10 }, behavior: 'turret', ammo: 'ghost', range: 8, hp: 400 },
       },
     });
-    expect(errors).toEqual(['здание turret: предмет ghost (ammo) не существует']);
+    expect(errors).toContain('здание turret: предмет ghost (ammo) не существует');
+  });
+});
+
+describe('валидатор ссылок: здания и топливо', () => {
+  const turret: BuildingDef = { size: [1, 1], behavior: 'turret', hp: 1 };
+
+  it('ловит здание без предмета-здания', () => {
+    const errors = validateContent({ ...real, buildings: { ...buildings, turret } });
+    expect(errors).toEqual(['здание turret: нет предмета-здания turret']);
+  });
+
+  it('ловит предмет-здание без рецепта madeIn assembler', () => {
+    const errors = validateContent({
+      ...real,
+      items: { ...items, turret: { name: 'Турель', stack: 50 } },
+      buildings: { ...buildings, turret },
+    });
+    expect(errors).toEqual(['предмет-здание turret: нет рецепта madeIn assembler']);
+  });
+
+  it('ловит fuel-здание без fuelSlot', () => {
+    const errors = validateContent({
+      ...real,
+      buildings: { ...buildings, furnace: { ...buildings.furnace, fuelSlot: false } },
+    });
+    expect(errors).toEqual(['здание furnace: питается топливом, но без fuelSlot']);
+  });
+
+  it('ловит рецепт печи с несколькими входами', () => {
+    const errors = validateContent({
+      ...real,
+      recipes: { ...recipes, bad: { in: { ironOre: 1, stone: 1 }, out: { ironPlate: 1 }, ticks: 1, madeIn: 'furnace' } },
+    });
+    expect(errors).toEqual(['рецепт bad: печь furnace выбирает рецепт по входу, вход должен быть один']);
   });
 });
 
@@ -130,7 +220,7 @@ describe('строгие типы ключей', () => {
     // @ts-expect-error нет здания ghost
     const badMadeIn = { in: { ironOre: 1 }, out: { ironPlate: 1 }, ticks: 1, madeIn: 'ghost' } satisfies Recipe;
     // @ts-expect-error нет предмета ghost в ammo
-    const badAmmo = { size: [1, 1], power: 0, behavior: 'turret', hp: 1, ammo: 'ghost' } satisfies BuildingDef<ItemId>;
+    const badAmmo = { size: [1, 1], behavior: 'turret', hp: 1, ammo: 'ghost' } satisfies BuildingDef<ItemId>;
     const good = { in: { ironOre: 1 }, out: { ironPlate: 1 }, ticks: 1, madeIn: 'furnace' } satisfies Recipe;
     expect([badIn, badOut, badMadeIn, badAmmo, good]).toHaveLength(5);
   });

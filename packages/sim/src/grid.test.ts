@@ -41,7 +41,7 @@ describe('отпечаток здания', () => {
   });
 
   it('команда строит прямоугольное здание из переданной таблицы с учётом направления', () => {
-    const defs = { bar: { size: [3, 1] as const, power: 0, behavior: 'belt' as const, hp: 1 } };
+    const defs = { bar: { size: [3, 1] as const, behavior: 'belt' as const, hp: 1 } };
     const state = small();
     applyCommand(state, build(1, 1, 1, 'bar'), defs);
     expect(buildingAt(state, 1, 3)?.type).toBe('bar');

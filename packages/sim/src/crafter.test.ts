@@ -1,5 +1,6 @@
 import { buildings, recipes } from '@factory/content';
 import { describe, expect, it } from 'vitest';
+import { crafterCanAccept } from './crafter';
 import { buildingAt, createState, tick, type Command, type PlacedBuilding, type SimState } from './index';
 
 const recipe = recipes.smeltIron;
@@ -71,5 +72,25 @@ describe('печь', () => {
     run(state, 1);
     expect(f.recipe).toBeUndefined();
     expect(f.input).toBeUndefined();
+  });
+});
+
+describe('здания M2 без реализованного поведения', () => {
+  it('сборщик без выбранного рецепта стоит и ничего не принимает', () => {
+    const state = createState(1, { width: 8, height: 8 });
+    tick(state, [{ type: 'build', building: 'assembler', x: 2, y: 2, dir: 0 } as Command]);
+    const a = buildingAt(state, 2, 2)!;
+    expect(crafterCanAccept(a, buildings.assembler, 'ironPlate')).toBe(false);
+    run(state, 100);
+    expect(a.output).toBeNull();
+  });
+
+  it('разделитель, столб и генератор ставятся и стоят без падений', () => {
+    const state = createState(1, { width: 12, height: 12 });
+    for (const [building, x, y] of [['splitter', 0, 0], ['pole', 2, 0], ['generator', 4, 4]] as const) {
+      tick(state, [{ type: 'build', building, x, y, dir: 0 } as Command]);
+      expect(buildingAt(state, x, y)).toBeTruthy();
+    }
+    run(state, 50);
   });
 });
