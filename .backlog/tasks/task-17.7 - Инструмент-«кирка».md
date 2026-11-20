@@ -1,10 +1,10 @@
 ---
 id: TASK-17.7
 title: Инструмент «кирка»
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-11-20T18:38:00Z'
-updated_date: '2026-11-20T19:39:00Z'
+updated_date: '2026-11-20T19:43:00Z'
 labels:
   - m2
 dependencies:
@@ -32,6 +32,12 @@ ordinal: 39000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Кнопка на панели и клавиша M включают кирку; зажатая кнопка мыши на залежи шлёт startMining, отпускание или уход с клетки — stopMining
-- [ ] #2 Кирка не конфликтует со стройкой и сносом
+- [x] #1 Кнопка на панели и клавиша M включают кирку; зажатая кнопка мыши на залежи шлёт startMining, отпускание или уход с клетки — stopMining
+- [x] #2 Кирка не конфликтует со стройкой и сносом
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Ревью: кнопка кирки перенесена в одну панель со сносом, цвета иконки по style-ui (рукоять steel-light, железко steel); тесты кирки вынесены в mine.test.ts (лимит 300 строк).
+<!-- SECTION:NOTES:END -->

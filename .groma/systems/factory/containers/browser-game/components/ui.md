@@ -35,6 +35,11 @@ groma:
       symbol: buildingName
     - scanner: typescript
       file: packages/app/src/persist.ts
+    - scanner: react
+      file: packages/app/src/ui/MineButton.tsx
+    - scanner: typescript
+      file: packages/app/src/ui/MineButton.tsx
+      symbol: MineButton
   technology: React
 description: Превращает ввод игрока в команды для ядра
 ---
