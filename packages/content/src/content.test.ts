@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildings, items, recipes } from './index';
-import type { BuildingDef, ItemDef, RecipeDef } from './index';
+import type { BuildingDef, BuildingId, ItemDef, ItemId, RecipeDef } from './index';
 
 interface ContentTables {
   items: Record<string, ItemDef>;
@@ -114,5 +114,24 @@ describe('валидатор ссылок', () => {
       },
     });
     expect(errors).toEqual(['здание turret: предмет ghost (ammo) не существует']);
+  });
+});
+
+// Типовые проверки. vitest типы не проверяет, их ловит tsc (pnpm typecheck и
+// pnpm build): лишний @ts-expect-error там тоже станет ошибкой.
+describe('строгие типы ключей', () => {
+  type Recipe = RecipeDef<ItemId, BuildingId>;
+
+  it('компилятор ловит опечатки в id', () => {
+    // @ts-expect-error нет предмета ghost во входе
+    const badIn = { in: { ghost: 1 }, out: { ironPlate: 1 }, ticks: 1, madeIn: 'furnace' } satisfies Recipe;
+    // @ts-expect-error нет предмета ghost в выходе
+    const badOut = { in: { ironOre: 1 }, out: { ghost: 1 }, ticks: 1, madeIn: 'furnace' } satisfies Recipe;
+    // @ts-expect-error нет здания ghost
+    const badMadeIn = { in: { ironOre: 1 }, out: { ironPlate: 1 }, ticks: 1, madeIn: 'ghost' } satisfies Recipe;
+    // @ts-expect-error нет предмета ghost в ammo
+    const badAmmo = { size: [1, 1], power: 0, behavior: 'turret', hp: 1, ammo: 'ghost' } satisfies BuildingDef<ItemId>;
+    const good = { in: { ironOre: 1 }, out: { ironPlate: 1 }, ticks: 1, madeIn: 'furnace' } satisfies Recipe;
+    expect([badIn, badOut, badMadeIn, badAmmo, good]).toHaveLength(5);
   });
 });

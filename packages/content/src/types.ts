@@ -6,14 +6,21 @@ export interface ItemDef {
   stack: number;
 }
 
-export interface RecipeDef {
+/** id предмета -> количество; при узком I не все предметы обязательны. */
+type ItemCounts<I extends string> = string extends I ? Record<string, number> : Partial<Record<I, number>>;
+
+/**
+ * Параметры I и B ограничивают id предметов и зданий. По умолчанию это
+ * просто строки, а таблицы content подставляют свои настоящие id.
+ */
+export interface RecipeDef<I extends string = string, B extends string = string> {
   /** id предмета -> количество. */
-  in: Record<string, number>;
-  out: Record<string, number>;
+  in: ItemCounts<I>;
+  out: ItemCounts<I>;
   /** Длительность в тиках симуляции. */
   ticks: number;
   /** id здания из таблицы buildings. */
-  madeIn: string;
+  madeIn: B;
 }
 
 export type Behavior =
@@ -26,7 +33,7 @@ export type Behavior =
   | 'turret'
   | 'container';
 
-export interface BuildingDef {
+export interface BuildingDef<I extends string = string> {
   /** Ширина и высота в клетках. */
   size: readonly [number, number];
   power: number;
@@ -45,6 +52,6 @@ export interface BuildingDef {
   /** Скорость конвейера: единиц пути за тик; клетка конвейера — 256 единиц (BELT_CELL в sim). */
   beltSpeed?: number;
   /** id предмета-боеприпаса (турели). */
-  ammo?: string;
+  ammo?: I;
   range?: number;
 }
