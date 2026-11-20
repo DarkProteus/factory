@@ -9,6 +9,7 @@ import { drawItem } from './draw/items';
 import { OverlayLayer, type Overlay } from './overlay';
 import { beltItemPos, captureBelts, type BeltSnapshot, type ViewState } from './interp';
 import { CELL } from './palette';
+import { PowerLayer } from './powerDraw';
 import { BELT_CELL } from '@factory/sim';
 
 /** Зум, ниже которого предметы рисуются кругами. */
@@ -35,11 +36,24 @@ export class Scene {
   private held = new Map<number, boolean>();
   private placedAt = new Map<number, number>();
   private overlay: OverlayLayer;
+  private power: PowerLayer;
   private overlayState: Overlay | null = null;
 
   constructor(private defs: Defs = contentBuildings) {
     this.overlay = new OverlayLayer(defs);
-    this.world.addChild(this.ground, this.deposits.graphics, this.overlay.grid, this.shadows, this.buildingLayer, this.items, this.overlay.top);
+    this.power = new PowerLayer(defs);
+    this.world.addChild(
+      this.ground,
+      this.deposits.graphics,
+      this.overlay.grid,
+      this.power.zones,
+      this.shadows,
+      this.buildingLayer,
+      this.items,
+      this.power.wires,
+      this.overlay.top,
+      this.power.badges,
+    );
   }
 
   /** Оверлей стройки на следующие кадры; null — убрать. */
@@ -89,6 +103,7 @@ export class Scene {
       this.placedAt.delete(id);
     }
     this.overlay.update(this.overlayState, state);
+    this.power.update(state, this.overlayState, state.tick + alpha);
   }
 
   /** Центр отпечатка в мире и размер в ориентации N. */

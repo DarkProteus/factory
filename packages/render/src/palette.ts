@@ -34,6 +34,7 @@ export const palette = {
   'lamp-work': 0x9fc26b,
   'lamp-wait': 0xd9a441,
   'lamp-off': 0x4a4540,
+  power: 0x6fb7d9,
   ok: 0x7fb5a0,
   bad: 0xc2452d,
   text: 0xe6dfd3,

@@ -20,6 +20,7 @@ import {
   type ToolState,
 } from './input';
 import { applyUiKey } from './craftUi';
+import { netSummaryAt, type NetSummary } from './powerSummary';
 import { clearSave, loadGame, saveGame, shouldAutosave, type KeyValueStorage } from './persist';
 
 /** Шаг симуляции: 60 тиков в секунду. */
@@ -65,6 +66,8 @@ export interface Game {
   /** Инвентарь и очередь ручного крафта; только для чтения, массивы меняются на тиках. */
   getInventory(): readonly ItemStack[];
   getCraftQueue(): readonly CraftJob[];
+  /** Сводка сети под курсором и положение курсора в px канваса; null, если показывать нечего. */
+  getNetSummary(): { summary: NetSummary; x: number; y: number } | null;
   /** Окно инвентаря (клавиша E). */
   isInventoryOpen(): boolean;
   setInventoryOpen(open: boolean): void;
@@ -217,6 +220,10 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
     command: (command) => queue.push(command),
     getInventory: () => state.inventory,
     getCraftQueue: () => state.craftQueue,
+    getNetSummary() {
+      const summary = netSummaryAt(state, tools, cellUnderPointer());
+      return summary && pointer && { summary, x: pointer.x, y: pointer.y };
+    },
     isInventoryOpen: () => inventoryOpen,
     setInventoryOpen,
     destroy() {

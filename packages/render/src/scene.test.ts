@@ -92,7 +92,7 @@ describe('сцена', () => {
       camera.setZoom(zoom);
       scene.update(deepFreeze(structuredClone(state)), 0.5, camera);
     }
-    scene.setOverlay({ ghost: { building: 'pole', x: 3, y: 6, dir: 1, valid: true }, grid: true });
+    scene.setOverlay({ ghost: { building: 'pole', x: 3, y: 6, dir: 1, valid: true }, grid: true, zones: true });
     expect(() => scene.update(state, 0, camera)).not.toThrow();
   });
 

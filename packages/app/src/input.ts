@@ -142,11 +142,12 @@ export function miningStep(
 export function overlayFor(state: SimState, s: ToolState, cell: Cell | null): Overlay | null {
   if (!cell) return null;
   if (s.tool.kind === 'build') {
-    const def = buildings[s.tool.building as keyof typeof buildings];
+    const def: BuildingDef | undefined = buildings[s.tool.building as keyof typeof buildings];
     if (!def) return null;
     const a = ghostAnchor(cell, def.size, s.dir);
     const valid = canPlace(state, s.tool.building, a.x, a.y, s.dir);
-    return { ghost: { building: s.tool.building, x: a.x, y: a.y, dir: s.dir, valid }, grid: true };
+    const zones = def.behavior === 'pole' || def.energy?.kind === 'electric' || def.energy?.kind === 'generator';
+    return { ghost: { building: s.tool.building, x: a.x, y: a.y, dir: s.dir, valid }, grid: true, zones };
   }
   return { highlight: { x: cell.x, y: cell.y, demolish: s.tool.kind === 'demolish' }, grid: false };
 }

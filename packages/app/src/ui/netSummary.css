@@ -1,0 +1,35 @@
+/* Сводка сети под курсором: docs/style-ui.md. Панель без ленты, как подсказка кнопки. */
+.net-tip {
+  position: fixed;
+  box-sizing: border-box;
+  padding: 6px 10px;
+  background: var(--ui-bg);
+  border: 2px solid var(--steel);
+  pointer-events: none;
+  z-index: 3;
+  white-space: nowrap;
+}
+.net-title {
+  margin-bottom: 2px;
+  font: 500 12px 'Oswald', sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--power);
+}
+.net-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font: 500 12px 'IBM Plex Mono', monospace;
+}
+.net-label {
+  color: var(--text-dim);
+}
+.net-value {
+  color: var(--text);
+  text-align: right;
+}
+.net-row.bad .net-label,
+.net-row.bad .net-value {
+  color: var(--bad);
+}

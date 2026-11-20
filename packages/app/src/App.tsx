@@ -8,6 +8,7 @@ import { BuildPanel } from './ui/BuildPanel';
 import { CraftQueue } from './ui/CraftQueue';
 import { Hud } from './ui/Hud';
 import { InventoryWindow } from './ui/InventoryWindow';
+import { NetSummaryTip } from './ui/NetSummaryTip';
 import './ui/fonts';
 import './ui/theme.css';
 import './ui/ui.css';
@@ -45,6 +46,7 @@ export function App() {
             <BuildPanel game={game} />
           </div>
           <InventoryWindow game={game} />
+          <NetSummaryTip game={game} />
         </div>
       )}
     </>
