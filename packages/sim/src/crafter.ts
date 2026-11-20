@@ -32,10 +32,9 @@ export function crafterCanAccept(
 ): boolean {
   // Топливо идёт в ячейку топлива, а не во вход.
   if (isFuel(item) && def.fuelSlot) return fuelCanAccept(b, def, item);
-  // Сборщик (recipeMode 'chosen') ждёт выбора рецепта игроком, пока стоит.
-  if (def.recipeMode === 'chosen') return false;
-  const id = recipeFor(b, item, recipes);
-  if (id === undefined) return false;
+  // Сборщик (recipeMode 'chosen') принимает только ингредиенты выбранного рецепта; без рецепта стоит.
+  const id = def.recipeMode === 'chosen' ? b.recipe : recipeFor(b, item, recipes);
+  if (id === undefined || !(item in (recipes[id]?.in ?? {}))) return false;
   const cap = recipes[id]!.in[item]! * (def.inputBuffer ?? 0);
   return (stackFor(b, item)?.count ?? 0) < cap;
 }
@@ -43,7 +42,7 @@ export function crafterCanAccept(
 /** Кладёт предмет на вход; перед этим нужно проверить crafterCanAccept. */
 export function crafterAccept(b: PlacedBuilding, def: BuildingDef, item: string, recipes: Recipes = contentRecipes): void {
   if (isFuel(item) && def.fuelSlot) return fuelAccept(b, item);
-  const id = recipeFor(b, item, recipes)!;
+  const id = def.recipeMode === 'chosen' ? b.recipe! : recipeFor(b, item, recipes)!;
   if (b.recipe !== id) {
     b.recipe = id;
     b.input = Object.keys(recipes[id]!.in).map((name) => ({ item: name, count: 0 }));
@@ -68,7 +67,8 @@ export function runCrafter(b: PlacedBuilding, def: BuildingDef, recipes: Recipes
   if (!recipe) return;
   if (b.progress === 0) {
     if (!canStart(b, recipe, def.buffer ?? 0)) {
-      if (!b.output && b.input!.every((s) => s.count === 0)) {
+      // Выбранный рецепт сборщика не сбрасывается: его меняет только игрок.
+      if (def.recipeMode !== 'chosen' && !b.output && b.input!.every((s) => s.count === 0)) {
         delete b.recipe;
         delete b.input;
       }

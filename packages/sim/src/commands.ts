@@ -1,4 +1,5 @@
 import { demolishAt, placeBuilding, type BuildingDefs, type Dir } from './buildings';
+import { setRecipe } from './assembler';
 import { startMining, stopMining } from './mining';
 import { cancelCraft, enqueueCraft } from './craftQueue';
 import { nextRandom } from './rng';
@@ -21,7 +22,9 @@ export type Command =
   /** Ставит в очередь ручного крафта count изготовлений рецепта, ингредиенты списываются сразу. */
   | { type: 'craft'; recipe: string; count: number }
   /** Убирает запись очереди ручного крафта и возвращает ингредиенты. */
-  | { type: 'cancelCraft'; index: number };
+  | { type: 'cancelCraft'; index: number }
+  /** Задаёт рецепт сборщика (id здания); содержимое при смене уходит в инвентарь, не помещается — смена запрещена. */
+  | { type: 'setRecipe'; building: number; recipe: string };
 
 /** `defs` — таблица зданий; по умолчанию content.buildings (параметр нужен тестам). */
 export function applyCommand(state: SimState, command: Command, defs?: BuildingDefs): void {
@@ -49,6 +52,9 @@ export function applyCommand(state: SimState, command: Command, defs?: BuildingD
       return;
     case 'cancelCraft':
       cancelCraft(state, command.index);
+      return;
+    case 'setRecipe':
+      setRecipe(state, command.building, command.recipe, defs);
       return;
   }
 }

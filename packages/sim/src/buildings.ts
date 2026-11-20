@@ -130,7 +130,7 @@ export function placeBuilding(
  * Всё, что лежит в здании: конвейер, выход, вход крафтера, ячейки контейнера, ячейка топлива
  * и ингредиенты идущего цикла крафта (они списаны со входа на старте цикла).
  */
-function contents(b: PlacedBuilding): ItemStack[] {
+export function contents(b: PlacedBuilding): ItemStack[] {
   const stacks: ItemStack[] = [];
   const table: Readonly<Record<string, RecipeDef>> = contentRecipes;
   const recipe = b.recipe === undefined ? undefined : table[b.recipe];
@@ -145,7 +145,7 @@ function contents(b: PlacedBuilding): ItemStack[] {
 }
 
 /** Кладёт все стеки в слоты; при неудаче возвращает false (слоты тогда не определены). */
-function addAll(slots: ItemStack[], slotCount: number, stacks: readonly ItemStack[]): boolean {
+export function addAll(slots: ItemStack[], slotCount: number, stacks: readonly ItemStack[]): boolean {
   for (const s of stacks) {
     for (let i = 0; i < s.count; i++) if (!add(slots, slotCount, s.item)) return false;
   }

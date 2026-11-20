@@ -15,15 +15,15 @@ function checkItem(item: unknown, where: string): void {
   }
 }
 
-function checkStack(stack: unknown, where: string): void {
+function checkStack(stack: unknown, where: string, allowEmpty = false): void {
   if (!isObject(stack)) fail(where, 'ожидалась стопка предметов');
   checkItem(stack.item, where);
-  if (!Number.isInteger(stack.count) || (stack.count as number) <= 0) fail(where, 'неверное количество');
+  if (!Number.isInteger(stack.count) || (stack.count as number) < (allowEmpty ? 0 : 1)) fail(where, 'неверное количество');
 }
 
-function checkStacks(list: unknown, where: string): void {
+function checkStacks(list: unknown, where: string, allowEmpty = false): void {
   if (!Array.isArray(list)) fail(where, 'ожидался список');
-  list.forEach((s, i) => checkStack(s, `${where}[${i}]`));
+  list.forEach((s, i) => checkStack(s, `${where}[${i}]`, allowEmpty));
 }
 
 function checkMap(map: unknown): void {
@@ -59,12 +59,16 @@ function checkBuilding(key: string, b: unknown): void {
   }
   if (![0, 1, 2, 3].includes(b.dir as number)) fail(where, 'неверное направление');
   if (b.output !== null) checkStack(b.output, `${where}.output`);
-  if (b.input !== undefined) checkStacks(b.input, `${where}.input`);
+  // Вход крафтера хранит стек на ингредиент, в том числе пустой (после старта цикла).
+  if (b.input !== undefined) checkStacks(b.input, `${where}.input`, true);
   if (b.slots !== undefined) checkStacks(b.slots, `${where}.slots`);
   if (b.fuel !== undefined) checkStack(b.fuel, `${where}.fuel`);
   if (b.burn !== undefined && (!Number.isInteger(b.burn) || (b.burn as number) < 0)) fail(where, 'неверное поле burn');
   if (b.recipe !== undefined && (typeof b.recipe !== 'string' || !Object.hasOwn(recipes, b.recipe))) {
     fail(where, `неизвестный рецепт «${String(b.recipe)}»`);
+  }
+  if (b.recipe !== undefined && recipes[b.recipe as keyof typeof recipes].madeIn !== b.type) {
+    fail(where, `рецепт «${String(b.recipe)}» не делается в этом здании`);
   }
   if (b.belt !== undefined) {
     if (!Array.isArray(b.belt)) fail(where, 'belt: ожидался список');

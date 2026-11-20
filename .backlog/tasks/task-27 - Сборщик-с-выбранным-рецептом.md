@@ -4,7 +4,7 @@ title: Сборщик с выбранным рецептом
 status: In Progress
 assignee: []
 created_date: '2026-11-20T18:38:00Z'
-updated_date: '2026-11-20T19:07:00Z'
+updated_date: '2026-11-20T19:11:00Z'
 labels:
   - m2
 dependencies:
@@ -12,6 +12,14 @@ dependencies:
   - TASK-26
 references:
   - sim
+modified_files:
+  - packages/save/src/index.test.ts
+  - packages/save/src/validate.ts
+  - packages/sim/src/buildings.ts
+  - packages/sim/src/commands.ts
+  - packages/sim/src/crafter.ts
+  - packages/sim/src/assembler.test.ts
+  - packages/sim/src/assembler.ts
 type: feature
 ordinal: 30000
 ---

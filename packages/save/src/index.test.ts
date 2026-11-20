@@ -212,6 +212,31 @@ describe('битые сохранения', () => {
     expect(() => deserialize(tamper((s) => delete s.craftQueue))).toThrow(SaveError);
   });
 
+  it('рецепт сборщика сохраняется; рецепт чужого здания не принимается', () => {
+    const state = createState(3, { width: 8, height: 8 });
+    state.inventory = [{ item: 'assembler', count: 1 }];
+    runTicks(state, [{ tick: 0, command: build('assembler', 0, 0) }], 1);
+    const asm = Object.values(state.buildings)[0]!;
+    runTicks(state, [{ tick: 1, command: { type: 'setRecipe', building: asm.id, recipe: 'circuit' } }], 1);
+    asm.input = [
+      { item: 'ironPlate', count: 1 },
+      { item: 'copperCable', count: 3 },
+    ];
+    // Цикл начат: на входе остались пустые стеки, они не должны мешать сохранению.
+    runTicks(state, [], 10);
+    expect(asm.input.every((s) => s.count === 0)).toBe(true);
+    const loaded = roundtrip(state);
+    expect(Object.values(loaded.buildings)[0]!.recipe).toBe('circuit');
+    expect(hash(loaded)).toBe(hash(state));
+  });
+
+  it('рецепт, который делается в другом здании, не принимается', () => {
+    const text = tamper((s) => {
+      Object.values<any>(s.buildings).find((b) => b.type === 'furnace').recipe = 'ironGear';
+    });
+    expect(() => deserialize(text)).toThrow(SaveError);
+  });
+
   it('усечённые массивы карты и пропавшие поля', () => {
     expect(() => deserialize(tamper((s) => s.map.tiles.pop()))).toThrow(SaveError);
     expect(() => deserialize(tamper((s) => delete s.map))).toThrow(SaveError);
