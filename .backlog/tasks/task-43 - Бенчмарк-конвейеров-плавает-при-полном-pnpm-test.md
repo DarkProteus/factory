@@ -1,9 +1,10 @@
 ---
 id: TASK-43
 title: Бенчмарк конвейеров плавает при полном pnpm test
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-20T22:55:00Z'
+updated_date: '2026-11-20T23:03:00Z'
 labels:
   - chore
 dependencies: []

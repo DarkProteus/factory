@@ -1,9 +1,10 @@
 ---
 id: TASK-41
 title: 'Проверка сейва: рецепт крафтера требует стопки входа'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-20T19:27:00Z'
+updated_date: '2026-11-20T23:03:00Z'
 labels: []
 dependencies: []
 references:

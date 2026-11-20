@@ -1,10 +1,10 @@
 ---
 id: TASK-42
 title: Лампы бура, сборщика и маховик генератора от энергосети
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-20T22:52:00Z'
-updated_date: '2026-11-20T22:56:00Z'
+updated_date: '2026-11-20T23:03:00Z'
 labels:
   - m2
 dependencies: []
