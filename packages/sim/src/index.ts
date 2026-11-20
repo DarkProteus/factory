@@ -11,3 +11,7 @@ export { type BuildingSlot } from './manual';
 export { hash } from './hash';
 export { nextRandom, rngStep, type RngStep } from './rng';
 export { runTicks, type ScheduledCommand } from './replay';
+export { addAll, contents } from './buildings';
+export { canAccept } from './transfer';
+export { powerNetworks, type Networks } from './network';
+export { POWER_SCALE, powerStats, type NetworkStats, type PowerTick } from './power';
