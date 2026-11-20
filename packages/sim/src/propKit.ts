@@ -72,8 +72,6 @@ export interface Ledger {
   initial: Record<string, number>;
   /** Ценность предметов, лежавших в инвентаре с самого начала (не из залежей). */
   startingHeld: number;
-  /** Ингредиенты недоделанных циклов крафта, уничтоженные сносом (в штуках входа); см. TASK-22. */
-  lostInFlight: number;
 }
 
 /** `fullInventory` — забить инвентарь почти целиком патронами, чтобы снос иногда упирался в нехватку места. */
@@ -85,7 +83,7 @@ export function newWorld(seed: number, map: MapParams, fullInventory = false): {
     for (let i = 0; i < INVENTORY_SLOTS - 1; i++) state.inventory.push({ item: 'ammo', count: items.ammo.stack });
   }
   const startingHeld = state.inventory.reduce((a, s) => a + s.count * oreValue(s.item), 0);
-  return { state, ledger: { initial, startingHeld, lostInFlight: 0 } };
+  return { state, ledger: { initial, startingHeld } };
 }
 
 const stacksOf = (b: PlacedBuilding): ItemStack[] => [
@@ -115,11 +113,8 @@ export function applyStep(state: SimState, ledger: Ledger, step: Step): boolean 
   }
   const c = step.command;
   const target = c.type === 'demolish' ? cellOwner(state, c.x, c.y) : undefined;
-  const lost = target ? inFlight(target) : 0;
   tick(state, [c]);
-  const demolished = target !== undefined && state.buildings[target.id] === undefined;
-  if (demolished) ledger.lostInFlight += lost;
-  return demolished;
+  return target !== undefined && state.buildings[target.id] === undefined;
 }
 
 /** Занятость карты согласована со зданиями: ни пересечений, ни «висящих» клеток. */
@@ -164,14 +159,14 @@ export function checkInventory(state: SimState): void {
 
 /**
  * Сохранение предметов: добытая руда (исходные запасы минус остаток) равна ценности всего,
- * что лежит в зданиях и инвентаре, плюс цикл крафта в работе, плюс потерянное сносом.
+ * что лежит в зданиях и инвентаре, плюс цикл крафта в работе. Снос ничего не теряет (TASK-22).
  */
 export function checkConservation(state: SimState, ledger: Ledger): void {
   const remaining: Record<string, number> = {};
   for (const d of state.map.deposits) if (d) remaining[d.item] = (remaining[d.item] ?? 0) + d.amount;
   let mined = 0;
   for (const [item, total] of Object.entries(ledger.initial)) mined += (total - (remaining[item] ?? 0)) * oreValue(item);
-  let held = ledger.lostInFlight - ledger.startingHeld;
+  let held = -ledger.startingHeld;
   const count = (s: ItemStack): void => void (held += s.count * oreValue(s.item));
   state.inventory.forEach(count);
   for (const b of Object.values(state.buildings)) {

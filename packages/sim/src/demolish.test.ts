@@ -113,3 +113,38 @@ describe('инвентарь игрока', () => {
     expect(buildingAt(state, 2, 2)).toBeNull();
   });
 });
+
+describe('снос печи посреди цикла (TASK-22)', () => {
+  /** Печь с рудой во входе и запущенным циклом плавки: руда цикла уже списана со входа. */
+  function smelting(): SimState {
+    const state = world();
+    build(state, 'furnace', 2, 2);
+    const furnace = buildingAt(state, 2, 2)!;
+    furnace.recipe = 'smeltIron';
+    furnace.input = [{ item: 'ironOre', count: 2 }];
+    furnace.progress = 50;
+    return state;
+  }
+
+  it('ингредиенты идущего цикла возвращаются в инвентарь', () => {
+    const state = smelting();
+    demolish(state, 2, 2);
+    expect(buildingAt(state, 2, 2)).toBeNull();
+    expect(state.inventory).toEqual([{ item: 'ironOre', count: 3 }]);
+  });
+
+  it('если ингредиентам цикла нет места, снос запрещён', () => {
+    const state = smelting();
+    fill(state, 0);
+    const before = hash(state);
+    demolish(state, 2, 2);
+    expect(hash(state)).toBe(before);
+  });
+
+  it('печь без идущего цикла возвращает только вход', () => {
+    const state = smelting();
+    buildingAt(state, 2, 2)!.progress = 0;
+    demolish(state, 2, 2);
+    expect(state.inventory).toEqual([{ item: 'ironOre', count: 2 }]);
+  });
+});

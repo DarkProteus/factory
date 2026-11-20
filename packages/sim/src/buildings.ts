@@ -1,4 +1,4 @@
-import { buildings as contentBuildings, INVENTORY_SLOTS, type BuildingDef } from '@factory/content';
+import { buildings as contentBuildings, INVENTORY_SLOTS, recipes as contentRecipes, type BuildingDef, type RecipeDef } from '@factory/content';
 import type { BeltItem } from './belt';
 import { cellIndex, inBounds, type GameMap } from './grid';
 import { add } from './inventory';
@@ -90,9 +90,17 @@ export function placeBuilding(
   setOccupancy(state.map, building, size, building.id);
 }
 
-/** Всё, что лежит в здании: конвейер, выход, вход крафтера, ячейки контейнера. */
+/**
+ * Всё, что лежит в здании: конвейер, выход, вход крафтера, ячейки контейнера
+ * и ингредиенты идущего цикла крафта (они списаны со входа на старте цикла).
+ */
 function contents(b: PlacedBuilding): ItemStack[] {
   const stacks: ItemStack[] = [];
+  const table: Readonly<Record<string, RecipeDef>> = contentRecipes;
+  const recipe = b.recipe === undefined ? undefined : table[b.recipe];
+  if (recipe && b.progress > 0) {
+    for (const [item, count] of Object.entries(recipe.in)) stacks.push({ item, count });
+  }
   for (const it of b.belt ?? []) stacks.push({ item: it.item, count: 1 });
   if (b.output) stacks.push(b.output);
   stacks.push(...(b.input ?? []), ...(b.slots ?? []));

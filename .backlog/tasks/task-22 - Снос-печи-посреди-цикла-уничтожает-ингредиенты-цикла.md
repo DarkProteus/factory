@@ -1,9 +1,10 @@
 ---
 id: TASK-22
 title: Снос печи посреди цикла уничтожает ингредиенты цикла
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-11-20T16:39:00Z'
+updated_date: '2026-11-20T16:43:00Z'
 labels: []
 dependencies: []
 references:
@@ -20,6 +21,12 @@ ordinal: 21000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Решение принято и записано: ингредиенты цикла возвращаются при сносе или потеря задокументирована
-- [ ] #2 Property-тест сохранения предметов не использует Ledger.lostInFlight (если выбран возврат)
+- [x] #1 Решение принято и записано: ингредиенты цикла возвращаются при сносе или потеря задокументирована
+- [x] #2 Property-тест сохранения предметов не использует Ledger.lostInFlight (если выбран возврат)
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Решение пользователя (2026-11-20): ингредиенты идущего цикла возвращаются в инвентарь при сносе, как в Factorio; они входят в проверку места (нет места — снос запрещён). Записано в docs/design.md. Реализация: contents() в buildings.ts, тесты в demolish.test.ts; Ledger.lostInFlight убран из propKit.
+<!-- SECTION:NOTES:END -->
