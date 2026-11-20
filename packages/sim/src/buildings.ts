@@ -19,6 +19,12 @@ export interface PlacedBuilding {
   output: ItemStack | null;
   /** Предметы на конвейере (только у поведения belt), см. belt.ts. */
   belt?: BeltItem[];
+  /** Вход крафтера: по стеку на ингредиент рецепта. */
+  input?: ItemStack[];
+  /** Текущий рецепт крафтера (id из content.recipes). */
+  recipe?: string;
+  /** Ячейки контейнера: только непустые стеки. */
+  slots?: ItemStack[];
 }
 
 /** Стопка одного предмета. */

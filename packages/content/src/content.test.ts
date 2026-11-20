@@ -22,6 +22,8 @@ function validateContent(tables: ContentTables): string[] {
     }
     if (!(recipe.madeIn in tables.buildings)) {
       errors.push(`рецепт ${id}: здание ${recipe.madeIn} (madeIn) не существует`);
+    } else if (tables.buildings[recipe.madeIn]!.behavior === 'crafter' && Object.keys(recipe.out).length !== 1) {
+      errors.push(`рецепт ${id}: крафтер ${recipe.madeIn} держит один выходной предмет`);
     }
   }
   for (const [id, building] of Object.entries(tables.buildings)) {
@@ -50,7 +52,35 @@ describe('настоящий контент', () => {
   });
 });
 
+describe('манипулятор, печь и сундук', () => {
+  it('описаны с поведениями inserter, crafter и container', () => {
+    expect(buildings.inserter.behavior).toBe('inserter');
+    expect(buildings.furnace.behavior).toBe('crafter');
+    expect(buildings.chest.behavior).toBe('container');
+  });
+
+  it('имеют параметры своих поведений', () => {
+    expect(buildings.inserter.swingTicks).toBeGreaterThan(0);
+    expect(buildings.furnace.inputBuffer).toBeGreaterThan(0);
+    expect(buildings.furnace.buffer).toBeGreaterThan(0);
+    expect(buildings.chest.slots).toBeGreaterThan(0);
+  });
+
+  it('рецепт печи: руда в пластину за ticks тиков', () => {
+    expect(recipes.smeltIron).toMatchObject({ in: { ironOre: 1 }, out: { ironPlate: 1 }, madeIn: 'furnace' });
+    expect(recipes.smeltIron.ticks).toBeGreaterThan(0);
+  });
+});
+
 describe('валидатор ссылок', () => {
+  it('ловит рецепт крафтера с несколькими выходными предметами', () => {
+    const errors = validateContent({
+      ...real,
+      recipes: { bad: { in: { ironOre: 1 }, out: { ironPlate: 1, ammo: 1 }, ticks: 1, madeIn: 'furnace' } },
+    });
+    expect(errors).toEqual(['рецепт bad: крафтер furnace держит один выходной предмет']);
+  });
+
   it('ловит предмет во входе рецепта, которого нет', () => {
     const errors = validateContent({
       ...real,

@@ -1,6 +1,8 @@
 import { buildings as contentBuildings } from '@factory/content';
 import type { BuildingDefs } from './buildings';
 import { runBelts } from './belt';
+import { runCrafter } from './crafter';
+import { runInserter } from './inserter';
 import { runMiner } from './miner';
 import type { SimState } from './state';
 
@@ -15,6 +17,12 @@ export function runBehaviors(state: SimState, defs: BuildingDefs = contentBuildi
     switch (def.behavior) {
       case 'miner':
         runMiner(state.map, b, def);
+        break;
+      case 'inserter':
+        runInserter(state, b, def, defs);
+        break;
+      case 'crafter':
+        runCrafter(b, def);
         break;
       default:
         // Остальные поведения появятся в следующих задачах.
