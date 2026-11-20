@@ -1,9 +1,10 @@
 ---
 id: TASK-27
 title: Сборщик с выбранным рецептом
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-20T18:38:00Z'
+updated_date: '2026-11-20T19:07:00Z'
 labels:
   - m2
 dependencies:

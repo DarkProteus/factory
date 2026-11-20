@@ -1,9 +1,10 @@
 ---
 id: TASK-17.2
 title: 'Новая партия: стартовая карта и стартовый набор из content'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-20T18:38:00Z'
+updated_date: '2026-11-20T19:07:00Z'
 labels:
   - m2
 dependencies:
