@@ -1,9 +1,10 @@
 ---
 id: TASK-34
 title: Окно здания
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-20T18:38:00Z'
+updated_date: '2026-11-20T22:38:00Z'
 labels:
   - m2
 dependencies:
