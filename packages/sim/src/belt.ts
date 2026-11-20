@@ -1,5 +1,5 @@
 import type { BuildingDef } from '@factory/content';
-import { buildingAt, type BuildingDefs, type Dir, type PlacedBuilding } from './buildings';
+import { buildingAt, topologyVersion, type BuildingDefs, type Dir, type PlacedBuilding } from './buildings';
 import type { SimState } from './state';
 
 /** Длина клетки конвейера в единицах пути. */
@@ -84,9 +84,31 @@ function moveBelt(b: PlacedBuilding, def: BuildingDef, target: PlacedBuilding | 
   }
 }
 
-/** Поведение belt: двигает предметы всех конвейеров и передаёт их на следующие. */
-export function runBelts(state: SimState, defs: BuildingDefs): void {
+/** Шаг сегмента: конвейер, его определение и цель (следующий конвейер или null). */
+type Step = readonly [PlacedBuilding, BuildingDef, PlacedBuilding | null];
+
+/** Сегменты конвейеров, выведенные из зданий: порядок обхода с готовыми целями (TASK-15). */
+interface Segments {
+  version: number;
+  defs: BuildingDefs;
+  steps: Step[];
+}
+
+const segmentsCache = new WeakMap<SimState, Segments>();
+
+/** Порядок обхода и цели; пересчитываются только при стройке, сносе или смене defs. */
+function segments(state: SimState, defs: BuildingDefs): Step[] {
+  const version = topologyVersion(state);
+  const cached = segmentsCache.get(state);
+  if (cached && cached.version === version && cached.defs === defs) return cached.steps;
   const belts = Object.values(state.buildings).filter((b) => isBelt(b, defs));
   const targets = new Map(belts.map((b) => [b.id, targetOf(state, b, defs)] as const));
-  for (const b of beltOrder(belts, targets)) moveBelt(b, defs[b.type]!, targets.get(b.id) ?? null);
+  const steps = beltOrder(belts, targets).map((b): Step => [b, defs[b.type]!, targets.get(b.id) ?? null]);
+  segmentsCache.set(state, { version, defs, steps });
+  return steps;
+}
+
+/** Поведение belt: двигает предметы всех конвейеров и передаёт их на следующие. */
+export function runBelts(state: SimState, defs: BuildingDefs): void {
+  for (const [b, def, target] of segments(state, defs)) moveBelt(b, def, target);
 }

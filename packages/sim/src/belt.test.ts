@@ -152,3 +152,27 @@ describe('конвейер', () => {
     expect(JSON.parse(JSON.stringify(state))).toEqual(state);
   });
 });
+
+describe('сегменты конвейеров (TASK-15)', () => {
+  it('стройка и снос посреди работы пересчитывают цели', () => {
+    const state = line([
+      [0, 0, 1],
+      [1, 0, 1],
+    ]);
+    pushToBelt(at(state, 0, 0), 'ironOre');
+    run(state, 1);
+    // Цепочка обрывается на клетке 1: предмет упирается в её конец.
+    run(state, Math.ceil((2 * BELT_CELL) / SPEED) + 5);
+    expect(at(state, 1, 0).belt).toHaveLength(1);
+    tick(state, [{ type: 'build', building: 'belt', x: 2, y: 0, dir: 1 }]);
+    run(state, Math.ceil(BELT_CELL / SPEED) + 5);
+    expect(at(state, 1, 0).belt).toHaveLength(0);
+    expect(at(state, 2, 0).belt).toHaveLength(1);
+    tick(state, [{ type: 'demolish', x: 1, y: 0 }]);
+    pushToBelt(at(state, 0, 0), 'ironOre');
+    run(state, Math.ceil((2 * BELT_CELL) / SPEED) + 5);
+    // Без среднего конвейера предмет остаётся на первом.
+    expect(at(state, 0, 0).belt).toHaveLength(1);
+    expect(at(state, 2, 0).belt).toHaveLength(1);
+  });
+});

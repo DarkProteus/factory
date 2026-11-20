@@ -87,6 +87,20 @@ export function canPlace(
 }
 
 /** Ставит здание; неверную команду (занято, вне карты, неизвестный тип) молча игнорирует. */
+/**
+ * Версия набора зданий: растёт при каждой стройке и сносе. Живёт вне состояния
+ * (в хеш и сохранение не входит), по ней сбрасываются выведенные кеши, например сегменты конвейеров.
+ */
+const topology = new WeakMap<object, number>();
+
+function bumpTopology(state: BuildingsState): void {
+  topology.set(state, (topology.get(state) ?? 0) + 1);
+}
+
+export function topologyVersion(state: BuildingsState): number {
+  return topology.get(state) ?? 0;
+}
+
 export function placeBuilding(
   state: BuildingsState,
   type: string,
@@ -101,6 +115,7 @@ export function placeBuilding(
   state.nextId += 1;
   state.buildings[building.id] = building;
   setOccupancy(state.map, building, size, building.id);
+  bumpTopology(state);
 }
 
 /**
@@ -147,4 +162,5 @@ export function demolishAt(
   state.inventory = trial;
   setOccupancy(state.map, building, defs[building.type]!.size, 0);
   delete state.buildings[building.id];
+  bumpTopology(state);
 }
