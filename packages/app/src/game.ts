@@ -1,8 +1,8 @@
 // Игровой цикл и ввод: связывает sim, render и интерфейс. Состояние sim меняет
 // только tick(state, commands); ввод превращается в команды через CommandQueue.
+import { startMap } from '@factory/content';
 import { createRenderer } from '@factory/render';
-import { tick } from '@factory/sim';
-import { createDemo, DEMO_CENTER } from './demo';
+import { createState, tick } from '@factory/sim';
 import {
   applyKey,
   cellAt,
@@ -21,6 +21,9 @@ import { clearSave, loadGame, saveGame, shouldAutosave, type KeyValueStorage } f
 const TICK_MS = 1000 / 60;
 /** Больше тиков за кадр не догоняем, чтобы не застыть после паузы вкладки. */
 const MAX_TICKS_PER_FRAME = 5;
+
+/** Зерно новой партии: стартовая карта задана данными, зерно нужно только генератору sim. */
+const NEW_GAME_SEED = 1;
 
 /** Сообщение об ошибке сохранения показывается 10 с. */
 const MESSAGE_MS = 10_000;
@@ -62,7 +65,7 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
     return null;
   }
   const storage = browserStorage();
-  const loaded = loadGame(storage, createDemo);
+  const loaded = loadGame(storage, () => createState(NEW_GAME_SEED));
   const state = loaded.state;
   let lastSavedTick = state.tick;
   /** После «Новой партии» страница перезагружается; сохранять её уже нельзя. */
@@ -130,7 +133,8 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
   canvas.addEventListener('pointerleave', onLeave);
   window.addEventListener('keydown', onKey);
 
-  renderer.lookAt(DEMO_CENTER.x, DEMO_CENTER.y, 1.5);
+  // Камера новой партии стоит в центре стартовой карты.
+  renderer.lookAt(startMap.width / 2, startMap.height / 2, 1.5);
   let acc = 0;
   let last = performance.now();
   let frame = 0;

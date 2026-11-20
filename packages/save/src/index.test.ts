@@ -112,16 +112,16 @@ describe('версия формата', () => {
   it('неизвестная версия даёт понятную ошибку', () => {
     const text = JSON.stringify({ version: SAVE_VERSION + 1, state: createState(1) });
     expect(() => deserialize(text)).toThrow(SaveError);
-    expect(() => deserialize(text)).toThrow(/Неизвестная версия сохранения: 3/);
+    expect(() => deserialize(text)).toThrow(new RegExp(`Неизвестная версия сохранения: ${SAVE_VERSION + 1}`));
   });
 
-  it('сохранение версии 1 без исходного запаса читается: initial берётся из amount', () => {
+  it('сохранения старых версий не мигрируются: понятная ошибка', () => {
     const file = JSON.parse(serialize(factory()));
-    file.version = 1;
-    for (const d of file.state.map.deposits) if (d) delete d.initial;
-    const loaded = deserialize(JSON.stringify(file));
-    const d = loaded.map.deposits[0]!;
-    expect(d.initial).toBe(d.amount);
+    for (const version of [1, 2]) {
+      file.version = version;
+      expect(() => deserialize(JSON.stringify(file))).toThrow(SaveError);
+      expect(() => deserialize(JSON.stringify(file))).toThrow(/устарело: версия \d/);
+    }
   });
 
   it('нет номера версии', () => {

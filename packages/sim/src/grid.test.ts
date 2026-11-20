@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { applyCommand, buildingAt, createState, depositAt, footprintSize, hash, tick, type Command, type Dir } from './index';
+import { createMap } from './grid';
 import { give, stocked } from './testKit';
 
 const build = (x: number, y: number, dir: Dir = 0, building = 'drill'): Command => ({ type: 'build', building, x, y, dir });
 const small = () => stocked(createState(1, { width: 8, height: 6, deposits: [{ x: 3, y: 2, item: 'ironOre', amount: 500 }] }));
 
 describe('карта', () => {
-  it('по умолчанию это пустая карта 64×64', () => {
-    const { map } = createState(1);
+  it('createMap без параметров даёт пустую карту 64×64 (стартовая карта — в start.test.ts)', () => {
+    const map = createMap();
     expect(map.width).toBe(64);
     expect(map.height).toBe(64);
     expect(map.tiles).toHaveLength(64 * 64);

@@ -158,10 +158,10 @@ describe('интерфейс не меняет состояние напряму
     expect(buildingAt(state, 5, 5)).toBeNull();
   });
 
-  it('исходники интерфейса не вызывают мутаторов sim (кроме стартовой сцены demo.ts)', () => {
+  it('исходники интерфейса не вызывают мутаторов sim', () => {
     const forbidden = /\b(applyCommand|placeBuilding|demolishAt|pushToBelt|createMap)\b|\.(buildings|map|inventory)\s*(=[^=]|\[[^\]]*\]\s*=[^=])/;
     const sources = Object.entries(
-      import.meta.glob<string>(['./**/*.{ts,tsx}', '!./**/*.test.ts', '!./demo.ts'], { query: '?raw', import: 'default', eager: true }),
+      import.meta.glob<string>(['./**/*.{ts,tsx}', '!./**/*.test.ts'], { query: '?raw', import: 'default', eager: true }),
     );
     expect(sources.length).toBeGreaterThan(3);
     for (const [file, text] of sources) expect(text, file).not.toMatch(forbidden);

@@ -1,6 +1,6 @@
-import { hash, tick, type SimState } from '@factory/sim';
+import { SAVE_VERSION } from '@factory/save';
+import { createState, hash, tick, type SimState } from '@factory/sim';
 import { describe, expect, it } from 'vitest';
-import { createDemo } from './demo';
 import {
   BROKEN_KEY,
   clearSave,
@@ -11,6 +11,9 @@ import {
   shouldAutosave,
   type KeyValueStorage,
 } from './persist';
+
+/** Новая партия: стартовая карта и стартовый набор. */
+const newGame = () => createState(1);
 
 class FakeStorage implements KeyValueStorage {
   data = new Map<string, string>();
@@ -37,18 +40,18 @@ const advance = (state: SimState, n: number) => {
 };
 
 describe('loadGame', () => {
-  it('без сохранения стартует демо-сцена без ошибки', () => {
-    const r = loadGame(new FakeStorage(), createDemo);
-    expect(hash(r.state)).toBe(hash(createDemo()));
+  it('без сохранения стартует новая партия без ошибки', () => {
+    const r = loadGame(new FakeStorage(), newGame);
+    expect(hash(r.state)).toBe(hash(newGame()));
     expect(r.error).toBeNull();
   });
 
   it('сохранение загружается, хеш совпадает с сохранённым', () => {
     const storage = new FakeStorage();
-    const state = createDemo();
+    const state = newGame();
     advance(state, 200);
     expect(saveGame(storage, state)).toBeNull();
-    const r = loadGame(storage, createDemo);
+    const r = loadGame(storage, newGame);
     expect(r.error).toBeNull();
     expect(r.state.tick).toBe(200);
     expect(hash(r.state)).toBe(hash(state));
@@ -56,20 +59,20 @@ describe('loadGame', () => {
 
   it('загруженная партия дальше идёт так же, как исходная', () => {
     const storage = new FakeStorage();
-    const state = createDemo();
+    const state = newGame();
     advance(state, 100);
     saveGame(storage, state);
-    const loaded = loadGame(storage, createDemo).state;
+    const loaded = loadGame(storage, newGame).state;
     advance(state, 300);
     advance(loaded, 300);
     expect(hash(loaded)).toBe(hash(state));
   });
 
-  it('битое сохранение: демо, сообщение, копия в factory.save.broken', () => {
+  it('битое сохранение: новая партия, сообщение, копия в factory.save.broken', () => {
     const storage = new FakeStorage();
     storage.setItem(SAVE_KEY, '{не json');
-    const r = loadGame(storage, createDemo);
-    expect(hash(r.state)).toBe(hash(createDemo()));
+    const r = loadGame(storage, newGame);
+    expect(hash(r.state)).toBe(hash(newGame()));
     expect(r.error).toContain('Сохранение повреждено');
     expect(r.error).toContain('Начата новая партия');
     expect(storage.getItem(BROKEN_KEY)).toBe('{не json');
@@ -79,33 +82,44 @@ describe('loadGame', () => {
   it('неизвестная версия тоже считается ошибкой сохранения', () => {
     const storage = new FakeStorage();
     storage.setItem(SAVE_KEY, JSON.stringify({ version: 99, state: {} }));
-    const r = loadGame(storage, createDemo);
+    const r = loadGame(storage, newGame);
     expect(r.error).toContain('Неизвестная версия');
     expect(storage.getItem(BROKEN_KEY)).not.toBeNull();
   });
 
+  it('сохранение старой версии не загружается: новая партия с уведомлением', () => {
+    const storage = new FakeStorage();
+    storage.setItem(SAVE_KEY, JSON.stringify({ version: SAVE_VERSION - 1, state: {} }));
+    const r = loadGame(storage, newGame);
+    expect(hash(r.state)).toBe(hash(newGame()));
+    expect(r.error).toContain('устарело');
+    expect(r.error).toContain('Начата новая партия');
+    expect(storage.getItem(SAVE_KEY)).toBeNull();
+    expect(storage.getItem(BROKEN_KEY)).not.toBeNull();
+  });
+
   it('недоступный localStorage не роняет игру', () => {
-    const r = loadGame(brokenStorage, createDemo);
-    expect(hash(r.state)).toBe(hash(createDemo()));
+    const r = loadGame(brokenStorage, newGame);
+    expect(hash(r.state)).toBe(hash(newGame()));
     expect(r.error).toContain('Начата новая партия');
   });
 
-  it('storage = null (localStorage недоступен целиком): демо и сообщение', () => {
-    const r = loadGame(null, createDemo);
-    expect(hash(r.state)).toBe(hash(createDemo()));
+  it('storage = null (localStorage недоступен целиком): новая партия и сообщение', () => {
+    const r = loadGame(null, newGame);
+    expect(hash(r.state)).toBe(hash(newGame()));
     expect(r.error).toContain('Начата новая партия');
   });
 });
 
 describe('saveGame и clearSave', () => {
   it('ошибка записи возвращается строкой и не бросает', () => {
-    expect(saveGame(brokenStorage, createDemo())).toContain('Не удалось сохранить');
-    expect(saveGame(null, createDemo())).toContain('Не удалось сохранить');
+    expect(saveGame(brokenStorage, newGame())).toContain('Не удалось сохранить');
+    expect(saveGame(null, newGame())).toContain('Не удалось сохранить');
   });
 
   it('clearSave удаляет сохранение и не бросает при сбое хранилища', () => {
     const storage = new FakeStorage();
-    saveGame(storage, createDemo());
+    saveGame(storage, newGame());
     clearSave(storage);
     expect(storage.getItem(SAVE_KEY)).toBeNull();
     expect(() => clearSave(brokenStorage)).not.toThrow();

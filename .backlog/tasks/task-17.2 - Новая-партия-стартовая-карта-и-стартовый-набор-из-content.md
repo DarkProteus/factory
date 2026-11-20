@@ -4,7 +4,7 @@ title: 'Новая партия: стартовая карта и стартов
 status: In Progress
 assignee: []
 created_date: '2026-11-20T18:38:00Z'
-updated_date: '2026-11-20T19:07:00Z'
+updated_date: '2026-11-20T19:11:00Z'
 labels:
   - m2
 dependencies:
@@ -13,6 +13,18 @@ references:
   - sim
   - ui
   - save
+modified_files:
+  - packages/sim/src/start.ts
+  - packages/sim/src/start.test.ts
+  - packages/sim/src/state.ts
+  - packages/sim/src/grid.test.ts
+  - packages/save/src/index.ts
+  - packages/save/src/index.test.ts
+  - packages/app/src/game.ts
+  - packages/app/src/demo.ts
+  - packages/app/src/deposits.test.ts
+  - packages/app/src/persist.test.ts
+  - packages/app/src/input.test.ts
 parent_task_id: TASK-17
 type: feature
 ordinal: 26000

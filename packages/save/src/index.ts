@@ -7,18 +7,7 @@ export const PACKAGE = '@factory/save';
 export { SaveError } from './errors';
 
 /** Версия формата сохранения; растёт при несовместимых изменениях SimState. */
-export const SAVE_VERSION = 2;
-
-/** Версия 1 не хранила исходный запас залежи: лучшее, что известно, — остаток на момент сохранения. */
-function migrateV1(state: unknown): void {
-  const deposits = (state as { map?: { deposits?: unknown } } | null)?.map?.deposits;
-  if (!Array.isArray(deposits)) return;
-  for (const d of deposits) {
-    if (typeof d === 'object' && d !== null && !('initial' in d)) {
-      (d as { initial?: unknown }).initial = (d as { amount?: unknown }).amount;
-    }
-  }
-}
+export const SAVE_VERSION = 3;
 
 export interface SaveFile {
   version: number;
@@ -43,11 +32,12 @@ export function deserialize(text: string): SimState {
     throw new SaveError('Сохранение повреждено: не найден номер версии формата.');
   }
   const { version, state } = data as { version: unknown; state?: unknown };
-  if (version === 1) migrateV1(state);
-  else if (version !== SAVE_VERSION) {
-    throw new SaveError(
-      `Неизвестная версия сохранения: ${String(version)}. Эта игра читает версию ${SAVE_VERSION}.`,
-    );
+  if (version !== SAVE_VERSION) {
+    // Старые версии не мигрируются: партия начинается заново.
+    if (typeof version === 'number' && version < SAVE_VERSION) {
+      throw new SaveError(`Сохранение устарело: версия ${version}, игра читает только версию ${SAVE_VERSION}.`);
+    }
+    throw new SaveError(`Неизвестная версия сохранения: ${String(version)}. Эта игра читает версию ${SAVE_VERSION}.`);
   }
   return validateState(state);
 }

@@ -1,6 +1,7 @@
 import type { ItemStack, PlacedBuilding } from './buildings';
 import type { CraftJob } from './craftQueue';
 import { createMap, type GameMap, type MapParams } from './grid';
+import { startInventory, startMapParams } from './start';
 
 /** Состояние симуляции: только простые данные, сериализуется в JSON без потерь. */
 export interface SimState {
@@ -32,6 +33,11 @@ export interface MiningState {
   progress: number;
 }
 
+/**
+ * Без параметра карты — стартовая партия: карта startMap и START_KIT в инвентаре.
+ * С явной картой (тесты, малые сцены) инвентарь пуст: предметы кладёт вызывающий.
+ */
 export function createState(seed: number, map?: MapParams): SimState {
-  return { tick: 0, rng: seed | 0, counters: {}, map: createMap(map), buildings: {}, nextId: 1, inventory: [], mining: null, craftQueue: [] };
+  const inventory = map ? [] : startInventory();
+  return { tick: 0, rng: seed | 0, counters: {}, map: createMap(map ?? startMapParams()), buildings: {}, nextId: 1, inventory, mining: null, craftQueue: [] };
 }
