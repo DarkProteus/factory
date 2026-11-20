@@ -88,7 +88,7 @@ function renderIcon(app: Application, id: string, size: number): string {
   if (!def) return '';
   const g = new Graphics();
   // Иконке нужна только форма: пустая карта 1×1 делает лампы «выкл».
-  const empty = { map: { width: 1, height: 1, deposits: [null] } } as unknown as Parameters<typeof drawPreview>[3];
+  const empty = { buildings: {}, map: { width: 1, height: 1, deposits: [null] } } as unknown as Parameters<typeof drawPreview>[3];
   drawPreview(g, id, def, empty, 0, null);
   return snapshot(app, g, size);
 }

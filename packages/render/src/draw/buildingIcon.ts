@@ -6,7 +6,7 @@ import { drawBuilding, localSize, type BuildingView } from './buildings';
 import { withGhost } from './shapes';
 
 /** Пустая карта 1×1: иконке нужна только форма, лампы получаются «выкл». */
-const EMPTY = { tick: 0, map: { width: 1, height: 1, deposits: [null] } } as unknown as ViewState;
+const EMPTY = { tick: 0, buildings: {}, map: { width: 1, height: 1, deposits: [null] } } as unknown as ViewState;
 
 /** Рисует здание id с центром в (x, y); false, если такого здания нет. */
 export function drawBuildingIcon(g: Graphics, id: string, x: number, y: number, size: number): boolean {

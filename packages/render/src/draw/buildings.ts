@@ -4,6 +4,7 @@ import type { BuildingDef } from '@factory/content';
 import type { Graphics } from 'pixi.js';
 import type { ViewState } from '../interp';
 import { CELL, palette, SHADOW_ALPHA } from '../palette';
+import { satisfactionOf } from '../powerView';
 import { drawAssembler, drawGenerator, drawPole, drawSplitter, outOfFuel } from './buildingsM2';
 import { body, fill, hazardStripes, lamp, line, OUTLINE, OUTLINE_THIN, rectPts, rivets, rust, type LampState } from './shapes';
 
@@ -66,7 +67,8 @@ function hasDeposit(state: ViewState, b: BuildingView, def: BuildingDef): boolea
 }
 
 export function drillLamp(state: ViewState, b: BuildingView, def: BuildingDef): LampState {
-  if (!hasDeposit(state, b, def)) return 'off';
+  // Нет залежи, вне сети или удовлетворённость сети 0 — лампа не горит.
+  if (!hasDeposit(state, b, def) || satisfactionOf(state, b.id) === 0) return 'off';
   return (b.output?.count ?? 0) >= (def.buffer ?? 0) ? 'wait' : 'work';
 }
 

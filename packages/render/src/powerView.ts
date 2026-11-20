@@ -82,6 +82,22 @@ function hasDepositUnder(state: ViewState, x: number, y: number, w: number, h: n
   return false;
 }
 
+/**
+ * Удовлетворённость сети здания, 0..POWER_SCALE: вне сети — 0. До первого тика данных нет (undefined),
+ * тогда здание считается питаемым, чтобы лампы и значки не мигали на пустом месте.
+ */
+export function satisfactionOf(state: ViewState, id: number, defs: Defs = contentBuildings): number | undefined {
+  if (!powerNetworks(sim(state), defs).buildingNet.has(id)) return 0;
+  return powerStats(sim(state)).byBuilding.get(id);
+}
+
+/** Нагрузка генератора, 0..1: min(выработка, спрос) / выработка его сети; вне сети или без выработки — 0. */
+export function generatorLoadOf(state: ViewState, id: number, defs: Defs = contentBuildings): number {
+  const net = powerNetworks(sim(state), defs).buildingNet.get(id);
+  const s = net === undefined ? undefined : powerStats(sim(state)).networks.get(net);
+  return s && s.supply > 0 ? Math.min(s.supply, s.demand) / s.supply : 0;
+}
+
 /** Значки над зданиями: «нет энергии» и «нет топлива» по правилам style.md. */
 export function badges(state: ViewState, defs: Defs = contentBuildings): Badge[] {
   const nets = powerNetworks(sim(state), defs);

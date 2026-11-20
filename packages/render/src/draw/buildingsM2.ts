@@ -2,6 +2,8 @@
 // Как и в buildings.ts, всё рисуется в ориентации N с центром в (0, 0).
 import { recipes } from '@factory/content';
 import type { Graphics } from 'pixi.js';
+import type { ViewState } from '../interp';
+import { generatorLoadOf, satisfactionOf } from '../powerView';
 import type { BuildingView, FrameCtx } from './buildings';
 import { body, fill, line, lamp, OUTLINE, OUTLINE_THIN, rivets, rust, type LampState } from './shapes';
 
@@ -14,12 +16,9 @@ function splitterNext(_b: BuildingView): number {
   return 0;
 }
 
-/**
- * Нагрузка генератора, 0..1. Поля энергии в состоянии sim пока нет (TASK-33):
- * маховик не крутится. Когда поле появится, читать его здесь.
- */
-export function generatorLoad(_b: BuildingView): number {
-  return 0;
+/** Нагрузка генератора, 0..1: min(выработка, спрос) / выработка его сети (powerStats). */
+export function generatorLoad(state: ViewState, b: BuildingView): number {
+  return generatorLoadOf(state, b.id);
 }
 
 /** Топливо кончилось: ячейка пуста и остаток сожжённой энергии меньше стоимости одного тика (cost, Вт·тик). */
@@ -33,15 +32,14 @@ export function assemblerProduct(b: BuildingView): string | undefined {
   return recipe && Object.keys(recipe.out)[0];
 }
 
-export function assemblerLamp(b: BuildingView): LampState {
-  if (b.recipe === undefined) return 'off';
-  // Нет энергии (электросеть) пока не видна в состоянии sim: см. TASK-33.
+export function assemblerLamp(state: ViewState, b: BuildingView): LampState {
+  if (b.recipe === undefined || satisfactionOf(state, b.id) === 0) return 'off';
   return b.progress > 0 ? 'work' : 'wait';
 }
 
-export function generatorLamp(b: BuildingView): LampState {
+export function generatorLamp(state: ViewState, b: BuildingView): LampState {
   if (outOfFuel(b)) return 'off';
-  return generatorLoad(b) > 0 ? 'work' : 'wait';
+  return generatorLoad(state, b) > 0 ? 'work' : 'wait';
 }
 
 /** Полоса 4 px `hazard` вдоль переднего края корпуса. */
@@ -84,13 +82,13 @@ export function drawAssembler(g: Graphics, b: BuildingView, ctx: FrameCtx, w: nu
   rivets(g, w, h);
   // Окно: иконку продукта рисует сцена поверх (она не должна поворачиваться со зданием).
   g.rect(-22, -22, 44, 44).fill(fill('hazard-dark')).stroke(line('steel', 3));
-  const working = assemblerLamp(b) === 'work';
+  const working = assemblerLamp(ctx.state, b) === 'work';
   if (working) {
     const alpha = 0.5 + 0.5 * Math.sin((ctx.tick + ctx.alpha) * 0.3);
     for (const sx of [-1, 1]) for (const sy of [-1, 1]) g.rect(sx * 17 - 2, sy * 17 - 2, 4, 4).fill(fill('heat-2', alpha));
   }
   frontStrip(g, w, h);
-  lamp(g, w, h, assemblerLamp(b));
+  lamp(g, w, h, assemblerLamp(ctx.state, b));
 }
 
 export function drawPole(g: Graphics): void {
@@ -105,7 +103,7 @@ export function drawGenerator(g: Graphics, b: BuildingView, ctx: FrameCtx, w: nu
   rust(g, b.id, w, h);
   rivets(g, w, h);
   // Маховик: оборот за 120 тиков при полной нагрузке, медленнее пропорционально нагрузке.
-  const turn = ((ctx.tick + ctx.alpha) / 120) * generatorLoad(b) * Math.PI * 2;
+  const turn = ((ctx.tick + ctx.alpha) / 120) * generatorLoad(ctx.state, b) * Math.PI * 2;
   g.circle(0, 0, 22).fill(fill('steel')).stroke(OUTLINE);
   for (let i = 0; i < 6; i++) {
     const a = turn + (i * Math.PI) / 3;
@@ -117,5 +115,5 @@ export function drawGenerator(g: Graphics, b: BuildingView, ctx: FrameCtx, w: nu
   g.rect(-31, 17, 14, 14).fill(fill('hazard-dark')).stroke(line('steel', 2));
   if ((b.burn ?? 0) > 0) g.rect(-28, 20, 8, 8).fill(fill('heat-1'));
   frontStrip(g, w, h);
-  lamp(g, w, h, generatorLamp(b));
+  lamp(g, w, h, generatorLamp(ctx.state, b));
 }
