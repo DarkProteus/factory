@@ -45,6 +45,10 @@ groma:
       symbol: runInserter
     - scanner: typescript
       file: packages/sim/src/propKit.ts
+    - scanner: typescript
+      file: packages/sim/src/mining.ts
+    - scanner: typescript
+      file: packages/sim/src/craftQueue.ts
   technology: TypeScript
 description: Хранит состояние мира и обновляет его раз в тик
 ---
