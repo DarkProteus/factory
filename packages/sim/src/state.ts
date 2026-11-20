@@ -1,4 +1,5 @@
 import type { ItemStack, PlacedBuilding } from './buildings';
+import type { CraftJob } from './craftQueue';
 import { createMap, type GameMap, type MapParams } from './grid';
 
 /** Состояние симуляции: только простые данные, сериализуется в JSON без потерь. */
@@ -19,6 +20,8 @@ export interface SimState {
   inventory: ItemStack[];
   /** Ручная добыча: клетка залежи и прогресс текущего цикла в тиках; null, если игрок не добывает. */
   mining: MiningState | null;
+  /** Очередь ручного крафта игрока, см. craftQueue.ts; выполняется первая запись. */
+  craftQueue: CraftJob[];
 }
 
 /** Состояние ручной добычи (см. mining.ts). */
@@ -30,5 +33,5 @@ export interface MiningState {
 }
 
 export function createState(seed: number, map?: MapParams): SimState {
-  return { tick: 0, rng: seed | 0, counters: {}, map: createMap(map), buildings: {}, nextId: 1, inventory: [], mining: null };
+  return { tick: 0, rng: seed | 0, counters: {}, map: createMap(map), buildings: {}, nextId: 1, inventory: [], mining: null, craftQueue: [] };
 }

@@ -171,6 +171,24 @@ describe('битые сохранения', () => {
     expect(() => deserialize(bad({ x: 1, y: 1, progress: -1 }))).toThrow(SaveError);
   });
 
+  it('очередь ручного крафта сохраняется и валидируется', () => {
+    const state = factory();
+    state.craftQueue = [{ recipe: 'ironGear', progress: 5 }];
+    const loaded = roundtrip(state);
+    expect(loaded.craftQueue).toEqual(state.craftQueue);
+    expect(hash(loaded)).toBe(hash(state));
+    const bad = (change: (job: any) => void) =>
+      tamper((s) => {
+        s.craftQueue = [{ recipe: 'ironGear', progress: 5 }];
+        change(s.craftQueue[0]);
+      });
+    expect(() => deserialize(bad((j) => (j.recipe = 'nope')))).toThrow(/неизвестный рецепт «nope»/);
+    expect(() => deserialize(bad((j) => (j.recipe = 'smeltIron')))).toThrow(SaveError);
+    expect(() => deserialize(bad((j) => (j.progress = -1)))).toThrow(SaveError);
+    expect(() => deserialize(bad((j) => (j.progress = 9999)))).toThrow(SaveError);
+    expect(() => deserialize(tamper((s) => delete s.craftQueue))).toThrow(SaveError);
+  });
+
   it('усечённые массивы карты и пропавшие поля', () => {
     expect(() => deserialize(tamper((s) => s.map.tiles.pop()))).toThrow(SaveError);
     expect(() => deserialize(tamper((s) => delete s.map))).toThrow(SaveError);

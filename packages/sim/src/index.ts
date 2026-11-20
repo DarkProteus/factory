@@ -4,6 +4,7 @@ export { depositAt, type Deposit, type GameMap, type MapParams, type Tile } from
 export { buildingAt, canPlace, footprintSize, type BuildingDefs, type Dir, type ItemStack, type PlacedBuilding } from './buildings';
 export { BELT_CELL, BELT_GAP, pushToBelt, type BeltItem } from './belt';
 export { createState, type MiningState, type SimState } from './state';
+export { type CraftJob } from './craftQueue';
 export { tick } from './tick';
 export { applyCommand, type Command } from './commands';
 export { hash } from './hash';

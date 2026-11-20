@@ -1,5 +1,6 @@
 import { demolishAt, placeBuilding, type BuildingDefs, type Dir } from './buildings';
 import { startMining, stopMining } from './mining';
+import { cancelCraft, enqueueCraft } from './craftQueue';
 import { nextRandom } from './rng';
 import type { SimState } from './state';
 
@@ -16,7 +17,11 @@ export type Command =
   /** Начинает ручную добычу на клетке (x, y), пока не придёт stopMining. */
   | { type: 'startMining'; x: number; y: number }
   /** Прекращает ручную добычу. */
-  | { type: 'stopMining' };
+  | { type: 'stopMining' }
+  /** Ставит в очередь ручного крафта count изготовлений рецепта, ингредиенты списываются сразу. */
+  | { type: 'craft'; recipe: string; count: number }
+  /** Убирает запись очереди ручного крафта и возвращает ингредиенты. */
+  | { type: 'cancelCraft'; index: number };
 
 /** `defs` — таблица зданий; по умолчанию content.buildings (параметр нужен тестам). */
 export function applyCommand(state: SimState, command: Command, defs?: BuildingDefs): void {
@@ -38,6 +43,12 @@ export function applyCommand(state: SimState, command: Command, defs?: BuildingD
       return;
     case 'stopMining':
       stopMining(state);
+      return;
+    case 'craft':
+      enqueueCraft(state, command.recipe, command.count);
+      return;
+    case 'cancelCraft':
+      cancelCraft(state, command.index);
       return;
   }
 }

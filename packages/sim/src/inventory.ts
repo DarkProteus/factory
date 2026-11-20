@@ -35,3 +35,25 @@ export function takeFirst(slots: ItemStack[], accepts: (item: string) => boolean
   if (slot.count <= 0) slots.splice(i, 1);
   return slot.item;
 }
+
+/** Сколько предметов этого вида лежит во всех ячейках. */
+export function countOf(slots: readonly ItemStack[], item: string): number {
+  return slots.reduce((sum, s) => (s.item === item ? sum + s.count : sum), 0);
+}
+
+/** Убирает count предметов вида item (по ячейкам с начала); пустые ячейки удаляет. Наличие нужно проверить заранее. */
+export function removeItems(slots: ItemStack[], item: string, count: number): void {
+  let left = count;
+  for (let i = 0; i < slots.length && left > 0; ) {
+    const s = slots[i]!;
+    if (s.item !== item) {
+      i += 1;
+      continue;
+    }
+    const part = Math.min(s.count, left);
+    s.count -= part;
+    left -= part;
+    if (s.count <= 0) slots.splice(i, 1);
+    else i += 1;
+  }
+}

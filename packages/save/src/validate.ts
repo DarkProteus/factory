@@ -81,6 +81,23 @@ function checkMining(mining: unknown): void {
   }
 }
 
+function checkCraftQueue(queue: unknown): void {
+  if (!Array.isArray(queue)) fail('очередь крафта', 'ожидался список');
+  queue.forEach((job: unknown, i) => {
+    const where = `очередь крафта[${i}]`;
+    if (!isObject(job)) fail(where, 'ожидался объект');
+    if (typeof job.recipe !== 'string' || !Object.hasOwn(recipes, job.recipe)) {
+      fail(where, `неизвестный рецепт «${String(job.recipe)}»`);
+    }
+    const def = recipes[job.recipe as keyof typeof recipes];
+    if (def.madeIn !== 'assembler') fail(where, 'рецепт нельзя делать руками');
+    const { progress } = job;
+    if (!Number.isInteger(progress) || (progress as number) < 0 || (progress as number) > def.ticks) {
+      fail(where, 'неверный прогресс');
+    }
+  });
+}
+
 /** Проверяет форму разобранного JSON и ссылки на content; при ошибке бросает SaveError. */
 export function validateState(state: unknown): SimState {
   if (!isObject(state)) fail('состояние', 'ожидался объект');
@@ -93,5 +110,6 @@ export function validateState(state: unknown): SimState {
   for (const [key, b] of Object.entries(state.buildings)) checkBuilding(key, b);
   checkStacks(state.inventory, 'инвентарь');
   checkMining(state.mining);
+  checkCraftQueue(state.craftQueue);
   return state as unknown as SimState;
 }
