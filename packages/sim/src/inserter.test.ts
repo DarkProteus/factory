@@ -10,6 +10,7 @@ import {
   type PlacedBuilding,
   type SimState,
 } from './index';
+import { stocked } from './testKit';
 
 const SWING = buildings.inserter.swingTicks;
 const SLOTS = buildings.chest.slots;
@@ -19,7 +20,7 @@ function run(state: SimState, ticks: number): void {
 }
 
 function build(cmds: Command[]): SimState {
-  const state = createState(1, { width: 16, height: 16 });
+  const state = stocked(createState(1, { width: 16, height: 16 }));
   tick(state, cmds);
   return state;
 }

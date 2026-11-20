@@ -1,12 +1,15 @@
 import { INVENTORY_SLOTS, items } from '@factory/content';
 import { describe, expect, it } from 'vitest';
 import { applyCommand, buildingAt, createState, hash, pushToBelt, type SimState } from './index';
+import { give } from './testKit';
 
 function world(): SimState {
   return createState(1, { width: 16, height: 16 });
 }
 
+/** Постройка тратит предмет-здание, поэтому он выдаётся перед командой (инвентарь после неё прежний). */
 function build(state: SimState, building: string, x: number, y: number): void {
+  give(state, building, 1);
   applyCommand(state, { type: 'build', building, x, y, dir: 1 });
 }
 
@@ -42,6 +45,7 @@ describe('инвентарь игрока', () => {
     expect(state.inventory).toEqual([
       { item: 'ironOre', count: 2 },
       { item: 'ironPlate', count: 1 },
+      { item: 'belt', count: 1 },
     ]);
   });
 
@@ -51,7 +55,10 @@ describe('инвентарь игрока', () => {
     buildingAt(state, 4, 4)!.output = { item: 'ironPlate', count: 7 };
     demolish(state, 4, 4);
     expect(buildingAt(state, 4, 4)).toBeNull();
-    expect(state.inventory).toEqual([{ item: 'ironPlate', count: 7 }]);
+    expect(state.inventory).toEqual([
+      { item: 'ironPlate', count: 7 },
+      { item: 'furnace', count: 1 },
+    ]);
   });
 
   it('снос отдаёт вход крафтера, ячейки контейнера и предмет в руке манипулятора', () => {
@@ -68,15 +75,18 @@ describe('инвентарь игрока', () => {
     expect(Object.keys(state.buildings)).toHaveLength(0);
     expect(state.inventory).toEqual([
       { item: 'ironOre', count: 4 },
+      { item: 'furnace', count: 1 },
       { item: 'ammo', count: 5 },
+      { item: 'chest', count: 1 },
       { item: 'ironPlate', count: 1 },
+      { item: 'inserter', count: 1 },
     ]);
   });
 
   it('при полном инвентаре снос запрещён, ничего не меняется', () => {
     const state = world();
-    fill(state, 0);
     build(state, 'belt', 2, 2);
+    fill(state, 0);
     pushToBelt(buildingAt(state, 2, 2)!, 'ironOre');
     const before = hash(state);
     demolish(state, 2, 2);
@@ -86,12 +96,12 @@ describe('инвентарь игрока', () => {
 
   it('снос атомарный: если помещается лишь часть содержимого, не уходит ничего', () => {
     const state = world();
-    fill(state, 1);
     build(state, 'chest', 8, 8);
     buildingAt(state, 8, 8)!.slots = [
       { item: 'ironOre', count: 2 },
       { item: 'ammo', count: 2 },
     ];
+    fill(state, 1);
     const before = hash(state);
     demolish(state, 8, 8);
     expect(buildingAt(state, 8, 8)).not.toBeNull();
@@ -101,11 +111,14 @@ describe('инвентарь игрока', () => {
 
   it('содержимое дополняет неполные ячейки и пустое здание сносится при полном инвентаре', () => {
     const state = world();
-    fill(state, 0);
-    state.inventory[0] = { item: 'ironPlate', count: items.ironPlate.stack - 1 };
     build(state, 'furnace', 4, 4);
     buildingAt(state, 4, 4)!.output = { item: 'ironPlate', count: 1 };
     build(state, 'belt', 2, 2);
+    // Инвентарь полон, но предметам-зданиям есть куда вернуться: у них свои неполные стопки.
+    fill(state, 0);
+    state.inventory[0] = { item: 'ironPlate', count: items.ironPlate.stack - 1 };
+    state.inventory[1] = { item: 'furnace', count: 1 };
+    state.inventory[2] = { item: 'belt', count: 1 };
     demolish(state, 4, 4);
     expect(buildingAt(state, 4, 4)).toBeNull();
     expect(state.inventory[0]!.count).toBe(items.ironPlate.stack);
@@ -130,7 +143,10 @@ describe('снос печи посреди цикла (TASK-22)', () => {
     const state = smelting();
     demolish(state, 2, 2);
     expect(buildingAt(state, 2, 2)).toBeNull();
-    expect(state.inventory).toEqual([{ item: 'ironOre', count: 3 }]);
+    expect(state.inventory).toEqual([
+      { item: 'ironOre', count: 3 },
+      { item: 'furnace', count: 1 },
+    ]);
   });
 
   it('если ингредиентам цикла нет места, снос запрещён', () => {
@@ -145,6 +161,9 @@ describe('снос печи посреди цикла (TASK-22)', () => {
     const state = smelting();
     buildingAt(state, 2, 2)!.progress = 0;
     demolish(state, 2, 2);
-    expect(state.inventory).toEqual([{ item: 'ironOre', count: 2 }]);
+    expect(state.inventory).toEqual([
+      { item: 'ironOre', count: 2 },
+      { item: 'furnace', count: 1 },
+    ]);
   });
 });

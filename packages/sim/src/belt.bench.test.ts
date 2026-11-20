@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { BELT_CELL, BELT_GAP, createState, tick, type Command, type SimState } from './index';
+import { give } from './testKit';
 
 // Таймер без DOM- и node-типов: в sim их нет.
 const now = (): number => (globalThis as unknown as { performance: { now(): number } }).performance.now();
@@ -11,7 +12,7 @@ const BUDGET_MS = 5;
 
 /** Завод из ROWS × WIDTH конвейеров, каждый заполнен предметами до упора. */
 function factory(): SimState {
-  const state = createState(1, { width: WIDTH, height: ROWS * 2 });
+  const state = give(createState(1, { width: WIDTH, height: ROWS * 2 }), 'belt', ROWS * WIDTH);
   const cmds: Command[] = [];
   for (let r = 0; r < ROWS; r++) {
     for (let x = 0; x < WIDTH; x++) cmds.push({ type: 'build', building: 'belt', x, y: r * 2, dir: 1 });
@@ -27,6 +28,7 @@ function factory(): SimState {
 describe('бенчмарк конвейеров', () => {
   it(`${ROWS * WIDTH} загруженных конвейеров укладываются в ${BUDGET_MS} мс на тик`, () => {
     const state = factory();
+    expect(Object.keys(state.buildings)).toHaveLength(ROWS * WIDTH);
     for (let i = 0; i < 50; i++) tick(state, []);
     const samples: number[] = [];
     for (let batch = 0; batch < 9; batch++) {

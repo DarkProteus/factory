@@ -27,6 +27,10 @@ export const DEMO_CENTER = { x: 26, y: 21 };
 
 export function createDemo(seed = 1): SimState {
   const state = createState(seed, { width: 64, height: 64, deposits });
+  // Постройка тратит предмет-здание: перед стройкой кладём в инвентарь ровно столько, сколько нужно демо.
+  const need: Record<string, number> = {};
+  for (const c of commands) if (c.type === 'build') need[c.building] = (need[c.building] ?? 0) + 1;
+  for (const [item, count] of Object.entries(need)) state.inventory.push({ item, count });
   for (const c of commands) applyCommand(state, c);
   return state;
 }

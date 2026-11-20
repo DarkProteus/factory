@@ -9,6 +9,7 @@ import {
   type PlacedBuilding,
   type SimState,
 } from './index';
+import { stocked } from './testKit';
 
 const ORE = 100;
 const E = 1;
@@ -16,7 +17,7 @@ const cmd = (building: string, x: number, y: number): Command => ({ type: 'build
 
 /** Конвейер -> манипулятор -> печь -> манипулятор -> сундук. */
 function plant(): SimState {
-  const state = createState(1, { width: 16, height: 16 });
+  const state = stocked(createState(1, { width: 16, height: 16 }));
   tick(state, [
     cmd('belt', 0, 0),
     cmd('belt', 1, 0),
@@ -64,7 +65,7 @@ describe('руда -> пластины', () => {
   });
 
   it('печь не берёт руды больше, чем вмещает: при полном входе манипулятор ждёт', () => {
-    const state = createState(1, { width: 16, height: 16 });
+    const state = stocked(createState(1, { width: 16, height: 16 }));
     tick(state, [cmd('chest', 1, 0), cmd('inserter', 2, 0), cmd('furnace', 3, 0)]);
     const chest = buildingAt(state, 1, 0)!;
     const hand = buildingAt(state, 2, 0)!;

@@ -9,6 +9,9 @@ import { tick } from './tick';
 
 export const MAP_SIZE = 12;
 
+/** Сколько предметов каждого здания лежит в инвентаре в начале сценария. */
+const BUILDING_ITEMS_EACH = 6;
+
 /** Шаг сценария: одна команда (в своём тике) или пачка пустых тиков. */
 export type Step = { kind: 'cmd'; command: Command } | { kind: 'ticks'; count: number };
 
@@ -79,8 +82,10 @@ export function newWorld(seed: number, map: MapParams, fullInventory = false): {
   const initial: Record<string, number> = {};
   for (const d of map.deposits ?? []) initial[d.item] = (initial[d.item] ?? 0) + d.amount;
   const state = createState(seed, map);
+  // Предметы-здания: без них команды build игнорируются и сценарии ничего не строят.
+  for (const id of buildingIds) state.inventory.push({ item: id, count: BUILDING_ITEMS_EACH });
   if (fullInventory) {
-    for (let i = 0; i < INVENTORY_SLOTS - 1; i++) state.inventory.push({ item: 'ammo', count: items.ammo.stack });
+    while (state.inventory.length < INVENTORY_SLOTS - 1) state.inventory.push({ item: 'ammo', count: items.ammo.stack });
   }
   const startingHeld = state.inventory.reduce((a, s) => a + s.count * oreValue(s.item), 0);
   return { state, ledger: { initial, startingHeld } };
@@ -140,11 +145,14 @@ export function checkOccupancy(state: SimState): void {
   if (occupied !== claimed) throw new Error(`Занято клеток ${occupied}, в отпечатках ${claimed}`);
 }
 
-/** Ценность предмета в «руде»: пластина стоит столько руды, сколько уходит на неё по рецепту. */
+/**
+ * Ценность предмета в «руде»: считается рекурсивно по рецептам (цикла в рецептах нет).
+ * Предмет без рецепта (руда, камень) стоит 1; предмет-здание стоит столько же, сколько его ингредиенты.
+ */
 function oreValue(item: string): number {
   for (const r of Object.values(recipes)) {
     const out = (r.out as Record<string, number>)[item];
-    if (out) return Object.values(r.in).reduce((a, n) => a + n, 0) / out;
+    if (out) return Object.entries(r.in).reduce((a, [ing, n]) => a + n * oreValue(ing), 0) / out;
   }
   return 1;
 }
@@ -159,7 +167,8 @@ export function checkInventory(state: SimState): void {
 
 /**
  * Сохранение предметов: добытая руда (исходные запасы минус остаток) равна ценности всего,
- * что лежит в зданиях и инвентаре, плюс цикл крафта в работе. Снос ничего не теряет (TASK-22).
+ * что лежит в зданиях и инвентаре, плюс цикл крафта в работе и сами поставленные здания (предмет-здание
+ * при постройке превращается в здание, при сносе возвращается). Снос ничего не теряет (TASK-22).
  */
 export function checkConservation(state: SimState, ledger: Ledger): void {
   const remaining: Record<string, number> = {};
@@ -171,7 +180,7 @@ export function checkConservation(state: SimState, ledger: Ledger): void {
   state.inventory.forEach(count);
   for (const b of Object.values(state.buildings)) {
     stacksOf(b).forEach(count);
-    held += inFlight(b);
+    held += inFlight(b) + oreValue(b.type);
   }
   if (Math.abs(mined - held) > 1e-9) throw new Error(`Баланс предметов: добыто ${mined}, учтено ${held}`);
 }

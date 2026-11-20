@@ -33,6 +33,14 @@ function factory(): SimState {
       { x: 0, y: 0, item: 'ironOre', amount: 5000 },
       { x: 0, y: 4, item: 'ironOre', amount: 5000 },
     ] });
+  // Постройка тратит предмет-здание; снесённый конвейер возвращается в инвентарь и уходит на перестройку.
+  state.inventory = [
+    { item: 'drill', count: 2 },
+    { item: 'belt', count: 3 },
+    { item: 'inserter', count: 2 },
+    { item: 'furnace', count: 1 },
+    { item: 'chest', count: 1 },
+  ];
   runTicks(state, BUILD, 400);
   state.inventory = [
     { item: 'ironPlate', count: 40 },

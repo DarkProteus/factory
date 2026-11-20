@@ -1,8 +1,9 @@
 import type { BuildingDef } from '@factory/content';
 import { describe, expect, it } from 'vitest';
 import { applyCommand, canPlace, createState, hash } from './index';
+import { stocked } from './testKit';
 
-const world = () => createState(1, { width: 8, height: 8 });
+const world = () => stocked(createState(1, { width: 8, height: 8 }));
 
 describe('canPlace', () => {
   it('свободное место внутри карты подходит', () => {

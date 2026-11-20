@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { applyCommand, buildingAt, createState, depositAt, footprintSize, hash, tick, type Command, type Dir } from './index';
+import { give, stocked } from './testKit';
 
 const build = (x: number, y: number, dir: Dir = 0, building = 'drill'): Command => ({ type: 'build', building, x, y, dir });
-const small = () => createState(1, { width: 8, height: 6, deposits: [{ x: 3, y: 2, item: 'ironOre', amount: 500 }] });
+const small = () => stocked(createState(1, { width: 8, height: 6, deposits: [{ x: 3, y: 2, item: 'ironOre', amount: 500 }] }));
 
 describe('карта', () => {
   it('по умолчанию это пустая карта 64×64', () => {
@@ -42,7 +43,7 @@ describe('отпечаток здания', () => {
 
   it('команда строит прямоугольное здание из переданной таблицы с учётом направления', () => {
     const defs = { bar: { size: [3, 1] as const, behavior: 'belt' as const, hp: 1 } };
-    const state = small();
+    const state = give(small(), 'bar', 1);
     applyCommand(state, build(1, 1, 1, 'bar'), defs);
     expect(buildingAt(state, 1, 3)?.type).toBe('bar');
     expect(buildingAt(state, 2, 1)).toBeNull();

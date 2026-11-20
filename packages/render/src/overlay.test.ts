@@ -19,6 +19,7 @@ describe('сетка вокруг призрака', () => {
 
 describe('рамка под курсором', () => {
   const state = createState(1, { width: 16, height: 16 });
+  state.inventory.push({ item: 'drill', count: 1 });
   applyCommand(state, { type: 'build', building: 'drill', x: 4, y: 5, dir: 0 });
 
   it('берёт весь отпечаток здания по любой его клетке', () => {
@@ -58,6 +59,7 @@ describe('режим призрака', () => {
 describe('оверлей в сцене', () => {
   it('рисуется для каждого здания, не меняя состояние sim', () => {
     const state = createState(1, { width: 16, height: 16 });
+    state.inventory.push({ item: 'chest', count: 1 });
     applyCommand(state, { type: 'build', building: 'chest', x: 8, y: 8, dir: 0 });
     const before = hash(state);
     const scene = new Scene();

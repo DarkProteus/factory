@@ -1,7 +1,7 @@
 import { buildings as contentBuildings, INVENTORY_SLOTS, recipes as contentRecipes, type BuildingDef, type RecipeDef } from '@factory/content';
 import type { BeltItem } from './belt';
 import { cellIndex, inBounds, type GameMap } from './grid';
-import { add } from './inventory';
+import { add, takeFirst } from './inventory';
 
 /** Направление: 0 — N, 1 — E, 2 — S, 3 — W. */
 export type Dir = 0 | 1 | 2 | 3;
@@ -86,7 +86,6 @@ export function canPlace(
   return true;
 }
 
-/** Ставит здание; неверную команду (занято, вне карты, неизвестный тип) молча игнорирует. */
 /**
  * Версия набора зданий: растёт при каждой стройке и сносе. Живёт вне состояния
  * (в хеш и сохранение не входит), по ней сбрасываются выведенные кеши, например сегменты конвейеров.
@@ -101,6 +100,10 @@ export function topologyVersion(state: BuildingsState): number {
   return topology.get(state) ?? 0;
 }
 
+/**
+ * Ставит здание и тратит один предмет-здание (его id равен id здания) из инвентаря.
+ * Неверную команду (занято, вне карты, неизвестный тип, нет предмета) молча игнорирует.
+ */
 export function placeBuilding(
   state: BuildingsState,
   type: string,
@@ -110,6 +113,7 @@ export function placeBuilding(
   defs: BuildingDefs = contentBuildings,
 ): void {
   if (!isDir(dir) || !canPlace(state, type, x, y, dir, defs)) return;
+  if (takeFirst(state.inventory, (item) => item === type) === null) return;
   const size = defs[type]!.size;
   const building: PlacedBuilding = { id: state.nextId, type, x, y, dir, progress: 0, output: null };
   state.nextId += 1;
@@ -145,7 +149,7 @@ function addAll(slots: ItemStack[], slotCount: number, stacks: readonly ItemStac
 
 /**
  * Сносит здание, которому принадлежит клетка; пустая клетка — без эффекта.
- * Содержимое уходит в инвентарь игрока; если оно не помещается целиком, снос не выполняется.
+ * В инвентарь игрока уходит содержимое и предмет-здание; если всё вместе не помещается, снос не выполняется.
  */
 export function demolishAt(
   state: BuildingsState,
@@ -157,7 +161,7 @@ export function demolishAt(
   const building = buildingAt(state, x, y);
   if (!building) return;
   const trial = state.inventory.map((s) => ({ ...s }));
-  const stacks = contents(building);
+  const stacks = [...contents(building), { item: building.type, count: 1 }];
   if (!addAll(trial, slotCount, stacks)) return;
   state.inventory = trial;
   setOccupancy(state.map, building, defs[building.type]!.size, 0);

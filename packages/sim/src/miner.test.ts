@@ -1,6 +1,7 @@
 import { buildings } from '@factory/content';
 import { describe, expect, it } from 'vitest';
 import { buildingAt, createState, depositAt, tick, type Command, type Dir, type SimState } from './index';
+import { stocked } from './testKit';
 
 const drill = buildings.drill;
 const T = drill.miningTicks;
@@ -10,7 +11,7 @@ function run(state: SimState, ticks: number): void {
 }
 
 function withDrill(deposits: { x: number; y: number; item: string; amount: number }[]): SimState {
-  const state = createState(1, { width: 8, height: 8, deposits });
+  const state = stocked(createState(1, { width: 8, height: 8, deposits }));
   tick(state, [{ type: 'build', building: 'drill', x: 2, y: 2, dir: 0 }]);
   return state;
 }
@@ -71,7 +72,7 @@ describe('бур', () => {
 
     /** Бур (2,2) смотрит на восток: клетка выдачи (4,2). Здания перед ним ставятся командами. */
     function drillWith(cmds: Command[], dir: Dir = 1): SimState {
-      const state = createState(1, { width: 8, height: 8, deposits: ore });
+      const state = stocked(createState(1, { width: 8, height: 8, deposits: ore }));
       tick(state, [{ type: 'build', building: 'drill', x: 2, y: 2, dir }, ...cmds]);
       return state;
     }
@@ -141,7 +142,7 @@ describe('бур', () => {
 
     it('манипулятор по-прежнему берёт руду из буфера бура', () => {
       // Манипулятор забирает слева от бура, цель выкладки (сундук справа) отсутствует.
-      const state = createState(1, { width: 8, height: 8, deposits: ore });
+      const state = stocked(createState(1, { width: 8, height: 8, deposits: ore }));
       tick(state, [put('drill', 2, 2, 1), put('inserter', 4, 2, 1), put('chest', 5, 2)]);
       run(state, T * 2);
       expect(buildingAt(state, 5, 2)!.slots).toEqual([{ item: 'ironOre', count: 1 }]);

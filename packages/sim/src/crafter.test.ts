@@ -2,6 +2,7 @@ import { buildings, recipes } from '@factory/content';
 import { describe, expect, it } from 'vitest';
 import { crafterCanAccept } from './crafter';
 import { buildingAt, createState, tick, type Command, type PlacedBuilding, type SimState } from './index';
+import { stocked } from './testKit';
 
 const recipe = recipes.smeltIron;
 const T = recipe.ticks;
@@ -12,7 +13,7 @@ function run(state: SimState, ticks: number): void {
 }
 
 function withFurnace(): { state: SimState; f: PlacedBuilding } {
-  const state = createState(1, { width: 8, height: 8 });
+  const state = stocked(createState(1, { width: 8, height: 8 }));
   tick(state, [{ type: 'build', building: 'furnace', x: 2, y: 2, dir: 0 } as Command]);
   return { state, f: buildingAt(state, 2, 2)! };
 }
@@ -77,7 +78,7 @@ describe('печь', () => {
 
 describe('здания M2 без реализованного поведения', () => {
   it('сборщик без выбранного рецепта стоит и ничего не принимает', () => {
-    const state = createState(1, { width: 8, height: 8 });
+    const state = stocked(createState(1, { width: 8, height: 8 }));
     tick(state, [{ type: 'build', building: 'assembler', x: 2, y: 2, dir: 0 } as Command]);
     const a = buildingAt(state, 2, 2)!;
     expect(crafterCanAccept(a, buildings.assembler, 'ironPlate')).toBe(false);
@@ -86,7 +87,7 @@ describe('здания M2 без реализованного поведения
   });
 
   it('разделитель, столб и генератор ставятся и стоят без падений', () => {
-    const state = createState(1, { width: 12, height: 12 });
+    const state = stocked(createState(1, { width: 12, height: 12 }));
     for (const [building, x, y] of [['splitter', 0, 0], ['pole', 2, 0], ['generator', 4, 4]] as const) {
       tick(state, [{ type: 'build', building, x, y, dir: 0 } as Command]);
       expect(buildingAt(state, x, y)).toBeTruthy();
