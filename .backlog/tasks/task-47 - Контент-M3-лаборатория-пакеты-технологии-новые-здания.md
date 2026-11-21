@@ -1,9 +1,10 @@
 ---
 id: TASK-47
 title: 'Контент M3: лаборатория, пакеты, технологии, новые здания'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-21T12:01:00Z'
+updated_date: '2026-11-21T12:03:00Z'
 labels:
   - m3
 dependencies: []
