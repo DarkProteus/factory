@@ -4,11 +4,14 @@ title: Таблица «поведение × поведение» из content 
 status: To Do
 assignee: []
 created_date: '2026-11-21T17:17:00Z'
+updated_date: '2026-11-21T17:25:00Z'
 labels:
   - quality
 milestone: m-7
 dependencies:
   - TASK-70
+  - TASK-77
+  - TASK-78
 references:
   - sim
   - content

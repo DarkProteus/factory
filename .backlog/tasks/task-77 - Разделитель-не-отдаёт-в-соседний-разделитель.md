@@ -1,9 +1,10 @@
 ---
 id: TASK-77
 title: Разделитель не отдаёт в соседний разделитель
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-21T17:24:00Z'
+updated_date: '2026-11-21T17:25:00Z'
 labels:
   - quality
 milestone: m-7
