@@ -13,6 +13,7 @@ import { setup, stack } from "./buildingUi.testkit";
 import { NO_TOOL } from "./input";
 
 describe("клик по зданию", () => {
+  // rule: building-window
   it("открывает окно у бура, печи, сборщика, сундука, генератора и фильтрующего разделителя", () => {
     for (const type of ["drill", "furnace", "assembler", "chest", "generator", "filterSplitter"]) {
       const { state, b } = setup(type);

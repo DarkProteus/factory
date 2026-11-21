@@ -81,6 +81,7 @@ describe("предметы-здания в инвентаре", () => {
     expect(itemCount(inv, "belt")).toBe(0);
   });
 
+  // rule: build-panel
   it("здание с нулём предметов не выбирается ни кнопкой, ни клавишей", () => {
     const owned = (id: string) => (id === "belt" ? 0 : 4);
     expect(selectBuilding(idle, "belt", owned)).toBe(idle);
@@ -96,6 +97,7 @@ describe("предметы-здания в инвентаре", () => {
     });
   });
 
+  // rule: build-panel
   it("после последнего экземпляра режим стройки сбрасывается, остальные режимы и направление целы", () => {
     const state = world();
     const s: ToolState = { tool: { kind: "build", building: "drill" }, dir: 2 };
@@ -130,6 +132,7 @@ describe("предметы-здания в инвентаре", () => {
 describe("закрытые здания на панели стройки", () => {
   const ids = ["belt", "splitter", "lab"];
 
+  // rule: locked-hidden
   it("здание с закрытым рецептом скрыто, с открытым и без рецепта — видно", () => {
     const state = createState(1);
     state.inventory = [];

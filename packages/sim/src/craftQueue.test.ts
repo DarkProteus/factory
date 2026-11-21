@@ -23,6 +23,7 @@ const fillUp = (state: SimState) => {
 
 const GEAR = recipes.ironGear.ticks;
 
+// rule: hand-craft-queue
 describe('очередь ручного крафта: постановка', () => {
   it('списывает ингредиенты сразу и ставит рецепт в очередь', () => {
     const state = world([{ item: 'ironPlate', count: 7 }]);

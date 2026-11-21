@@ -8,6 +8,7 @@ const m2Text = () => JSON.stringify(fixtureM2);
 const techId = Object.keys(technologies)[0]!;
 const tech = technologies[techId as keyof typeof technologies];
 
+// rule: m2-saves
 describe('миграция сейва M2 (версия 3) в M3', () => {
   it('версия формата поднята до 4', () => {
     expect(SAVE_VERSION).toBe(4);
@@ -59,6 +60,7 @@ describe('миграция сейва M2 (версия 3) в M3', () => {
   });
 });
 
+// rule: research-state
 describe('сейв M3 с исследованиями', () => {
   function researched(): SimState {
     const s = createState(5, { width: 8, height: 8 });

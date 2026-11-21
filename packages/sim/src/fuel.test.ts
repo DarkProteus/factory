@@ -23,6 +23,7 @@ function run(state: SimState, ticks: number): void {
   for (let i = 0; i < ticks; i++) tick(state, []);
 }
 
+// rule: fuel, energy-sources
 describe('ячейка топлива', () => {
   it('топливо манипулятор кладёт в ячейку, прочее во вход', () => {
     const { f } = furnaceWorld();
@@ -74,6 +75,7 @@ describe('ячейка топлива', () => {
   });
 });
 
+// rule: furnace-recipe, smelting-recipes
 describe('выбор рецепта печью по входу', () => {
   it('рецепт выбирается по пришедшей руде', () => {
     const { f } = furnaceWorld();
@@ -110,6 +112,7 @@ describe('выбор рецепта печью по входу', () => {
   });
 });
 
+// rule: fuel
 describe('расход топлива', () => {
   it('цикл тратит kw за тик: уголь списывается целиком, остаток энергии хранится в состоянии', () => {
     const { state, f } = furnaceWorld();
@@ -153,6 +156,7 @@ describe('расход топлива', () => {
     expect(f.output).toEqual({ item: 'ironPlate', count: 1 });
   });
 
+  // rule: idle-power
   it('простаивающая печь топливо не тратит', () => {
     const { state, f } = furnaceWorld();
     f.fuel = { item: 'coal', count: 1 };

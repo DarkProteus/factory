@@ -51,6 +51,7 @@ describe('сохранение завода', () => {
   });
 });
 
+// rule: m1-saves
 describe('версия формата', () => {
   it('сохранение содержит номер версии', () => {
     const file = JSON.parse(serialize(createState(1))) as { version: number };

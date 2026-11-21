@@ -14,6 +14,7 @@ import {
 import { itemName } from "./ui/names";
 
 describe("рецепты ручного крафта", () => {
+  // rule: hand-craft-scope
   it("это все рецепты madeIn: assembler, плавки нет", () => {
     const ids = manualRecipes().map((r) => r.id);
     expect(ids).toContain("ironGear");
@@ -24,6 +25,7 @@ describe("рецепты ручного крафта", () => {
     );
   });
 
+  // rule: locked-hidden
   it("закрытые рецепты в окне крафта скрыты", () => {
     const open = (id: string) => id !== "circuit";
     const ids = manualRecipes(recipes, open).map((r) => r.id);
@@ -31,6 +33,7 @@ describe("рецепты ручного крафта", () => {
     expect(ids).not.toContain("circuit");
   });
 
+  // rule: inventory-window
   it("рецепт серый, пока не хватает ингредиентов", () => {
     const gear = recipes.ironGear;
     expect(canCraft([], gear)).toBe(false);
@@ -53,6 +56,7 @@ describe("рецепты ручного крафта", () => {
 });
 
 describe("команды окна", () => {
+  // rule: inventory-window
   it("клик — craft на 1, Shift+клик — на 5", () => {
     const inv = [{ item: "ironPlate", count: 20 }];
     expect(craftCommand(inv, "ironGear", false)).toEqual({

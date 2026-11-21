@@ -111,6 +111,7 @@ function inserterMoved(state: SimState, hand: PlacedBuilding, ticks = 80): boole
   return false;
 }
 
+// rule: building-combos
 describe('таблица «здание × здание»: полнота', () => {
   it('для каждого здания content есть строки во всех таблицах', () => {
     expect(missingRows(defsOf)).toEqual([]);

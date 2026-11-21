@@ -2,6 +2,7 @@ import { START_KIT, startMap } from '@factory/content';
 import { describe, expect, it } from 'vitest';
 import { createState, depositAt, hash } from './index';
 
+// rule: start-kit
 describe('стартовая партия по умолчанию', () => {
   it('карта строится из startMap: размер и клетки пятен', () => {
     const { map } = createState(1);

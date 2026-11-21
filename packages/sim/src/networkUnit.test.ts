@@ -58,6 +58,7 @@ function covered(type: string, x: number, y: number, dir: Dir = 0): boolean {
   return nets.buildingNet.has(id);
 }
 
+// rule: pole-coverage
 describe('зона покрытия столба 5×5', () => {
   it.each([
     ['слева', 18, 20, 17, 20],

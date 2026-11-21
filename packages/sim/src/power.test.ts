@@ -96,6 +96,7 @@ describe('электросеть: столбы и сети', () => {
   });
 });
 
+// rule: power-satisfaction
 describe('электросеть: удовлетворённость', () => {
   it('один сборщик на 900 кВт генератора работает в полную силу', () => {
     const { state, asm } = plant([[6, 0]]);
@@ -123,6 +124,7 @@ describe('электросеть: удовлетворённость', () => {
     expect(asm[1]!.output).toEqual({ item: 'ironGear', count: 10 });
   });
 
+  // rule: idle-power
   it('простаивающий сборщик не входит в спрос: работающий идёт в полную силу', () => {
     const { state, asm } = plant([[6, 0], [6, 3]]);
     const defs = weakGenerator(75);

@@ -88,6 +88,7 @@ const full = (): Run => (fullRun ??= run(plant(), buildings, 20 * MINUTE));
 /** Урезанная генерация: каждый генератор даёт долю share своей мощности. */
 const reduced = (share: number): Run => run(plant(), withGenerator(GEN_KW * share), 30 * MINUTE);
 
+// rule: m3-ready-test
 describe('готовность M3: завод пакетов', () => {
   it('раскладка: все электрические здания в одной сети с генераторами', () => {
     const state = plant();

@@ -121,6 +121,7 @@ function stagePeriods(): Record<string, number> {
   };
 }
 
+// rule: m2-ready-test
 describe('готовность M2: завод схем', () => {
   it('раскладка: все манипуляторы и сборщики в одной сети с генератором', () => {
     const { state, installedKw } = plant();

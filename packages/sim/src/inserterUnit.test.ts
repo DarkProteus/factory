@@ -106,6 +106,7 @@ describe('манипулятор без энергии (неэлектричес
   });
 });
 
+// rule: energy-sources
 describe('электрический манипулятор', () => {
   it('вне сети (satisfaction undefined): ничего не берёт и спрос не отмечает', () => {
     const r = rig('inserter');

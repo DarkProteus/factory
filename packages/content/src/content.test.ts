@@ -5,6 +5,7 @@ import { validateContent, type ContentTables } from './validateContent.testkit';
 
 const real: ContentTables = { items, recipes, buildings, technologies };
 
+// rule: craft-recipes
 describe('настоящий контент', () => {
   it('содержит предметы и рецепты из таблиц design.md', () => {
     for (const id of ['ironOre', 'copperOre', 'coal', 'stone', 'ironPlate', 'copperPlate', 'stoneBrick', 'ironGear', 'copperCable', 'circuit', 'ammo']) {

@@ -43,6 +43,7 @@ describe('inBounds', () => {
   });
 });
 
+// rule: deposits
 describe('createMap: размер и залежи', () => {
   it('нулевая, отрицательная и дробная сторона — RangeError с размером в тексте', () => {
     expect(() => createMap({ width: 0, height: 4 })).toThrow(RangeError);

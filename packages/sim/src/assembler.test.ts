@@ -22,6 +22,7 @@ function withAssembler(): { state: SimState; asm: PlacedBuilding } {
 const setRecipe = (state: SimState, asm: PlacedBuilding, recipe: string): void =>
   applyCommand(state, { type: 'setRecipe', building: asm.id, recipe });
 
+// rule: assembler-recipe
 describe('сборщик: команда setRecipe', () => {
   it('задаёт рецепт из madeIn: assembler и готовит вход', () => {
     const { state, asm } = withAssembler();
@@ -93,6 +94,7 @@ describe('сборщик: приём предметов', () => {
   });
 });
 
+// rule: assembler-recipe
 describe('сборщик: смена рецепта', () => {
   it('отдаёт в инвентарь вход, выход и ингредиенты идущего цикла', () => {
     const { state, asm } = withAssembler();

@@ -33,6 +33,7 @@ function tunnel(): SimState {
   return s;
 }
 
+// rule: underground
 describe('подземный конвейер: роли и пары', () => {
   it('первый становится входом, второй позади с ним в пределах дальности — выходом', () => {
     const s = tunnel();

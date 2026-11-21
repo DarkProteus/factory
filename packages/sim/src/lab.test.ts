@@ -44,6 +44,7 @@ function ticksToFinish(state: SimState, tech: string, limit: number): number {
   return -1;
 }
 
+// rule: lab
 describe('лаборатория: исследование', () => {
   it('одна лаборатория проходит технологию за units × unitTicks тиков и тратит units пакетов', () => {
     const { state, labs } = world();

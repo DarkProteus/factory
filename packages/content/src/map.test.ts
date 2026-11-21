@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { INVENTORY_SLOTS, items, MINING_TICKS, startMap, START_KIT } from './index';
 
+// rule: deposits, start-map
 describe('startMap', () => {
   it('карта 128×128', () => {
     expect([startMap.width, startMap.height]).toEqual([128, 128]);

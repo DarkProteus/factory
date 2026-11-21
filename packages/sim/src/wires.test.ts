@@ -61,6 +61,7 @@ function crosses(state: SimState, w1: [number, number], w2: [number, number]): b
   return d1 * d2 < 0 && d3 * d4 < 0;
 }
 
+// rule: pole-wires
 describe('провода: минимальное остовное дерево', () => {
   it('число проводов = столбы − сети', () => {
     const state = withPoles(scatter(40, 7));

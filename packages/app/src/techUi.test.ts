@@ -32,6 +32,7 @@ const techs = { a: tech(), e: tech(), b: tech(['a']), c: tech(['a', 'b']), d: te
 
 const fresh = () => createState(1);
 
+// rule: research-window
 describe('слои дерева', () => {
   it('глубина — самая длинная цепочка requires', () => {
     expect(techDepths(techs)).toEqual({ a: 0, e: 0, b: 1, c: 2, d: 1 });

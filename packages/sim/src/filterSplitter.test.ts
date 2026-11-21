@@ -50,6 +50,7 @@ function feed(state: SimState, queue: string[], maxTicks: number): void {
   }
 }
 
+// rule: filter-splitter
 describe('фильтрующий разделитель (TASK-37)', () => {
   it('описан в content: 1×1, без энергии', () => {
     expect(buildings.filterSplitter.behavior).toBe('filterSplitter');

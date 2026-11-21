@@ -18,6 +18,7 @@ describe('M3: предметы', () => {
 });
 
 describe('M3: рецепты', () => {
+  // rule: packs
   it('научные пакеты', () => {
     expect(recipes.sciencePackRed).toMatchObject({ in: { copperPlate: 1, ironGear: 1 }, out: { sciencePackRed: 1 }, ticks: 300, madeIn: 'assembler' });
     expect(recipes.sciencePackGreen).toMatchObject({ in: { inserter: 1, belt: 1 }, out: { sciencePackGreen: 1 }, ticks: 360, madeIn: 'assembler' });
@@ -78,6 +79,7 @@ describe('M3: технологии', () => {
   const red = { sciencePackRed: 1 };
   const both = { sciencePackRed: 1, sciencePackGreen: 1 };
 
+  // rule: tech-tree, technologies-data
   it('таблица дерева', () => {
     const t = technologies;
     expect(t.logistics).toMatchObject({ unit: red, units: 10, unitTicks: 600, requires: [], unlocks: ['splitter'] });
@@ -96,6 +98,7 @@ describe('M3: технологии', () => {
 });
 
 describe('M3: стартовый набор рецептов', () => {
+  // rule: research-start-unlocked
   it('всё из M2, кроме splitter, плюс lab и sciencePackRed', () => {
     const m2 = [
       'smeltIron', 'smeltCopper', 'smeltStone', 'ironGear', 'copperCable', 'circuit', 'ammo', 'drill', 'furnace',

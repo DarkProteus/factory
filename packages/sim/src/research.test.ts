@@ -15,6 +15,7 @@ function finish(state: SimState, tech: keyof typeof technologies): void {
   addResearchProgress(state, t.units * t.unitTicks);
 }
 
+// rule: research-start-unlocked
 describe('исследования: начальное состояние', () => {
   it('новая партия: ничего не изучено, открыты startRecipes (отсортированный массив)', () => {
     for (const state of [createState(1), world()]) {
@@ -36,6 +37,7 @@ describe('исследования: начальное состояние', () =
   });
 });
 
+// rule: research-active
 describe('команда setResearch', () => {
   it('выбирает доступную технологию', () => {
     const state = world();
@@ -88,6 +90,7 @@ describe('команда setResearch', () => {
   });
 });
 
+// rule: research-progress
 describe('прогресс и завершение технологии', () => {
   it('без активной технологии прогресс не растёт', () => {
     const state = world();

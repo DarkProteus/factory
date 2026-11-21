@@ -44,6 +44,7 @@ function count(state: SimState, item: string): number {
   return n;
 }
 
+// rule: smelting-recipes
 describe('руда -> пластины', () => {
   it(`${ORE} руды по конвейеру превращаются ровно в ${ORE} пластин`, () => {
     const state = plant();

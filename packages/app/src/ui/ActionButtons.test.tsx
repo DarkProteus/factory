@@ -23,6 +23,7 @@ const build: Tool = { kind: 'build', building: 'conveyor' };
 const st = (tool: Tool): ToolState => ({ tool, dir: 0 });
 const html = (el: ReactElement) => renderToStaticMarkup(el);
 
+// rule: mouse-buttons
 describe('кнопка поворота (R)', () => {
   it('подписана клавишей R и подсказкой «Поворот»', () => {
     const out = html(rotateButton(fakeGame(build).game, st(build)));

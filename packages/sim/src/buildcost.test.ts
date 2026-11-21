@@ -11,6 +11,7 @@ const build = (state: SimState, building: string, x: number, y: number): void =>
 const demolish = (state: SimState, x: number, y: number): void => applyCommand(state, { type: 'demolish', x, y });
 const count = (state: SimState, item: string): number => state.inventory.filter((s) => s.item === item).reduce((a, s) => a + s.count, 0);
 
+// rule: building-items
 describe('постройка тратит предмет-здание (TASK-17.1)', () => {
   it('build списывает один предмет-здание из инвентаря', () => {
     const state = world();
@@ -45,6 +46,7 @@ describe('постройка тратит предмет-здание (TASK-17.1
   });
 });
 
+// rule: building-items
 describe('снос возвращает предмет-здание (TASK-17.1)', () => {
   it('пустое здание возвращается предметом в инвентарь', () => {
     const state = world();

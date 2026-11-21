@@ -49,6 +49,7 @@ function feed(state: SimState, queue: string[], maxTicks: number): void {
   }
 }
 
+// rule: splitter
 describe('разделитель (TASK-29)', () => {
   it('описан в content: 1×1, без энергии', () => {
     expect(buildings.splitter.behavior).toBe('splitter');

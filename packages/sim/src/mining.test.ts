@@ -14,6 +14,7 @@ function field(amount = 100): SimState {
 
 const ore = (s: SimState): number => s.inventory.find((x) => x.item === 'ironOre')?.count ?? 0;
 
+// rule: hand-mining
 describe('ручная добыча', () => {
   it('по умолчанию добычи нет', () => {
     expect(createState(1).mining).toBeNull();
