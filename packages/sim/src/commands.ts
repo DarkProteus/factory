@@ -4,6 +4,7 @@ import { setFilter } from './splitter';
 import { startMining, stopMining } from './mining';
 import { cancelCraft, enqueueCraft } from './craftQueue';
 import { putIntoBuilding, takeFromBuilding, type BuildingSlot } from './manual';
+import { releaseLabUnits } from './lab';
 import { setResearch } from './research';
 import { nextRandom } from './rng';
 import type { SimState } from './state';
@@ -75,6 +76,7 @@ export function applyCommand(state: SimState, command: Command, defs?: BuildingD
       return;
     case 'setResearch':
       setResearch(state, command.tech);
+      releaseLabUnits(state);
       return;
     case 'setFilter':
       setFilter(state, command.building, command.item, defs);

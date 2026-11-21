@@ -20,7 +20,7 @@ interface ManualState {
   buildings: Record<number, PlacedBuilding>;
   inventory: ItemStack[];
   /** Открытые рецепты: печь не принимает предмет без открытого рецепта. */
-  research: { unlocked: readonly string[] };
+  research: { unlocked: readonly string[]; active: string | null };
 }
 
 function buildingById(state: ManualState, id: number): PlacedBuilding | undefined {
@@ -88,7 +88,7 @@ export function putIntoBuilding(
   if (!b || !Number.isInteger(count) || count <= 0) return;
   const limit = Math.min(count, countOf(state.inventory, item));
   let moved = 0;
-  while (moved < limit && canAccept(b, item, defs, state.research.unlocked)) {
+  while (moved < limit && canAccept(b, item, defs, state.research.unlocked, state.research.active)) {
     accept(b, item, defs, state.research.unlocked);
     moved += 1;
   }

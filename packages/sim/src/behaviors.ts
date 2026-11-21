@@ -3,6 +3,7 @@ import type { BuildingDefs } from './buildings';
 import { runBelts } from './segments';
 import { runCrafter } from './crafter';
 import { runInserter } from './inserter';
+import { runLab } from './lab';
 import { runMiner } from './miner';
 import { stepPower } from './power';
 import type { SimState } from './state';
@@ -25,6 +26,9 @@ export function runBehaviors(state: SimState, defs: BuildingDefs = contentBuildi
         break;
       case 'crafter':
         runCrafter(b, def, power.get(b.id));
+        break;
+      case 'lab':
+        runLab(state, b, def, defs, power.get(b.id));
         break;
       default:
         // Остальные поведения появятся в следующих задачах.

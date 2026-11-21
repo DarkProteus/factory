@@ -1,4 +1,4 @@
-import { buildings as contentBuildings, INVENTORY_SLOTS, recipes as contentRecipes, type BuildingDef, type RecipeDef } from '@factory/content';
+import { buildings as contentBuildings, INVENTORY_SLOTS, recipes as contentRecipes, technologies, type BuildingDef, type RecipeDef } from '@factory/content';
 import type { BeltItem } from './belt';
 import { cellIndex, inBounds, type GameMap } from './grid';
 import { add, takeFirst } from './inventory';
@@ -37,6 +37,8 @@ export interface PlacedBuilding {
   draw?: true;
   /** Накопленная удовлетворённость сети, 1..POWER_SCALE-1; при нуле поле удаляется (см. power.ts). */
   charge?: number;
+  /** Лаборатория: технология, чьи пакеты списаны для идущей единицы (b.progress — её тики); без идущей единицы поля нет. См. lab.ts. */
+  unit?: string;
   /** Роль подземного конвейера: вход или выход тоннеля; задаётся при постановке (см. underground.ts). */
   underground?: 'in' | 'out';
 }
@@ -148,6 +150,9 @@ export function contents(b: PlacedBuilding): ItemStack[] {
   if (recipe && b.progress > 0) {
     for (const [item, count] of Object.entries(recipe.in)) stacks.push({ item, count });
   }
+  // Лаборатория: пакеты идущей единицы списаны с ячеек, как ингредиенты цикла.
+  const unit = b.unit === undefined ? undefined : technologies[b.unit as keyof typeof technologies]?.unit;
+  for (const [item, count] of Object.entries(unit ?? {})) stacks.push({ item, count });
   for (const it of b.belt ?? []) stacks.push({ item: it.item, count: 1 });
   if (b.output) stacks.push(b.output);
   stacks.push(...(b.input ?? []), ...(b.slots ?? []));
