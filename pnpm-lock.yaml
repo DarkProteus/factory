@@ -96,6 +96,10 @@ importers:
       '@factory/sim':
         specifier: workspace:*
         version: link:../sim
+    devDependencies:
+      fast-check:
+        specifier: ^4.10.3
+        version: 4.10.3
 
   packages/sim:
     dependencies:
