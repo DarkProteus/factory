@@ -1,10 +1,10 @@
 ---
 id: TASK-76
 title: Дымовой тест интерфейса в Playwright
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-11-21T17:18:00Z'
-updated_date: '2026-11-21T18:59:00Z'
+updated_date: '2026-11-21T19:09:00Z'
 labels:
   - quality
 milestone: m-7
@@ -39,3 +39,9 @@ app и render почти не проверяются тестами. Поста�
 - [x] #3 Шаг e2e в ci.yml
 - [x] #4 pnpm test зелёный и не запускает e2e
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Ревью: pnpm e2e на main — 3 passed (3.6 мин под нагрузкой). e2e-файлы влиты в компонент groma ui.
+<!-- SECTION:NOTES:END -->
