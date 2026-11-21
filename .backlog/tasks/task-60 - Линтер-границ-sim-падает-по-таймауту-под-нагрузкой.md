@@ -4,9 +4,10 @@ title: Линтер границ sim падает по таймауту под �
 status: Done
 assignee: []
 created_date: '2026-11-21T12:45:00Z'
-updated_date: '2026-11-21T12:46:00Z'
+updated_date: '2026-11-21T16:43:00Z'
 labels:
   - m3
+milestone: m-3
 dependencies: []
 references:
   - sim

@@ -4,9 +4,10 @@ title: Ручная перекладка в здание — до стопки, 
 status: Done
 assignee: []
 created_date: '2026-11-21T13:36:00Z'
-updated_date: '2026-11-21T14:41:00Z'
+updated_date: '2026-11-21T16:43:00Z'
 labels:
   - m3
+milestone: m-3
 dependencies: []
 references:
   - sim

@@ -4,8 +4,9 @@ title: Инвентарь игрока и возврат предметов пр
 status: Done
 assignee: []
 created_date: '2026-11-16T17:53:00Z'
-updated_date: '2026-11-20T16:11:00Z'
+updated_date: '2026-11-21T16:42:00Z'
 labels: []
+milestone: m-1
 dependencies:
   - TASK-7
 references:

@@ -4,8 +4,9 @@ title: Бур выкладывает руду перед собой
 status: Done
 assignee: []
 created_date: '2026-11-20T15:41:00Z'
-updated_date: '2026-11-20T16:07:00Z'
+updated_date: '2026-11-21T16:42:00Z'
 labels: []
+milestone: m-1
 dependencies:
   - TASK-8
 references:

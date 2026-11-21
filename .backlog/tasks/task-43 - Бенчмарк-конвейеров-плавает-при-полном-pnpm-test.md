@@ -4,9 +4,10 @@ title: Бенчмарк конвейеров плавает при полном 
 status: Done
 assignee: []
 created_date: '2026-11-20T22:55:00Z'
-updated_date: '2026-11-20T23:11:00Z'
+updated_date: '2026-11-21T16:43:00Z'
 labels:
   - chore
+milestone: m-2
 dependencies: []
 references:
   - sim

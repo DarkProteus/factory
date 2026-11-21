@@ -4,8 +4,9 @@ title: Стоимость зданий, стартовый набор, ручн�
 status: Done
 assignee: []
 created_date: '2026-11-16T17:57:00Z'
-updated_date: '2026-11-20T23:03:00Z'
+updated_date: '2026-11-21T16:43:00Z'
 labels: []
+milestone: m-2
 dependencies:
   - TASK-16
 references:

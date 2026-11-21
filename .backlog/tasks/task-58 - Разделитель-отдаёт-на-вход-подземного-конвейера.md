@@ -4,9 +4,10 @@ title: Разделитель отдаёт на вход подземного к
 status: Done
 assignee: []
 created_date: '2026-11-21T12:32:00Z'
-updated_date: '2026-11-21T12:35:00Z'
+updated_date: '2026-11-21T16:43:00Z'
 labels:
   - m3
+milestone: m-3
 dependencies: []
 references:
   - sim

@@ -4,9 +4,10 @@ title: Манипулятор берёт из разделителя и клад
 status: Done
 assignee: []
 created_date: '2026-11-21T16:38:00Z'
-updated_date: '2026-11-21T16:42:00Z'
+updated_date: '2026-11-21T16:43:00Z'
 labels:
   - m3
+milestone: m-3
 dependencies: []
 references:
   - sim

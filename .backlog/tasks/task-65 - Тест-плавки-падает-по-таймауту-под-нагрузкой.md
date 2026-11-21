@@ -4,9 +4,10 @@ title: Тест плавки падает по таймауту под нагр�
 status: Done
 assignee: []
 created_date: '2026-11-21T13:08:00Z'
-updated_date: '2026-11-21T14:39:00Z'
+updated_date: '2026-11-21T16:43:00Z'
 labels:
   - m3
+milestone: m-3
 dependencies: []
 references:
   - sim

@@ -4,9 +4,10 @@ title: 'Тест готовности M3: завод пакетов'
 status: Done
 assignee: []
 created_date: '2026-11-21T12:01:00Z'
-updated_date: '2026-11-21T13:00:00Z'
+updated_date: '2026-11-21T16:43:00Z'
 labels:
   - m3
+milestone: m-3
 dependencies:
   - TASK-49
 references:

@@ -4,9 +4,10 @@ title: Подземные конвейеры
 status: Done
 assignee: []
 created_date: '2026-11-20T18:38:00Z'
-updated_date: '2026-11-21T12:32:00Z'
+updated_date: '2026-11-21T16:43:00Z'
 labels:
   - m3
+milestone: m-3
 dependencies:
   - TASK-47
 references:

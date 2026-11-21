@@ -4,8 +4,9 @@ title: Манипулятор и печь
 status: Done
 assignee: []
 created_date: '2026-11-16T15:55:00Z'
-updated_date: '2026-11-20T14:54:00Z'
+updated_date: '2026-11-21T16:42:00Z'
 labels: []
+milestone: m-1
 dependencies:
   - TASK-6
   - TASK-7

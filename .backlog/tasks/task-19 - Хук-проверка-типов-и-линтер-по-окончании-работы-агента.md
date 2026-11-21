@@ -4,8 +4,9 @@ title: 'Хук: проверка типов и линтер по окончан�
 status: Done
 assignee: []
 created_date: '2026-11-20T16:35:00Z'
-updated_date: '2026-11-20T16:38:00Z'
+updated_date: '2026-11-21T16:42:00Z'
 labels: []
+milestone: m-1
 dependencies: []
 references:
   - browser-game

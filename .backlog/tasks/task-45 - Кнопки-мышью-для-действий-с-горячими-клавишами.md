@@ -4,9 +4,10 @@ title: Кнопки мышью для действий с горячими кл�
 status: Done
 assignee: []
 created_date: '2026-11-21T00:09:00Z'
-updated_date: '2026-11-21T12:13:00Z'
+updated_date: '2026-11-21T16:43:00Z'
 labels:
   - m3
+milestone: m-3
 dependencies: []
 references:
   - ui

@@ -4,9 +4,10 @@ title: Окно инвентаря и ручного крафта
 status: Done
 assignee: []
 created_date: '2026-11-20T18:38:00Z'
-updated_date: '2026-11-20T19:46:00Z'
+updated_date: '2026-11-21T16:43:00Z'
 labels:
   - m2
+milestone: m-2
 dependencies:
   - TASK-17.4
 references:

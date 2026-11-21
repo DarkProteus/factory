@@ -4,9 +4,10 @@ title: Ручная перекладка между инвентарём и зд
 status: Done
 assignee: []
 created_date: '2026-11-20T18:38:00Z'
-updated_date: '2026-11-20T22:25:00Z'
+updated_date: '2026-11-21T16:43:00Z'
 labels:
   - m2
+milestone: m-2
 dependencies:
   - TASK-26
   - TASK-27

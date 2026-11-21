@@ -4,8 +4,9 @@ title: Рендер и камера
 status: Done
 assignee: []
 created_date: '2026-11-16T15:55:00Z'
-updated_date: '2026-11-20T16:24:00Z'
+updated_date: '2026-11-21T16:42:00Z'
 labels: []
+milestone: m-0
 dependencies:
   - TASK-5
   - TASK-7

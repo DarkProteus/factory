@@ -4,9 +4,10 @@ title: Миграция сейва M2 в M3
 status: Done
 assignee: []
 created_date: '2026-11-21T12:01:00Z'
-updated_date: '2026-11-21T12:45:00Z'
+updated_date: '2026-11-21T16:43:00Z'
 labels:
   - m3
+milestone: m-3
 dependencies:
   - TASK-48
 references:

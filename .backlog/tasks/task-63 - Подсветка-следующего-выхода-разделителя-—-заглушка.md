@@ -4,9 +4,10 @@ title: Подсветка следующего выхода разделител
 status: Done
 assignee: []
 created_date: '2026-11-21T12:59:00Z'
-updated_date: '2026-11-21T13:17:00Z'
+updated_date: '2026-11-21T16:43:00Z'
 labels:
   - m3
+milestone: m-3
 dependencies: []
 references:
   - render

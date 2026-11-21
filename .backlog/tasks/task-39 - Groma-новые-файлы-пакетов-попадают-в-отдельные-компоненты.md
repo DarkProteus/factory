@@ -4,9 +4,10 @@ title: 'Groma: новые файлы пакетов попадают в отде
 status: Done
 assignee: []
 created_date: '2026-11-20T19:07:00Z'
-updated_date: '2026-11-20T19:11:00Z'
+updated_date: '2026-11-21T16:43:00Z'
 labels:
   - tooling
+milestone: m-2
 dependencies: []
 references:
   - sim

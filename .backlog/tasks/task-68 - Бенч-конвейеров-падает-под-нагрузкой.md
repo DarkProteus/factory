@@ -4,8 +4,10 @@ title: Бенч конвейеров падает под нагрузкой
 status: To Do
 assignee: []
 created_date: '2026-11-21T14:39:00Z'
+updated_date: '2026-11-21T16:43:00Z'
 labels:
   - m3
+milestone: m-3
 dependencies: []
 references:
   - sim

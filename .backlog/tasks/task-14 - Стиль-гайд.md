@@ -4,8 +4,9 @@ title: Стиль-гайд
 status: Done
 assignee: []
 created_date: '2026-11-16T17:19:00Z'
-updated_date: '2026-11-20T15:43:00Z'
+updated_date: '2026-11-21T16:42:00Z'
 labels: []
+milestone: m-1
 dependencies: []
 references:
   - render

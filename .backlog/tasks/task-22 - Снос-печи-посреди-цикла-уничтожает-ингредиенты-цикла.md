@@ -4,8 +4,9 @@ title: Снос печи посреди цикла уничтожает ингр
 status: Done
 assignee: []
 created_date: '2026-11-20T16:39:00Z'
-updated_date: '2026-11-20T16:43:00Z'
+updated_date: '2026-11-21T16:42:00Z'
 labels: []
+milestone: m-1
 dependencies: []
 references:
   - sim

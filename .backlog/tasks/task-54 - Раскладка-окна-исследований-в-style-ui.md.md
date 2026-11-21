@@ -4,9 +4,10 @@ title: Раскладка окна исследований в style-ui.md
 status: Done
 assignee: []
 created_date: '2026-11-21T12:01:00Z'
-updated_date: '2026-11-21T12:06:00Z'
+updated_date: '2026-11-21T16:43:00Z'
 labels:
   - m3
+milestone: m-3
 dependencies: []
 references:
   - docs/style-ui.md
