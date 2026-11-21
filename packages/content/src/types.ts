@@ -35,6 +35,8 @@ export type Behavior =
   | 'turret'
   | 'container'
   | 'splitter'
+  | 'filterSplitter'
+  | 'underground'
   | 'pole';
 
 /** Откуда здание берёт энергию (kw — мощность в кВт). */
@@ -73,7 +75,28 @@ export interface BuildingDef<I extends string = string> {
   slots?: number;
   /** Скорость конвейера: единиц пути за тик; клетка конвейера — 256 единиц (BELT_CELL в sim). */
   beltSpeed?: number;
+  /** Сколько клеток может быть между входом и выходом подземного конвейера. */
+  undergroundReach?: number;
   /** id предмета-боеприпаса (турели). */
   ammo?: I;
   range?: number;
+}
+
+/**
+ * Технология: N единиц исследования, единица — набор пакетов и время.
+ * Параметры I, T и R ограничивают id предметов, технологий и рецептов.
+ * Открывает только рецепты; здание открывается рецептом своего предмета.
+ */
+export interface TechnologyDef<I extends string = string, T extends string = string, R extends string = string> {
+  name: string;
+  /** Пакеты на одну единицу: id предмета -> количество. */
+  unit: ItemCounts<I>;
+  /** Сколько единиц нужно изучить. */
+  units: number;
+  /** Длительность одной единицы в тиках симуляции (при полной сети). */
+  unitTicks: number;
+  /** id технологий, которые должны быть изучены раньше. */
+  requires: readonly T[];
+  /** id рецептов, которые открывает технология. */
+  unlocks: readonly R[];
 }

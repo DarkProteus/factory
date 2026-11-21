@@ -25,6 +25,10 @@ groma:
       symbol: INVENTORY_SLOTS
     - scanner: typescript
       file: packages/content/src/map.ts
+    - scanner: typescript
+      file: packages/content/src/technologies.ts
+    - scanner: typescript
+      file: packages/content/src/validateContent.testkit.ts
   technology: TypeScript
 description: Типизированные таблицы предметов, рецептов, зданий и врагов
 ---

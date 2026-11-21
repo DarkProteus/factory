@@ -26,6 +26,13 @@ export const buildings = {
     inputBuffer: 2,
     buffer: 50,
   },
+  lab: { size: [3, 3], energy: { kind: 'electric', kw: 60 }, behavior: 'lab', hp: 250 },
+  // Подземные и быстрые ленты: скорость быстрых вдвое выше обычной (beltSpeed 8).
+  undergroundBelt: { size: [1, 1], behavior: 'underground', hp: 50, beltSpeed: 8, undergroundReach: 4 },
+  fastUndergroundBelt: { size: [1, 1], behavior: 'underground', hp: 50, beltSpeed: 16, undergroundReach: 4 },
+  fastBelt: { size: [1, 1], behavior: 'belt', hp: 50, beltSpeed: 16 },
+  fastInserter: { size: [1, 1], energy: { kind: 'electric', kw: 46 }, behavior: 'inserter', hp: 50, swingTicks: 15 },
+  filterSplitter: { size: [1, 1], behavior: 'filterSplitter', hp: 50 },
   pole: { size: [1, 1], behavior: 'pole', hp: 50, coverage: 5, wireReach: 7 },
   generator: {
     size: [3, 3],

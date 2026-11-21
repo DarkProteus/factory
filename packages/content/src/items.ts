@@ -14,6 +14,9 @@ export const items = {
   copperCable: { name: 'Медный провод', stack: 200 },
   circuit: { name: 'Электросхема', stack: 200 },
   ammo: { name: 'Патроны', stack: 100 },
+  steelPlate: { name: 'Стальная пластина', stack: 100 },
+  sciencePackRed: { name: 'Красный научный пакет', stack: 200 },
+  sciencePackGreen: { name: 'Зелёный научный пакет', stack: 200 },
   // Предметы-здания: id совпадает с id здания.
   drill: { name: 'Бур', stack: 50 },
   belt: { name: 'Конвейер', stack: 100 },
@@ -24,6 +27,12 @@ export const items = {
   assembler: { name: 'Сборщик', stack: 50 },
   pole: { name: 'Столб', stack: 100 },
   generator: { name: 'Генератор', stack: 50 },
+  lab: { name: 'Лаборатория', stack: 50 },
+  undergroundBelt: { name: 'Подземный конвейер', stack: 50 },
+  fastUndergroundBelt: { name: 'Быстрый подземный конвейер', stack: 50 },
+  fastBelt: { name: 'Быстрый конвейер', stack: 100 },
+  fastInserter: { name: 'Быстрый манипулятор', stack: 50 },
+  filterSplitter: { name: 'Фильтрующий разделитель', stack: 50 },
 } satisfies Record<string, ItemDef>;
 
 /** id предмета из таблицы items. */

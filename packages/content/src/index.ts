@@ -1,9 +1,12 @@
 export const PACKAGE = '@factory/content';
-export type { Behavior, BuildingDef, EnergyDef, ItemDef, RecipeDef } from './types';
+export type { Behavior, BuildingDef, EnergyDef, ItemDef, RecipeDef, TechnologyDef } from './types';
 export type { ItemId } from './items';
+export type { RecipeId } from './recipes';
+export type { TechId } from './technologies';
 export type { BuildingId } from './buildings';
 export { items } from './items';
 export { recipes } from './recipes';
 export { buildings } from './buildings';
-export { INVENTORY_SLOTS, MINING_TICKS, START_KIT } from './player';
+export { technologies } from './technologies';
+export { INVENTORY_SLOTS, MINING_TICKS, START_KIT, startRecipes } from './player';
 export { startMap, type DepositPatch } from './map';
