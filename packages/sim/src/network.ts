@@ -69,10 +69,14 @@ function push(map: Map<number, number[]>, key: number, value: number): void {
   else map.set(key, [value]);
 }
 
-function buildNetworks(state: SimState, defs: BuildingDefs): Networks {
-  // Object.values обходит числовые ключи по возрастанию: столбы и здания идут по id.
-  const all = Object.values(state.buildings);
-  const poles = all.filter((b) => defs[b.type]?.behavior === 'pole');
+/**
+ * Провода как минимальное остовное дерево (Kruskal) по парам столбов в радиусе. Чистая функция:
+ * столбы должны идти по возрастанию id. parent — снимок групп для id сетей.
+ */
+export function wireTree(
+  poles: readonly { id: number; type: string; x: number; y: number }[],
+  defs: BuildingDefs = contentBuildings,
+): { wires: [number, number][]; parent: Map<number, number> } {
   const parent = new Map<number, number>(poles.map((p) => [p.id, p.id]));
   // Кандидаты в провода: все пары в радиусе. Kruskal берёт короткие первыми, при равенстве —
   // по паре id (столбы идут по возрастанию id, поэтому в паре меньший id первый).
@@ -91,6 +95,14 @@ function buildNetworks(state: SimState, defs: BuildingDefs): Networks {
   edges.sort((p, q) => p.d2 - q.d2 || p.a - q.a || p.b - q.b);
   const wires: [number, number][] = [];
   for (const e of edges) if (union(parent, e.a, e.b)) wires.push([e.a, e.b]);
+  return { wires, parent };
+}
+
+function buildNetworks(state: SimState, defs: BuildingDefs): Networks {
+  // Object.values обходит числовые ключи по возрастанию: столбы и здания идут по id.
+  const all = Object.values(state.buildings);
+  const poles = all.filter((b) => defs[b.type]?.behavior === 'pole');
+  const { wires, parent } = wireTree(poles, defs);
   const poleNet = new Map<number, number>(poles.map((p) => [p.id, find(parent, p.id)]));
   const buildingNet = new Map<number, number>();
   const consumers = new Map<number, number[]>();

@@ -2,7 +2,7 @@
 // Чистая логика без Pixi: зоны, провода, значки. Данные берутся из sim (powerNetworks, powerStats),
 // состояние только читается; кеш сетей в sim выведенный, не состояние.
 import { buildings as contentBuildings, type BuildingDef } from '@factory/content';
-import { footprintSize, powerNetworks, powerStats, type SimState } from '@factory/sim';
+import { footprintSize, powerNetworks, powerStats, wireTree, type SimState } from '@factory/sim';
 import type { ViewState } from './interp';
 import { CELL } from './palette';
 
@@ -39,20 +39,16 @@ export function wireSegments(state: ViewState, defs: Defs = contentBuildings): [
   });
 }
 
-/** id столбов, с которыми соединился бы призрак столба в клетке at (по тому же правилу, что и сеть). */
+/**
+ * id столбов, с которыми соединится призрак столба в клетке at: рёбра призрака в остовном дереве,
+ * пересчитанном вместе с ним (то же правило, что у сети). Призрак получит наибольший id.
+ */
 export function ghostLinks(state: ViewState, at: { x: number; y: number }, type: string, defs: Defs = contentBuildings): number[] {
-  const own = defs[type];
-  if (own?.behavior !== 'pole') return [];
-  const links: number[] = [];
-  for (const b of Object.values(state.buildings)) {
-    const def = defs[b.type];
-    if (def?.behavior !== 'pole') continue;
-    const reach = Math.min(own.wireReach ?? 0, def.wireReach ?? 0);
-    const dx = at.x - b.x;
-    const dy = at.y - b.y;
-    if (dx * dx + dy * dy <= reach * reach) links.push(b.id);
-  }
-  return links;
+  if (defs[type]?.behavior !== 'pole') return [];
+  const poles = Object.values(state.buildings).filter((b) => defs[b.type]?.behavior === 'pole');
+  const ghostId = poles.reduce((m, p) => Math.max(m, p.id), 0) + 1;
+  const { wires } = wireTree([...poles, { id: ghostId, type, x: at.x, y: at.y }], defs);
+  return wires.filter(([, b]) => b === ghostId).map(([a]) => a).sort((p, q) => p - q);
 }
 
 export type BadgeKind = 'power' | 'fuel';
