@@ -165,7 +165,9 @@ export class Scene {
         if (b.underground && inTunnel(it.pos)) continue;
         const p = beltItemPos(prev, it.item, it.pos, def.beltSpeed ?? 0, ctx.alpha);
         if (hiddenByPortal(b.underground, p)) continue;
-        drawItem(this.items, it.item, ...rot(0, CELL / 2 - (p / BELT_CELL) * CELL), BELT_ICON, lod);
+        // Буфер фильтрующего разделителя с фильтром — у заднего края, чтобы не закрывать иконку фильтра в центре (style-m3.md).
+        const ly = def.behavior === 'filterSplitter' && b.filter !== undefined ? CELL / 2 - 4 : CELL / 2 - (p / BELT_CELL) * CELL;
+        drawItem(this.items, it.item, ...rot(0, ly), BELT_ICON, lod);
       }
     } else if (def.behavior === 'inserter' && b.output) {
       drawItem(this.items, b.output.item, ...rot(...armTip(ctx.armAngle(b, def))), 10, lod);
