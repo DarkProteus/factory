@@ -1,7 +1,7 @@
 import type { BuildingDef } from '@factory/content';
 import { buildingAt, topologyVersion, type BuildingDefs, type Dir, type PlacedBuilding } from './buildings';
 import { DX, DY, isBelt, moveBelt } from './belt';
-import { feedsSplitter, runSplitter, splitterOutputs } from './splitter';
+import { feedsSplitter, isSplitter, runSplitter, splitterOutputs } from './splitter';
 import type { SimState } from './state';
 
 /** Шаг обхода: конвейер (target) или разделитель (outs). */
@@ -24,8 +24,6 @@ interface Segments {
 }
 
 const segmentsCache = new WeakMap<SimState, Segments>();
-
-const isSplitter = (b: PlacedBuilding, defs: BuildingDefs): boolean => defs[b.type]?.behavior === 'splitter';
 
 /** Куда конвейер передаёт предметы: конвейер впереди, не смотрящий навстречу, или разделитель, к которому лента подходит сзади. */
 function targetOf(state: SimState, b: PlacedBuilding, defs: BuildingDefs): PlacedBuilding | null {
