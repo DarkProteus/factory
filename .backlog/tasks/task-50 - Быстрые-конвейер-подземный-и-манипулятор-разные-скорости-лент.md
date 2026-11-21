@@ -1,9 +1,10 @@
 ---
 id: TASK-50
 title: 'Быстрые конвейер, подземный и манипулятор: разные скорости лент'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-21T12:01:00Z'
+updated_date: '2026-11-21T12:32:00Z'
 labels:
   - m3
 dependencies:

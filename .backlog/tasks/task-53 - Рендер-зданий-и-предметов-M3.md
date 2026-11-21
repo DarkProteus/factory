@@ -1,10 +1,10 @@
 ---
 id: TASK-53
 title: Рендер зданий и предметов M3
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-21T12:01:00Z'
-updated_date: '2026-11-21T12:24:00Z'
+updated_date: '2026-11-21T12:32:00Z'
 labels:
   - m3
 dependencies:
