@@ -1,15 +1,20 @@
 ---
 id: TASK-57
 title: Пунктир призрака столба по правилу дерева
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-11-21T12:13:00Z'
-updated_date: '2026-11-21T13:00:00Z'
+updated_date: '2026-11-21T13:14:00Z'
 labels:
   - m3
 dependencies: []
 references:
   - render
+modified_files:
+  - packages/sim/src/network.ts
+  - packages/sim/src/index.ts
+  - packages/render/src/powerView.ts
+  - packages/render/src/powerView.test.ts
 type: feature
 ordinal: 63000
 ---
@@ -22,6 +27,12 @@ ordinal: 63000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Пунктир призрака совпадает с проводами, которые появятся после постановки
-- [ ] #2 Скриншот плотного завода проверен; pnpm test зелёный
+- [x] #1 Пунктир призрака совпадает с проводами, которые появятся после постановки
+- [x] #2 Скриншот плотного завода проверен; pnpm test зелёный
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Из sim вынесена чистая wireTree(poles, defs); призрак получает id = max+1, как новое здание.
+<!-- SECTION:NOTES:END -->
