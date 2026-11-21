@@ -6,12 +6,15 @@
   "scripts": {
     "test": "vitest run --exclude '**/*.bench.test.ts' && pnpm bench",
     "bench": "vitest run bench.test",
+    "mutate": "stryker run",
     "lint": "eslint .",
     "typecheck": "pnpm -r typecheck",
     "build": "pnpm typecheck && pnpm --filter @factory/app build",
     "dev": "pnpm --filter @factory/app dev"
   },
   "devDependencies": {
+    "@stryker-mutator/core": "^10.1.1",
+    "@stryker-mutator/vitest-runner": "^10.1.1",
     "eslint": "^10.15.0",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.72.2",
