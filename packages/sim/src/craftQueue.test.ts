@@ -1,5 +1,6 @@
 import { INVENTORY_SLOTS, items, recipes } from '@factory/content';
 import { describe, expect, it } from 'vitest';
+import { stepCraftQueue } from './craftQueue';
 import { applyCommand, createState, hash, tick, type SimState } from './index';
 
 function world(inventory: SimState['inventory'] = []): SimState {
@@ -161,5 +162,38 @@ describe('очередь ручного крафта: состояние', () =>
     run(state, 3);
     expect(hash(state)).not.toBe(before);
     expect(JSON.parse(JSON.stringify(state))).toEqual(state);
+  });
+});
+
+describe('очередь ручного крафта: краевые случаи', () => {
+  it('не хватает одного из ингредиентов (другого вдоволь): команда игнорируется', () => {
+    const state = world([{ item: 'ironPlate', count: 5 }]);
+    const before = hash(state);
+    craft(state, 'circuit', 1);
+    expect(hash(state)).toBe(before);
+    expect(state.craftQueue).toEqual([]);
+  });
+
+  it('отмена возвращает ингредиенты в неполную ячейку того же предмета, а не в новую', () => {
+    const state = world([{ item: 'ironPlate', count: 5 }]);
+    craft(state, 'ironGear', 1);
+    expect(state.inventory).toEqual([{ item: 'ironPlate', count: 3 }]);
+    cancel(state, 0);
+    expect(state.inventory).toEqual([{ item: 'ironPlate', count: 5 }]);
+  });
+
+  it('отмена записи с исчезнувшим рецептом ничего не меняет, без ошибки', () => {
+    const state = world([{ item: 'ironPlate', count: 5 }]);
+    state.craftQueue.push({ recipe: 'gone', progress: 0 });
+    cancel(state, 0);
+    expect(state.craftQueue).toEqual([{ recipe: 'gone', progress: 0 }]);
+    expect(state.inventory).toEqual([{ item: 'ironPlate', count: 5 }]);
+  });
+
+  it('шаг очереди с исчезнувшим рецептом ничего не меняет, без ошибки', () => {
+    const state = world();
+    state.craftQueue.push({ recipe: 'gone', progress: 0 });
+    stepCraftQueue(state);
+    expect(state.craftQueue).toEqual([{ recipe: 'gone', progress: 0 }]);
   });
 });

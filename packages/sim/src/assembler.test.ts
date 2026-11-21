@@ -1,6 +1,7 @@
 import { buildings, INVENTORY_SLOTS, items } from '@factory/content';
 import { describe, expect, it } from 'vitest';
 import { applyCommand, buildingAt, createState, hash, tick, type Command, type PlacedBuilding, type SimState } from './index';
+import { setRecipe as setRecipeIn } from './assembler';
 import { electrify, give, stocked } from './testKit';
 import { canAccept } from './transfer';
 
@@ -167,5 +168,30 @@ describe('сборщик: цепочка провод -> схема', () => {
     const expected = (TICKS - 100) / 93;
     expect(out).toBeGreaterThanOrEqual(Math.floor(expected) - 1);
     expect(out).toBeLessThanOrEqual(Math.ceil(expected) + 1);
+  });
+});
+
+describe('сборщик: setRecipe с чужими таблицами зданий', () => {
+  it('тип здания, которого нет в таблице, игнорируется без ошибки', () => {
+    const { state, asm } = withAssembler();
+    setRecipeIn(state, asm.id, 'circuit', {});
+    expect(asm.recipe).toBeUndefined();
+  });
+
+  it('здание с recipeMode chosen, но другим поведением, рецепт не получает', () => {
+    const { state, asm } = withAssembler();
+    const defs = { ...buildings, assembler: { ...buildings.assembler, behavior: 'lab' as const } };
+    setRecipeIn(state, asm.id, 'circuit', defs);
+    expect(asm.recipe).toBeUndefined();
+    expect(asm.input).toBeUndefined();
+  });
+
+  it('печь (crafter с recipeMode byInput) рецепт командой не получает, даже свой', () => {
+    const { state } = withAssembler();
+    tick(state, [build('furnace', 8, 0)]);
+    const furnace = buildingAt(state, 8, 0)!;
+    setRecipeIn(state, furnace.id, 'smeltIron');
+    expect(furnace.recipe).toBeUndefined();
+    expect(furnace.input).toBeUndefined();
   });
 });
