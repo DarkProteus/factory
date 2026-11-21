@@ -16,6 +16,7 @@ import {
   techLayout,
   techStatus,
   techUnlocks,
+  tipPosition,
 } from './techUi';
 
 const tech = (requires: string[] = [], unlocks: string[] = []): TechnologyDef => ({
@@ -141,5 +142,46 @@ describe('событие researchDone и уведомление', () => {
     expect(noticeAlpha(3500)).toBe(1);
     expect(noticeAlpha(3750)).toBeCloseTo(0.5);
     expect(noticeAlpha(4000)).toBeNull();
+  });
+});
+
+describe('tipPosition', () => {
+  const view = { w: 1000, h: 600 };
+  const tip = { w: 260, h: 100 };
+
+  it('по умолчанию справа снизу от курсора', () => {
+    expect(tipPosition({ x: 100, y: 100 }, tip, view)).toEqual({ left: 116, top: 116 });
+  });
+
+  it('у правого края уходит влево от курсора', () => {
+    const p = tipPosition({ x: 900, y: 100 }, tip, view);
+    expect(p.left).toBe(900 - 16 - 260);
+  });
+
+  it('у нижнего края уходит вверх от курсора', () => {
+    const p = tipPosition({ x: 100, y: 580 }, tip, view);
+    expect(p.top).toBe(580 - 16 - 100);
+  });
+
+  it('в углу целиком на экране', () => {
+    const p = tipPosition({ x: 995, y: 595 }, tip, view);
+    expect(p.left + tip.w).toBeLessThanOrEqual(view.w);
+    expect(p.top + tip.h).toBeLessThanOrEqual(view.h);
+  });
+
+  it('при любой позиции курсора остаётся в пределах экрана', () => {
+    for (let x = 0; x <= view.w; x += 25) {
+      for (let y = 0; y <= view.h; y += 25) {
+        const p = tipPosition({ x, y }, tip, view);
+        expect(p.left).toBeGreaterThanOrEqual(0);
+        expect(p.top).toBeGreaterThanOrEqual(0);
+        expect(p.left + tip.w).toBeLessThanOrEqual(view.w);
+        expect(p.top + tip.h).toBeLessThanOrEqual(view.h);
+      }
+    }
+  });
+
+  it('подсказка больше экрана прижимается к левому верхнему углу', () => {
+    expect(tipPosition({ x: 50, y: 50 }, { w: 2000, h: 900 }, view)).toEqual({ left: 0, top: 0 });
   });
 });

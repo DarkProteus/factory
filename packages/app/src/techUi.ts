@@ -150,3 +150,22 @@ export function noticeAlpha(elapsed: number): number | null {
   const left = NOTICE_MS - elapsed;
   return left >= NOTICE_FADE_MS ? 1 : left / NOTICE_FADE_MS;
 }
+
+/** Отступ подсказки от курсора, px. */
+export const TIP_GAP = 16;
+
+/**
+ * Позиция подсказки у курсора: справа снизу, а при нехватке места — слева / сверху.
+ * Результат всегда зажат в пределах экрана.
+ */
+export function tipPosition(
+  cursor: { x: number; y: number },
+  tip: { w: number; h: number },
+  view: { w: number; h: number },
+): { left: number; top: number } {
+  const place = (c: number, size: number, max: number) => {
+    const pos = c + TIP_GAP + size > max ? c - TIP_GAP - size : c + TIP_GAP;
+    return Math.max(0, Math.min(pos, max - size));
+  };
+  return { left: place(cursor.x, tip.w, view.w), top: place(cursor.y, tip.h, view.h) };
+}
