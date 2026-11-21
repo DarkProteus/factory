@@ -16,7 +16,7 @@ import {
   type PlacedBuilding,
   type SimState,
 } from './index';
-import { stocked } from './testKit';
+import { electrify, stocked } from './testKit';
 
 const build = (building: string, x: number, y: number, dir: Dir = 1): Command => ({ type: 'build', building, x, y, dir });
 const demolish = (x: number, y: number): Command => ({ type: 'demolish', x, y });
@@ -131,6 +131,39 @@ describe('подземный конвейер: перенос', () => {
     expect(takeFrom(at(s, 3, 5), () => true, buildings)).toBeNull();
     at(s, 3, 5).belt = [{ item: 'coal', pos: 100 }];
     expect(takeFrom(at(s, 3, 5), () => true, buildings)).toBe('coal');
+  });
+});
+
+describe('подземный конвейер: манипулятор у входа', () => {
+  /** Тоннель из tunnel() плюс манипулятор над входом: берёт из (3,5) и кладёт на север, в сундук (3,3). */
+  function withInserter(): SimState {
+    const s = tunnel();
+    tick(s, [build('inserter', 3, 4, 0), build('chest', 3, 3)]);
+    electrify(s);
+    return s;
+  }
+
+  it('предмет на поверхности входа манипулятор берёт в сундук', () => {
+    const s = withInserter();
+    expect(at(s, 3, 5).underground).toBe('in');
+    expect(at(s, 7, 5).underground).toBe('out');
+    at(s, 3, 5).belt = [{ item: 'coal', pos: 0 }];
+    run(s, 100);
+    expect(at(s, 3, 3).slots).toEqual([{ item: 'coal', count: 1 }]);
+    expect(at(s, 3, 5).belt ?? []).toEqual([]);
+  });
+
+  it('предмет в тоннеле (pos > BELT_CELL) манипулятор не берёт и пока он под землёй', () => {
+    const s = withInserter();
+    at(s, 3, 5).belt = [{ item: 'coal', pos: BELT_CELL + 100 }];
+    for (let i = 0; i < 20; i++) {
+      tick(s, []);
+      const held = at(s, 3, 5).belt!;
+      expect(held).toHaveLength(1);
+      expect(held[0]!.pos).toBeGreaterThan(BELT_CELL);
+      expect(at(s, 3, 3).slots ?? []).toEqual([]);
+      expect(at(s, 3, 4).output).toBeNull();
+    }
   });
 });
 
