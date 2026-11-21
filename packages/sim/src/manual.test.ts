@@ -1,6 +1,6 @@
-import { INVENTORY_SLOTS } from '@factory/content';
+import { buildings, INVENTORY_SLOTS, items, recipes, technologies } from '@factory/content';
 import { describe, expect, it } from 'vitest';
-import { applyCommand, buildingAt, createState, hash, tick, type BuildingSlot, type Command, type PlacedBuilding, type SimState } from './index';
+import { applyCommand, buildingAt, canAccept, createState, hash, tick, type BuildingSlot, type Command, type PlacedBuilding, type SimState } from './index';
 import { contents } from './buildings';
 import { takeFromBuilding } from './manual';
 import { give, stocked } from './testKit';
@@ -126,24 +126,20 @@ describe('putIntoBuilding', () => {
     put(state, furnace, 'coal', 10);
     put(state, furnace, 'ironOre', 4);
     expect(furnace.fuel).toEqual({ item: 'coal', count: 10 });
-    // Вход печи вмещает inputBuffer порций рецепта; остальная руда остаётся в инвентаре.
-    expect(furnace.input).toEqual([{ item: 'ironOre', count: 2 }]);
-    expect(state.inventory).toEqual([{ item: 'ironOre', count: 2 }]);
+    expect(furnace.input).toEqual([{ item: 'ironOre', count: 4 }]);
+    expect(state.inventory).toEqual([]);
   });
 
-  it('кладёт только то, что принял бы манипулятор; лишнее остаётся в инвентаре', () => {
+  it('кладёт только то, что подходит рецепту; лишнее остаётся в инвентаре', () => {
     const { state, asm } = world();
     applyCommand(state, { type: 'setRecipe', building: asm.id, recipe: 'ironGear' });
     give(state, 'ironPlate', 10);
     give(state, 'copperPlate', 3);
     put(state, asm, 'ironPlate', 10);
     put(state, asm, 'copperPlate', 3);
-    // inputBuffer 2: вход сборщика вмещает две порции рецепта (2 пластины по 2).
-    expect(asm.input).toEqual([{ item: 'ironPlate', count: 4 }]);
-    expect(state.inventory).toEqual([
-      { item: 'ironPlate', count: 6 },
-      { item: 'copperPlate', count: 3 },
-    ]);
+    // Медная пластина не входит в рецепт ironGear; железные кладутся все (стопка 100 больше запаса).
+    expect(asm.input).toEqual([{ item: 'ironPlate', count: 10 }]);
+    expect(state.inventory).toEqual([{ item: 'copperPlate', count: 3 }]);
   });
 
   it('сборщик без рецепта ничего не принимает', () => {
@@ -190,6 +186,85 @@ describe('putIntoBuilding', () => {
     for (const count of [0, -3, 1.5, NaN]) put(state, chest, 'stone', count);
     applyCommand(state, { type: 'putIntoBuilding', building: 999, item: 'stone', count: 1 });
     expect(hash(state)).toBe(before);
+  });
+});
+
+describe('putIntoBuilding: до стопки, мимо запаса манипуляторов', () => {
+  const unit = technologies.logistics.unit as Record<string, number>;
+  const labWorld = (): { state: SimState; lab: PlacedBuilding } => {
+    const state = stocked(createState(1, { width: 20, height: 20 }));
+    tick(state, [build('lab', 0, 0), build('inserter', 0, 4)]);
+    applyCommand(state, { type: 'setResearch', tech: 'logistics' } as Command);
+    state.inventory = [];
+    return { state, lab: buildingAt(state, 0, 0)! };
+  };
+
+  it('лаборатория берёт руками пакеты активной технологии до стопки (сверх запаса манипулятора)', () => {
+    const { state, lab } = labWorld();
+    const stack = items.sciencePackRed.stack;
+    expect(stack).toBeGreaterThan((unit.sciencePackRed ?? 1) * 2);
+    give(state, 'sciencePackRed', stack + 5);
+    put(state, lab, 'sciencePackRed', stack + 5);
+    expect(lab.input).toEqual([{ item: 'sciencePackRed', count: stack }]);
+    expect(state.inventory).toEqual([{ item: 'sciencePackRed', count: 5 }]);
+  });
+
+  it('лаборатория руками не берёт пакеты не активной технологии', () => {
+    const { state, lab } = labWorld();
+    give(state, 'sciencePackGreen', 5);
+    const before = hash(state);
+    put(state, lab, 'sciencePackGreen', 5);
+    expect(hash(state)).toBe(before);
+  });
+
+  it('сборщик берёт руками ингредиенты рецепта до стопки (сверх inputBuffer)', () => {
+    const { state, asm } = world();
+    applyCommand(state, { type: 'setRecipe', building: asm.id, recipe: 'ironGear' });
+    const stack = items.ironPlate.stack;
+    expect(stack).toBeGreaterThan(recipes.ironGear!.in.ironPlate! * 2);
+    give(state, 'ironPlate', stack + 7);
+    give(state, 'copperPlate', 3);
+    put(state, asm, 'ironPlate', stack + 7);
+    put(state, asm, 'copperPlate', 3);
+    expect(asm.input).toEqual([{ item: 'ironPlate', count: stack }]);
+    expect(state.inventory).toEqual([
+      { item: 'ironPlate', count: 7 },
+      { item: 'copperPlate', count: 3 },
+    ]);
+  });
+
+  it('печь берёт руками руду до стопки', () => {
+    const { state, furnace } = world();
+    give(state, 'ironOre', items.ironOre.stack + 1);
+    put(state, furnace, 'ironOre', items.ironOre.stack + 1);
+    expect(furnace.input).toEqual([{ item: 'ironOre', count: items.ironOre.stack }]);
+    expect(state.inventory).toEqual([{ item: 'ironOre', count: 1 }]);
+  });
+
+  it('манипулятор по-прежнему не кладёт сверх запаса', () => {
+    const { state, asm } = world();
+    applyCommand(state, { type: 'setRecipe', building: asm.id, recipe: 'ironGear' });
+    const cap = recipes.ironGear!.in.ironPlate! * 2;
+    give(state, 'ironPlate', items.ironPlate.stack);
+    put(state, asm, 'ironPlate', items.ironPlate.stack);
+    expect(asm.input![0]!.count).toBeGreaterThan(cap);
+    expect(canAccept(asm, 'ironPlate', buildings)).toBe(false);
+    asm.input![0]!.count = cap - 1;
+    expect(canAccept(asm, 'ironPlate', buildings)).toBe(true);
+    asm.input![0]!.count = cap;
+    expect(canAccept(asm, 'ironPlate', buildings)).toBe(false);
+    expect(canAccept(asm, 'ironPlate', buildings, undefined, undefined, 'stack')).toBe(true);
+  });
+
+  it('лаборатория: манипулятор берёт пакет только до запаса, руки — до стопки', () => {
+    const { state, lab } = labWorld();
+    const need = unit.sciencePackRed!;
+    const args = [buildings, state.research.unlocked, state.research.active] as const;
+    (lab.input ??= []).push({ item: 'sciencePackRed', count: need * 2 });
+    expect(canAccept(lab, 'sciencePackRed', ...args)).toBe(false);
+    expect(canAccept(lab, 'sciencePackRed', ...args, 'stack')).toBe(true);
+    lab.input![0]!.count = items.sciencePackRed.stack;
+    expect(canAccept(lab, 'sciencePackRed', ...args, 'stack')).toBe(false);
   });
 });
 

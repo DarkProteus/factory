@@ -243,9 +243,9 @@ export function putCommand(b: PlacedBuilding, stack: ItemStack | null, defs: Def
   return { type: 'putIntoBuilding', building: b.id, item: stack.item, count: stack.count };
 }
 
-/** Примет ли здание предмет сейчас (для подсветки «не примет»). */
+/** Примет ли здание предмет при ручной перекладке (до стопки, как putIntoBuilding; для подсветки «не примет»). */
 export const acceptsItem = (b: PlacedBuilding, item: string, defs: Defs = contentBuildings, active?: string | null): boolean =>
-  canAccept(b, item, defs, undefined, active);
+  canAccept(b, item, defs, undefined, active, 'stack');
 
 /** Поместится ли всё содержимое здания в инвентарь: иначе смена рецепта запрещена. */
 export function fitsInInventory(inventory: readonly ItemStack[], b: PlacedBuilding, slotCount = INVENTORY_SLOTS): boolean {

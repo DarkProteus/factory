@@ -1,5 +1,5 @@
 import { BELT_CELL, BELT_GAP, pushToBelt } from './belt';
-import type { BuildingDefs, PlacedBuilding } from './buildings';
+import type { AcceptLimit, BuildingDefs, PlacedBuilding } from './buildings';
 import { crafterAccept, crafterCanAccept } from './crafter';
 import { fuelAccept, fuelCanAccept } from './fuel';
 import { add, canAdd, takeFirst } from './inventory';
@@ -9,6 +9,7 @@ import { labAccept, labCanAccept } from './lab';
  * Принимает ли здание предмет прямо сейчас. Бур и манипулятор не принимают ничего.
  * unlocked — открытые рецепты (state.research.unlocked): печь не берёт предмет без открытого рецепта; без параметра открыто всё.
  * active — активная технология (state.research.active): лаборатория берёт только её пакеты (и лишь до запаса в 2 единицы); без параметра не берёт ничего.
+ * limit — лимит запаса крафтера и лаборатории: `buffer` (по умолчанию, манипуляторы) или `stack` (до стопки, ручная перекладка).
  */
 export function canAccept(
   b: PlacedBuilding,
@@ -16,6 +17,7 @@ export function canAccept(
   defs: BuildingDefs,
   unlocked?: readonly string[],
   active?: string | null,
+  limit: AcceptLimit = 'buffer',
 ): boolean {
   const def = defs[b.type];
   if (!def) return false;
@@ -26,13 +28,13 @@ export function canAccept(
       return !last || last.pos >= BELT_GAP;
     }
     case 'crafter':
-      return crafterCanAccept(b, def, item, undefined, unlocked);
+      return crafterCanAccept(b, def, item, undefined, unlocked, limit);
     case 'container':
       return canAdd(b.slots ?? [], def.slots ?? 0, item);
     case 'generator':
       return fuelCanAccept(b, def, item);
     case 'lab':
-      return labCanAccept(b, item, active);
+      return labCanAccept(b, item, active, limit);
     default:
       return false;
   }

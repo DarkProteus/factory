@@ -51,6 +51,12 @@ export interface ItemStack {
 }
 
 /** Таблица определений зданий; по умолчанию берётся из content. */
+/**
+ * Лимит приёма предмета ячейкой здания: `buffer` — запас манипуляторов (inputBuffer крафтера, LAB_BUFFER_UNITS лаборатории),
+ * `stack` — до стопки предмета (ручная перекладка игрока, manual.ts).
+ */
+export type AcceptLimit = 'buffer' | 'stack';
+
 export type BuildingDefs = Readonly<Record<string, BuildingDef>>;
 
 interface BuildingsState {

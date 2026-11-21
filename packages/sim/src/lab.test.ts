@@ -1,4 +1,4 @@
-import { technologies } from '@factory/content';
+import { items, technologies } from '@factory/content';
 import { describe, expect, it } from 'vitest';
 import { applyCommand, buildingAt, canAccept, createState, tick, type Command, type PlacedBuilding, type SimState } from './index';
 import { buildings as defs } from '@factory/content';
@@ -125,11 +125,22 @@ describe('лаборатория: приём пакетов', () => {
     expect(chest.slots.find((s) => s.item === 'sciencePackGreen')?.count).toBe(5);
   });
 
-  it('ячейка принимает пакеты, пока их меньше, чем нужно на 2 единицы активной технологии', () => {
+  it('манипулятор берёт пакеты, пока их меньше, чем нужно на 2 единицы активной технологии', () => {
+    const { state, labs } = world();
+    set(state, 'logistics');
+    const lab = labs[0]!;
+    const cap = 2 * LOGISTICS.unit.sciencePackRed!;
+    stock(lab, 'sciencePackRed', cap - 1);
+    expect(open(state)).toBe(true);
+    stock(lab, 'sciencePackRed', 1);
+    expect(open(state)).toBe(false);
+  });
+
+  it('руки кладут пакеты до стопки, а не до запаса в 2 единицы (TASK-67)', () => {
     const { state, labs } = world();
     set(state, 'logistics');
     put(state, labs[0]!, 'sciencePackRed', 250);
-    expect(cell(labs[0]!, 'sciencePackRed')).toBe(2 * LOGISTICS.unit.sciencePackRed!);
+    expect(cell(labs[0]!, 'sciencePackRed')).toBe(items.sciencePackRed.stack);
   });
 
   it('лимит считается по unit технологии, а не по одному пакету', () => {
@@ -138,17 +149,21 @@ describe('лаборатория: приём пакетов', () => {
     state.research.done.push('scienceGreen');
     set(state, 'fastInserter');
     const lab = labs[0]!;
-    put(state, lab, 'sciencePackRed', 10);
-    put(state, lab, 'sciencePackGreen', 10);
-    expect(cell(lab, 'sciencePackRed')).toBe(2 * technologies.fastInserter.unit.sciencePackRed!);
-    expect(cell(lab, 'sciencePackGreen')).toBe(2 * technologies.fastInserter.unit.sciencePackGreen!);
+    const args = [defs, state.research.unlocked, state.research.active] as const;
+    const unit = technologies.fastInserter.unit;
+    stock(lab, 'sciencePackRed', 2 * unit.sciencePackRed! - 1);
+    stock(lab, 'sciencePackGreen', 2 * unit.sciencePackGreen!);
+    expect(canAccept(lab, 'sciencePackRed', ...args)).toBe(true);
+    expect(canAccept(lab, 'sciencePackGreen', ...args)).toBe(false);
+    stock(lab, 'sciencePackRed', 1);
+    expect(canAccept(lab, 'sciencePackRed', ...args)).toBe(false);
   });
 
   it('пакеты сверх лимита из старого сейва не выбрасываются, но новые не принимаются', () => {
     const { state, labs } = world();
     set(state, 'logistics');
     stock(labs[0]!, 'sciencePackRed', 50);
-    put(state, labs[0]!, 'sciencePackRed', 5);
+    expect(open(state)).toBe(false);
     expect(cell(labs[0]!, 'sciencePackRed')).toBe(50);
     ticks(state, 3);
     expect(cell(labs[0]!, 'sciencePackRed')).toBe(49);
