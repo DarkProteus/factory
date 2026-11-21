@@ -1,7 +1,7 @@
 ---
 id: TASK-46
 title: Столб соединяется только с ближайшими столбами
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-21T00:09:00Z'
 updated_date: '2026-11-21T12:02:00Z'
