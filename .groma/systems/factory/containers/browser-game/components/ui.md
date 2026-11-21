@@ -99,6 +99,13 @@ groma:
       file: packages/app/src/buildingUi.testkit.ts
     - scanner: typescript
       file: packages/app/src/input.testkit.ts
+    - scanner: typescript
+      file: e2e/fixtures.ts
+      symbol: test
+    - scanner: typescript
+      file: e2e/game.ts
+    - scanner: typescript
+      file: playwright.config.ts
   technology: React
 description: Превращает ввод игрока в команды для ядра
 ---
