@@ -1,13 +1,16 @@
 ---
 id: TASK-54
 title: Раскладка окна исследований в style-ui.md
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-11-21T12:01:00Z'
+updated_date: '2026-11-21T12:06:00Z'
 labels:
   - m3
 dependencies: []
 references:
+  - docs/style-ui.md
+modified_files:
   - docs/style-ui.md
 type: docs
 ordinal: 60000
@@ -21,5 +24,5 @@ ordinal: 60000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 В style-ui.md описаны окно, карточка, полоска и уведомление
+- [x] #1 В style-ui.md описаны окно, карточка, полоска и уведомление
 <!-- AC:END -->
