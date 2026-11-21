@@ -10,9 +10,11 @@
     "lint": "eslint .",
     "typecheck": "pnpm -r typecheck",
     "build": "pnpm typecheck && pnpm --filter @factory/app build",
-    "dev": "pnpm --filter @factory/app dev"
+    "dev": "pnpm --filter @factory/app dev",
+    "e2e": "playwright test"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.1",
     "@stryker-mutator/core": "^10.1.1",
     "@stryker-mutator/vitest-runner": "^10.1.1",
     "eslint": "^10.15.0",
