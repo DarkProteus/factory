@@ -3,3 +3,6 @@ dist/
 *.tsbuildinfo
 .playwright-mcp/
 .claude/worktrees/
+.stryker-tmp/
+.stryker-cache/
+/reports/
