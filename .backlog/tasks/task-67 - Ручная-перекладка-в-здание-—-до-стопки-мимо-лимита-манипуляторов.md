@@ -1,9 +1,10 @@
 ---
 id: TASK-67
 title: Ручная перекладка в здание — до стопки, мимо лимита манипуляторов
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-21T13:36:00Z'
+updated_date: '2026-11-21T14:35:00Z'
 labels:
   - m3
 dependencies: []

@@ -1,9 +1,10 @@
 ---
 id: TASK-65
 title: Тест плавки падает по таймауту под нагрузкой
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-21T13:08:00Z'
+updated_date: '2026-11-21T14:35:00Z'
 labels:
   - m3
 dependencies: []
