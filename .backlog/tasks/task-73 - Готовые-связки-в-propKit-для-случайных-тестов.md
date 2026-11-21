@@ -4,13 +4,17 @@ title: Готовые связки в propKit для случайных тест
 status: In Progress
 assignee: []
 created_date: '2026-11-21T17:17:00Z'
-updated_date: '2026-11-21T18:19:00Z'
+updated_date: '2026-11-21T18:39:00Z'
 labels:
   - quality
 milestone: m-7
 dependencies: []
 references:
   - sim
+modified_files:
+  - packages/sim/src/propKit.ts
+  - packages/sim/src/propBundles.ts
+  - packages/sim/src/invariants.bundles.test.ts
 type: chore
 ordinal: 79000
 ---
@@ -23,8 +27,8 @@ ordinal: 79000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Генератор мира из связок в propKit, связки задаются данными
-- [ ] #2 Свойство сохранения предметов проходит через каждую связку (тест считает, что предметы в связке реально двигались)
-- [ ] #3 Детерминизм по хешу на мирах из связок
-- [ ] #4 pnpm test зелёный, рост времени тестов не больше 10 с
+- [x] #1 Генератор мира из связок в propKit, связки задаются данными
+- [x] #2 Свойство сохранения предметов проходит через каждую связку (тест считает, что предметы в связке реально двигались)
+- [x] #3 Детерминизм по хешу на мирах из связок
+- [x] #4 pnpm test зелёный, рост времени тестов не больше 10 с
 <!-- AC:END -->
