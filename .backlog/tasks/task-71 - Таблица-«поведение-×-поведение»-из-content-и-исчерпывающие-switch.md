@@ -1,10 +1,10 @@
 ---
 id: TASK-71
 title: Таблица «поведение × поведение» из content и исчерпывающие switch
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-21T17:17:00Z'
-updated_date: '2026-11-21T17:25:00Z'
+updated_date: '2026-11-21T17:32:00Z'
 labels:
   - quality
 milestone: m-7
