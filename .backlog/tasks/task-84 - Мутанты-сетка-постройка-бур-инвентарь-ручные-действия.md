@@ -1,10 +1,10 @@
 ---
 id: TASK-84
 title: 'Мутанты: сетка, постройка, бур, инвентарь, ручные действия'
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-11-21T17:55:00Z'
-updated_date: '2026-11-21T19:19:00Z'
+updated_date: '2026-11-21T19:21:00Z'
 labels:
   - quality
 milestone: m-7
