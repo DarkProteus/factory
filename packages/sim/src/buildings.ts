@@ -2,6 +2,7 @@ import { buildings as contentBuildings, INVENTORY_SLOTS, recipes as contentRecip
 import type { BeltItem } from './belt';
 import { cellIndex, inBounds, type GameMap } from './grid';
 import { add, takeFirst } from './inventory';
+import { insideSpan, tunnelItems, undergroundPlacement } from './underground';
 
 /** Направление: 0 — N, 1 — E, 2 — S, 3 — W. */
 export type Dir = 0 | 1 | 2 | 3;
@@ -34,6 +35,8 @@ export interface PlacedBuilding {
   draw?: true;
   /** Накопленная удовлетворённость сети, 1..POWER_SCALE-1; при нуле поле удаляется (см. power.ts). */
   charge?: number;
+  /** Роль подземного конвейера: вход или выход тоннеля; задаётся при постановке (см. underground.ts). */
+  underground?: 'in' | 'out';
 }
 
 /** Стопка одного предмета. */
@@ -91,6 +94,7 @@ export function canPlace(
       if (state.map.occupancy[cellIndex(state.map, x + dx, y + dy)] !== 0) return false;
     }
   }
+  if (defs[type]!.behavior === 'underground' && insideSpan(state, type, x, y, dir, defs)) return false;
   return true;
 }
 
@@ -124,6 +128,7 @@ export function placeBuilding(
   if (takeFirst(state.inventory, (item) => item === type) === null) return;
   const size = defs[type]!.size;
   const building: PlacedBuilding = { id: state.nextId, type, x, y, dir, progress: 0, output: null };
+  if (defs[type]!.behavior === 'underground') building.underground = undergroundPlacement(state, type, x, y, dir, defs).role;
   state.nextId += 1;
   state.buildings[building.id] = building;
   setOccupancy(state.map, building, size, building.id);
@@ -170,9 +175,13 @@ export function demolishAt(
   const building = buildingAt(state, x, y);
   if (!building) return;
   const trial = state.inventory.map((s) => ({ ...s }));
+  // Снос выхода тоннеля забирает и предметы под землёй из ленты входа.
+  const tunnel = tunnelItems(state, building, defs);
   const stacks = [...contents(building), { item: building.type, count: 1 }];
+  for (const it of tunnel?.items ?? []) stacks.push({ item: it.item, count: 1 });
   if (!addAll(trial, slotCount, stacks)) return;
   state.inventory = trial;
+  if (tunnel) tunnel.from.belt = tunnel.from.belt!.filter((it) => !tunnel.items.includes(it));
   setOccupancy(state.map, building, defs[building.type]!.size, 0);
   delete state.buildings[building.id];
   bumpTopology(state);

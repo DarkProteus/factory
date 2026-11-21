@@ -3,6 +3,7 @@ import { buildingAt, topologyVersion, type BuildingDefs, type Dir, type PlacedBu
 import { DX, DY, isBelt, moveBelt } from './belt';
 import { feedsSplitter, runSplitter, splitterOutputs } from './splitter';
 import type { SimState } from './state';
+import { acceptsBeltFrom, isUnderground, laneLength, partnerOf } from './underground';
 
 /** Шаг обхода: конвейер (target) или разделитель (outs). */
 interface Step {
@@ -14,6 +15,8 @@ interface Step {
   intoSplitter: boolean;
   /** Разделитель: выходы вперёд, влево, вправо; у конвейера null. */
   outs: (PlacedBuilding | null)[] | null;
+  /** Длина ленты: у входа подземного с парой — вместе с тоннелем. */
+  length: number;
 }
 
 /** Сегменты, выведенные из зданий: порядок обхода с готовыми целями (TASK-15, TASK-29). */
@@ -27,11 +30,16 @@ const segmentsCache = new WeakMap<SimState, Segments>();
 
 const isSplitter = (b: PlacedBuilding, defs: BuildingDefs): boolean => defs[b.type]?.behavior === 'splitter';
 
-/** Куда конвейер передаёт предметы: конвейер впереди, не смотрящий навстречу, или разделитель, к которому лента подходит сзади. */
+/**
+ * Куда конвейер передаёт предметы: конвейер впереди, не смотрящий навстречу, разделитель или вход
+ * подземного, к которым лента подходит сзади. Вход подземного отдаёт выходу своей пары.
+ */
 function targetOf(state: SimState, b: PlacedBuilding, defs: BuildingDefs): PlacedBuilding | null {
+  if (b.underground === 'in' && isUnderground(b, defs)) return partnerOf(state, b, defs);
   const next = buildingAt(state, b.x + DX[b.dir], b.y + DY[b.dir]);
   if (next === null || next === b) return null;
   if (isSplitter(next, defs)) return feedsSplitter(b, next) ? next : null;
+  if (isUnderground(next, defs)) return acceptsBeltFrom(next, b) ? next : null;
   if (!isBelt(next, defs)) return null;
   return next.dir === (((b.dir + 2) % 4) as Dir) ? null : next;
 }
@@ -70,7 +78,7 @@ function segments(state: SimState, defs: BuildingDefs): Step[] {
   const version = topologyVersion(state);
   const cached = segmentsCache.get(state);
   if (cached && cached.version === version && cached.defs === defs) return cached.steps;
-  const nodes = Object.values(state.buildings).filter((b) => isBelt(b, defs) || isSplitter(b, defs));
+  const nodes = Object.values(state.buildings).filter((b) => isBelt(b, defs) || isSplitter(b, defs) || isUnderground(b, defs));
   const targets = new Map<number, PlacedBuilding | null>();
   const outs = new Map<number, (PlacedBuilding | null)[]>();
   const next = new Map<number, PlacedBuilding[]>();
@@ -87,7 +95,8 @@ function segments(state: SimState, defs: BuildingDefs): Step[] {
   }
   const steps = order(nodes, next).map((b): Step => {
     const target = targets.get(b.id) ?? null;
-    return { b, def: defs[b.type]!, target, intoSplitter: target !== null && isSplitter(target, defs), outs: outs.get(b.id) ?? null };
+    const intoSplitter = target !== null && isSplitter(target, defs);
+    return { b, def: defs[b.type]!, target, intoSplitter, outs: outs.get(b.id) ?? null, length: laneLength(state, b, defs) };
   });
   segmentsCache.set(state, { version, defs, steps });
   return steps;
@@ -97,6 +106,6 @@ function segments(state: SimState, defs: BuildingDefs): Step[] {
 export function runBelts(state: SimState, defs: BuildingDefs): void {
   for (const s of segments(state, defs)) {
     if (s.outs) runSplitter(s.b, s.outs);
-    else moveBelt(s.b, s.def, s.target, s.intoSplitter);
+    else moveBelt(s.b, s.def, s.target, s.intoSplitter, s.length);
   }
 }
