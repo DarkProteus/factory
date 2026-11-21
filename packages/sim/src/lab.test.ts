@@ -21,6 +21,12 @@ const put = (state: SimState, lab: PlacedBuilding, item: string, count: number):
   give(state, item, count);
   applyCommand(state, { type: 'putIntoBuilding', building: lab.id, item, count });
 };
+/** Кладёт пакеты прямо в ячейку, мимо лимита приёма (для тестов, которым нужен запас, например пакеты из старого сейва). */
+const stock = (lab: PlacedBuilding, item: string, count: number): void => {
+  const s = lab.input?.find((x) => x.item === item);
+  if (s) s.count += count;
+  else (lab.input ??= []).push({ item, count });
+};
 const cell = (lab: PlacedBuilding, item: string): number => lab.input?.find((s) => s.item === item)?.count ?? 0;
 const ticks = (state: SimState, n: number): void => {
   for (let i = 0; i < n; i++) tick(state, []);
@@ -42,7 +48,7 @@ describe('лаборатория: исследование', () => {
   it('одна лаборатория проходит технологию за units × unitTicks тиков и тратит units пакетов', () => {
     const { state, labs } = world();
     set(state, 'logistics');
-    put(state, labs[0]!, 'sciencePackRed', 12);
+    stock(labs[0]!, 'sciencePackRed', 12);
     const t = ticksToFinish(state, 'logistics', TOTAL + 50);
     expect(Math.abs(t - TOTAL)).toBeLessThanOrEqual(LOGISTICS.unitTicks);
     expect(state.research.unlocked).toContain('splitter');
@@ -55,8 +61,8 @@ describe('лаборатория: исследование', () => {
   it('две лаборатории вдвое быстрее; пакетов уходит те же units', () => {
     const { state, labs } = world(2);
     set(state, 'logistics');
-    put(state, labs[0]!, 'sciencePackRed', 10);
-    put(state, labs[1]!, 'sciencePackRed', 10);
+    stock(labs[0]!, 'sciencePackRed', 10);
+    stock(labs[1]!, 'sciencePackRed', 10);
     const t = ticksToFinish(state, 'logistics', TOTAL);
     expect(Math.abs(t - TOTAL / 2)).toBeLessThanOrEqual(LOGISTICS.unitTicks);
     ticks(state, 2);
@@ -66,7 +72,7 @@ describe('лаборатория: исследование', () => {
   it('прогресс единицы умножается на удовлетворённость сети', () => {
     const { state, labs } = world();
     set(state, 'logistics');
-    put(state, labs[0]!, 'sciencePackRed', 3);
+    stock(labs[0]!, 'sciencePackRed', 3);
     ticks(state, 600);
     const full = state.research.progress.logistics!;
     expect(full.units * LOGISTICS.unitTicks + full.ticks).toBeGreaterThan(500);
@@ -80,7 +86,7 @@ describe('лаборатория: исследование', () => {
   it('пакеты единицы списываются при её старте', () => {
     const { state, labs } = world();
     set(state, 'logistics');
-    put(state, labs[0]!, 'sciencePackRed', 5);
+    stock(labs[0]!, 'sciencePackRed', 5);
     ticks(state, 3);
     expect(cell(labs[0]!, 'sciencePackRed')).toBe(4);
     expect(labs[0]!.unit).toBe('logistics');
@@ -113,15 +119,66 @@ describe('лаборатория: приём пакетов', () => {
     expect(buildingAt(state, 1, 3)?.type).toBe('inserter');
     ticks(state, 600);
     expect(cell(lab, 'sciencePackGreen')).toBe(0);
-    expect(cell(lab, 'sciencePackRed') + (lab.unit === undefined ? 0 : 1)).toBe(5);
+    // Красные пакеты берутся только до запаса в 2 единицы (+ идущая единица), остальные остаются в сундуке.
+    expect(cell(lab, 'sciencePackRed') + (lab.unit === undefined ? 0 : 1)).toBe(3);
+    expect(chest.slots.find((s) => s.item === 'sciencePackRed')?.count).toBe(2);
     expect(chest.slots.find((s) => s.item === 'sciencePackGreen')?.count).toBe(5);
   });
 
-  it('ячейка вмещает одну стопку', () => {
+  it('ячейка принимает пакеты, пока их меньше, чем нужно на 2 единицы активной технологии', () => {
     const { state, labs } = world();
     set(state, 'logistics');
     put(state, labs[0]!, 'sciencePackRed', 250);
-    expect(cell(labs[0]!, 'sciencePackRed')).toBe(200);
+    expect(cell(labs[0]!, 'sciencePackRed')).toBe(2 * LOGISTICS.unit.sciencePackRed!);
+  });
+
+  it('лимит считается по unit технологии, а не по одному пакету', () => {
+    const { state, labs } = world();
+    // Технология с unit из двух видов: ячейки красных и зелёных набираются независимо до 2 × unit.
+    state.research.done.push('scienceGreen');
+    set(state, 'fastInserter');
+    const lab = labs[0]!;
+    put(state, lab, 'sciencePackRed', 10);
+    put(state, lab, 'sciencePackGreen', 10);
+    expect(cell(lab, 'sciencePackRed')).toBe(2 * technologies.fastInserter.unit.sciencePackRed!);
+    expect(cell(lab, 'sciencePackGreen')).toBe(2 * technologies.fastInserter.unit.sciencePackGreen!);
+  });
+
+  it('пакеты сверх лимита из старого сейва не выбрасываются, но новые не принимаются', () => {
+    const { state, labs } = world();
+    set(state, 'logistics');
+    stock(labs[0]!, 'sciencePackRed', 50);
+    put(state, labs[0]!, 'sciencePackRed', 5);
+    expect(cell(labs[0]!, 'sciencePackRed')).toBe(50);
+    ticks(state, 3);
+    expect(cell(labs[0]!, 'sciencePackRed')).toBe(49);
+  });
+
+  it('две лаборатории, кормимые манипуляторами из одного сундука, исследуют примерно поровну', () => {
+    const state = stocked(createState(1, { width: 24, height: 16 }));
+    // Лаборатория A (0..2), манипулятор (3,2) смотрит на запад, сундук (4,2), манипулятор (5,2) смотрит на восток, лаборатория B (6..8).
+    tick(state, [build('lab', 0, 0), build('lab', 6, 0), build('chest', 4, 2), build('inserter', 3, 2, 3), build('inserter', 5, 2, 1)]);
+    const [a, b] = [buildingAt(state, 0, 0)!, buildingAt(state, 6, 0)!];
+    const chest = buildingAt(state, 4, 2)!;
+    expect(chest.type).toBe('chest');
+    expect(buildingAt(state, 3, 2)?.type).toBe('inserter');
+    expect(buildingAt(state, 5, 2)?.type).toBe('inserter');
+    chest.slots = [{ item: 'sciencePackRed', count: 200 }];
+    electrify(state);
+    set(state, 'scienceGreen');
+    let workA = 0;
+    let workB = 0;
+    for (let t = 0; t < 3000; t++) {
+      tick(state, []);
+      if (a.draw) workA += 1;
+      if (b.draw) workB += 1;
+    }
+    expect(workA).toBeGreaterThan(2000);
+    expect(workB).toBeGreaterThan(2000);
+    expect(Math.min(workA, workB) / Math.max(workA, workB)).toBeGreaterThan(0.8);
+    // Лаборатории не копят запас: в ячейке не больше 2 единиц, остальное осталось в сундуке.
+    expect(cell(a, 'sciencePackRed')).toBeLessThanOrEqual(2);
+    expect(cell(b, 'sciencePackRed')).toBeLessThanOrEqual(2);
   });
 });
 
@@ -143,7 +200,7 @@ describe('лаборатория: смена технологии и снос', 
   it('смена технологии посреди единицы возвращает её пакеты в ячейки', () => {
     const { state, labs } = world();
     set(state, 'logistics');
-    put(state, labs[0]!, 'sciencePackRed', 5);
+    stock(labs[0]!, 'sciencePackRed', 5);
     ticks(state, 100);
     expect(cell(labs[0]!, 'sciencePackRed')).toBe(4);
     set(state, 'scienceGreen');
@@ -156,8 +213,8 @@ describe('лаборатория: смена технологии и снос', 
   it('завершение технологии возвращает пакеты незаконченных единиц других лабораторий', () => {
     const { state, labs } = world(2);
     set(state, 'logistics');
-    put(state, labs[0]!, 'sciencePackRed', 10);
-    put(state, labs[1]!, 'sciencePackRed', 10);
+    stock(labs[0]!, 'sciencePackRed', 10);
+    stock(labs[1]!, 'sciencePackRed', 10);
     // Одну единицу до конца технологии: обе лаборатории в середине последних единиц.
     state.research.progress.logistics = { units: LOGISTICS.units - 1, ticks: 0 };
     ticks(state, 301);
@@ -170,7 +227,7 @@ describe('лаборатория: смена технологии и снос', 
   it('снос возвращает ячейки и пакеты идущей единицы в инвентарь', () => {
     const { state, labs } = world();
     set(state, 'logistics');
-    put(state, labs[0]!, 'sciencePackRed', 5);
+    stock(labs[0]!, 'sciencePackRed', 5);
     ticks(state, 100);
     const before = state.inventory.find((s) => s.item === 'sciencePackRed')?.count ?? 0;
     applyCommand(state, { type: 'demolish', x: 0, y: 0 } as Command);
