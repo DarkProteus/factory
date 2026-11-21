@@ -1,61 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { buildings, items, recipes } from './index';
-import type { BuildingDef, BuildingId, ItemDef, ItemId, RecipeDef } from './index';
+import { buildings, items, recipes, technologies } from './index';
+import type { BuildingDef, BuildingId, ItemId, RecipeDef } from './index';
+import { validateContent, type ContentTables } from './validateContent.testkit';
 
-interface ContentTables {
-  items: Record<string, ItemDef>;
-  recipes: Record<string, RecipeDef>;
-  buildings: Record<string, BuildingDef>;
-}
-
-// Валидатор ссылок. Живёт только в тесте: в самом пакете content логики нет.
-// Возвращает список человекочитаемых ошибок, пустой список значит «всё в порядке».
-function validateContent(tables: ContentTables): string[] {
-  const errors: string[] = [];
-  for (const [id, recipe] of Object.entries(tables.recipes)) {
-    for (const side of ['in', 'out'] as const) {
-      for (const itemId of Object.keys(recipe[side])) {
-        if (!(itemId in tables.items)) {
-          errors.push(`рецепт ${id}: предмет ${itemId} (${side}) не существует`);
-        }
-      }
-    }
-    if (!(recipe.madeIn in tables.buildings)) {
-      errors.push(`рецепт ${id}: здание ${recipe.madeIn} (madeIn) не существует`);
-    } else if (tables.buildings[recipe.madeIn]!.behavior === 'crafter' && Object.keys(recipe.out).length !== 1) {
-      errors.push(`рецепт ${id}: крафтер ${recipe.madeIn} держит один выходной предмет`);
-    } else if (tables.buildings[recipe.madeIn]!.recipeMode === 'byInput' && Object.keys(recipe.in).length !== 1) {
-      errors.push(`рецепт ${id}: печь ${recipe.madeIn} выбирает рецепт по входу, вход должен быть один`);
-    }
-  }
-  const assemblerOutputs = new Set(
-    Object.values(tables.recipes)
-      .filter((r) => r.madeIn === 'assembler')
-      .flatMap((r) => Object.keys(r.out)),
-  );
-  for (const id of Object.keys(tables.buildings)) {
-    if (!(id in tables.items)) errors.push(`здание ${id}: нет предмета-здания ${id}`);
-    else if (!assemblerOutputs.has(id)) errors.push(`предмет-здание ${id}: нет рецепта madeIn assembler`);
-  }
-  for (const [id, building] of Object.entries(tables.buildings)) {
-    if ((building.energy?.kind === 'fuel' || building.energy?.kind === 'generator') && !building.fuelSlot) {
-      errors.push(`здание ${id}: питается топливом, но без fuelSlot`);
-    }
-    if (building.ammo !== undefined && !(building.ammo in tables.items)) {
-      errors.push(`здание ${id}: предмет ${building.ammo} (ammo) не существует`);
-    }
-  }
-  return errors;
-}
-
-const real: ContentTables = { items, recipes, buildings };
+const real: ContentTables = { items, recipes, buildings, technologies };
 
 describe('настоящий контент', () => {
   it('содержит предметы и рецепты из таблиц design.md', () => {
     for (const id of ['ironOre', 'copperOre', 'coal', 'stone', 'ironPlate', 'copperPlate', 'stoneBrick', 'ironGear', 'copperCable', 'circuit', 'ammo']) {
       expect(items).toHaveProperty(id);
     }
-    expect(Object.keys(recipes)).toHaveLength(3 + 4 + 9);
+    // 16 рецептов M2 и 9 рецептов M3 (см. m3.test.ts).
+    expect(Object.keys(recipes)).toHaveLength(16 + 9);
   });
 
   it('рецепт патронов: 4 ironPlate', () => {
@@ -91,9 +47,9 @@ describe('настоящий контент', () => {
     for (const id of ['belt', 'splitter', 'chest', 'pole'] as const) expect(buildings[id]).not.toHaveProperty('energy');
   });
 
-  it('предмет-здание: тот же id, stack 50 (belt и pole — 100); уголь даёт 4000 кДж', () => {
+  it('предмет-здание: тот же id, stack 50 (belt, fastBelt и pole — 100); уголь даёт 4000 кДж', () => {
     for (const id of Object.keys(buildings) as BuildingId[]) {
-      expect(items[id].stack).toBe(id === 'belt' || id === 'pole' ? 100 : 50);
+      expect(items[id].stack).toBe(id === 'belt' || id === 'fastBelt' || id === 'pole' ? 100 : 50);
     }
     expect(items.coal.fuel).toBe(4000);
   });
@@ -209,6 +165,34 @@ describe('валидатор ссылок: здания и топливо', () =
 
 // Типовые проверки. vitest типы не проверяет, их ловит tsc (pnpm typecheck и
 // pnpm build): лишний @ts-expect-error там тоже станет ошибкой.
+describe('валидатор ссылок: технологии', () => {
+  const tech = { name: 'Тест', unit: { sciencePackRed: 1 }, units: 1, unitTicks: 1, requires: [], unlocks: [] };
+  const withTech = (extra: Record<string, unknown>): string[] =>
+    validateContent({ ...real, technologies: { ...technologies, ...extra } as ContentTables['technologies'] });
+
+  it('ловит предмет в unit, которого нет', () => {
+    expect(withTech({ bad: { ...tech, unit: { ghost: 1 } } })).toEqual(['технология bad: предмет ghost (unit) не существует']);
+  });
+
+  it('ловит requires на несуществующую технологию', () => {
+    expect(withTech({ bad: { ...tech, requires: ['ghost'] } })).toEqual(['технология bad: требование ghost (requires) не существует']);
+  });
+
+  it('ловит unlocks на несуществующий рецепт', () => {
+    expect(withTech({ bad: { ...tech, unlocks: ['ghost'] } })).toEqual(['технология bad: рецепт ghost (unlocks) не существует']);
+  });
+
+  it('ловит цикл в requires', () => {
+    const errors = withTech({ a: { ...tech, requires: ['b'] }, b: { ...tech, requires: ['a'] } });
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toMatch(/цикл в requires/);
+  });
+
+  it('ловит технологию, требующую саму себя', () => {
+    expect(withTech({ a: { ...tech, requires: ['a'] } })).toEqual(['технологии: цикл в requires: a -> a']);
+  });
+});
+
 describe('строгие типы ключей', () => {
   type Recipe = RecipeDef<ItemId, BuildingId>;
 
