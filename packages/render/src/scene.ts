@@ -171,8 +171,6 @@ export class Scene {
       drawItem(this.items, b.output.item, ...rot(...armTip(ctx.armAngle(b, def))), 10, lod);
     } else if (def.behavior === 'container' && b.slots?.[0]) {
       drawItem(this.items, b.slots[0].item, cx, cy, 10, lod);
-    } else if (def.behavior === 'splitter' && b.output) {
-      drawItem(this.items, b.output.item, cx, cy, 8, lod);
     } else if (def.behavior === 'lab') {
       // Ячейки пакетов вдоль заднего края: иконка 6 px в непустой.
       PACK_KINDS.forEach((kind, k) => {
