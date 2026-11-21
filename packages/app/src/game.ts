@@ -16,10 +16,12 @@ import {
   selectBuilding,
   selectDemolish,
   selectMine,
+  visibleBuildingIds,
   type Cell,
   type ToolState,
 } from './input';
 import { applyWindowKey, windowTarget } from './buildingUi';
+import { noticeAlpha, pickNotice, type Notice } from './techUi';
 import { netSummaryAt, type NetSummary } from './powerSummary';
 import { clearSave, loadGame, saveGame, shouldAutosave, type KeyValueStorage } from './persist';
 
@@ -63,8 +65,8 @@ export interface Game {
   newGame(): void;
   /** Иконка здания 24 px как data URL. */
   icon(id: string): string;
-  /** Иконка предмета 24 px как data URL (та же отрисовка, что на карте). */
-  itemIcon(id: string): string;
+  /** Иконка предмета как data URL, по умолчанию 24 px (та же отрисовка, что на карте). */
+  itemIcon(id: string, size?: number): string;
   /** Команда игрока: выполнится на ближайшем тике. */
   command(command: Command): void;
   /** Инвентарь и очередь ручного крафта; только для чтения, массивы меняются на тиках. */
@@ -75,6 +77,11 @@ export interface Game {
   /** Окно инвентаря (клавиша E). */
   isInventoryOpen(): boolean;
   setInventoryOpen(open: boolean): void;
+  /** Окно исследований (клавиша T); взаимоисключающее с инвентарём и окном здания. */
+  isResearchOpen(): boolean;
+  setResearchOpen(open: boolean): void;
+  /** Уведомление «Изучено»: технология и прозрачность 0..1; null, когда его нет или оно ушло. */
+  getNotice(): { tech: string; alpha: number } | null;
   /** Состояние sim только для чтения: окно здания перечитывает его каждый кадр. */
   getState(): Readonly<SimState>;
   /** id здания с открытым окном или null; окно здания и окно инвентаря не открыты вместе. */
@@ -106,6 +113,9 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
   const listeners = new Set<() => void>();
   let tools: ToolState = { tool: NO_TOOL, dir: 0 };
   let inventoryOpen = false;
+  let researchOpen = false;
+  /** Последнее уведомление об изученной технологии; события sim живут один тик, поэтому собираем после каждого. */
+  let notice: Notice | null = null;
   let openBuilding: number | null = null;
   /** Положение курсора в px канваса; null, если курсор вне канваса. */
   let pointer: { x: number; y: number } | null = null;
@@ -136,13 +146,15 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
 
   const owned = (id: string) => itemCount(state.inventory, id);
   /** Окна взаимоисключающие: открытие одного закрывает другое. */
-  const setWindows = (inventory: boolean, building: number | null) => {
-    if (inventory === inventoryOpen && building === openBuilding) return;
+  const setWindows = (inventory: boolean, building: number | null, research = false) => {
+    if (inventory === inventoryOpen && building === openBuilding && research === researchOpen) return;
     inventoryOpen = inventory;
     openBuilding = building;
+    researchOpen = research;
     listeners.forEach((l) => l());
   };
-  const setInventoryOpen = (open: boolean) => setWindows(open, open ? null : openBuilding);
+  const setInventoryOpen = (open: boolean) => setWindows(open, open ? null : openBuilding, open ? false : researchOpen);
+  const setResearchOpen = (open: boolean) => setWindows(open ? false : inventoryOpen, open ? null : openBuilding, open);
 
   const cellUnderPointer = (): Cell | null => {
     if (!pointer) return null;
@@ -172,11 +184,12 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
   const onKey = (e: KeyboardEvent) => {
     if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-    // Esc сначала закрывает окно (инвентаря или здания), инструмент при этом остаётся.
-    const closing = e.code === 'Escape' && (inventoryOpen || openBuilding !== null);
-    const next = applyWindowKey({ inventory: inventoryOpen, building: openBuilding }, e.code);
-    setWindows(next.inventory, next.building);
-    if (!closing) setTools(applyKey(tools, e.code, undefined, owned));
+    // Esc сначала закрывает окно (инвентаря, исследований или здания), инструмент при этом остаётся.
+    const closing = e.code === 'Escape' && (inventoryOpen || researchOpen || openBuilding !== null);
+    const next = applyWindowKey({ inventory: inventoryOpen, research: researchOpen, building: openBuilding }, e.code);
+    setWindows(next.inventory, next.building, next.research);
+    // Цифры выбирают среди видимых кнопок панели стройки.
+    if (!closing) setTools(applyKey(tools, e.code, visibleBuildingIds(state), owned));
   };
   const onHidden = () => {
     if (document.visibilityState === 'hidden') save();
@@ -204,10 +217,11 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
     while (acc >= TICK_MS) {
       renderer.beforeTick(state);
       tick(state, queue.drain());
+      notice = pickNotice(notice, state.events, performance.now());
       acc -= TICK_MS;
     }
     // Снесённое здание закрывает своё окно.
-    if (openBuilding !== null && !state.buildings[openBuilding]) setWindows(inventoryOpen, null);
+    if (openBuilding !== null && !state.buildings[openBuilding]) setWindows(inventoryOpen, null, researchOpen);
     // Последний экземпляр построен: режим стройки сбрасывается.
     setTools(dropEmptyTool(state, tools));
     if (shouldAutosave(state.tick, lastSavedTick)) save();
@@ -237,7 +251,7 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
       location.reload();
     },
     icon: (id) => renderer.buildingIcon(id, 24),
-    itemIcon: (id) => renderer.itemIcon(id, 24),
+    itemIcon: (id, size = 24) => renderer.itemIcon(id, size),
     command: (command) => queue.push(command),
     getInventory: () => state.inventory,
     getCraftQueue: () => state.craftQueue,
@@ -247,9 +261,15 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
     },
     isInventoryOpen: () => inventoryOpen,
     setInventoryOpen,
+    isResearchOpen: () => researchOpen,
+    setResearchOpen,
+    getNotice() {
+      const alpha = notice && noticeAlpha(performance.now() - notice.at);
+      return notice && alpha !== null ? { tech: notice.tech, alpha } : null;
+    },
     getState: () => state,
     getOpenBuilding: () => openBuilding,
-    closeBuilding: () => setWindows(inventoryOpen, null),
+    closeBuilding: () => setWindows(inventoryOpen, null, researchOpen),
     destroy() {
       cancelAnimationFrame(frame);
       clearTimeout(messageTimer);

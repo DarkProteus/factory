@@ -22,6 +22,7 @@ import {
   miningStep,
   rotateDir,
   selectBuilding,
+  visibleBuildingIds,
   type ToolState,
 } from "./input";
 import themeCss from "./ui/theme.css?raw";
@@ -145,6 +146,39 @@ describe("предметы-здания в инвентаре", () => {
     const state = world();
     state.inventory = [];
     expect(clickCommand(state, drill, { x: 5, y: 5 })).toBeNull();
+  });
+});
+
+describe("закрытые здания на панели стройки", () => {
+  const ids = ["belt", "splitter", "lab"];
+
+  it("здание с закрытым рецептом скрыто, с открытым и без рецепта — видно", () => {
+    const state = createState(1);
+    state.inventory = [];
+    state.research.unlocked = ["belt"] as never;
+    expect(visibleBuildingIds(state, ids, { belt: 1, splitter: 1 })).toEqual(["belt", "lab"]);
+  });
+
+  it("закрытое здание из инвентаря остаётся видимым и ставится", () => {
+    const state = createState(1);
+    state.research.unlocked = [] as never;
+    state.inventory = [{ item: "splitter", count: 2 }];
+    expect(visibleBuildingIds(state, ids, { belt: 1, splitter: 1 })).toEqual(["splitter", "lab"]);
+  });
+
+  it("после исследования рецепта здание появляется", () => {
+    const state = createState(1);
+    state.inventory = [];
+    expect(visibleBuildingIds(state)).not.toContain("splitter");
+    state.research.unlocked = [...state.research.unlocked, "splitter"] as never;
+    expect(visibleBuildingIds(state)).toContain("splitter");
+  });
+
+  it("клавиши 1–9 идут по видимым зданиям", () => {
+    const state = createState(1);
+    state.inventory = [];
+    const visible = visibleBuildingIds(state, ["splitter", "belt"], { splitter: 1, belt: 1 });
+    expect(applyKey(idle, "Digit1", visible).tool).toEqual({ kind: "build", building: "belt" });
   });
 });
 

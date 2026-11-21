@@ -42,18 +42,29 @@ export function windowTarget(state: SimState, tool: Tool, cell: Cell, defs: Defs
   return b && hasBuildingWindow(defs[b.type]) ? b.id : null;
 }
 
-/** Открытые окна: инвентарь и окно здания взаимоисключающие. */
+/** Открытые окна: инвентарь, исследования и окно здания взаимоисключающие. */
 export interface Windows {
   inventory: boolean;
+  /** Окно исследований (T). */
+  research: boolean;
   /** id здания с открытым окном или null. */
   building: number | null;
 }
 
-/** E и Esc закрывают любое открытое окно; без окна E открывает инвентарь. */
+const NONE: Windows = { inventory: false, research: false, building: null };
+
+/**
+ * Esc закрывает любое окно. E закрывает окно здания, иначе переключает инвентарь;
+ * T переключает исследования. Открытие одного окна закрывает остальные.
+ */
 export function applyWindowKey(w: Windows, code: string): Windows {
-  if (w.building !== null) return code === 'KeyE' || code === 'Escape' ? { inventory: false, building: null } : w;
-  const inventory = applyUiKey(w.inventory, code);
-  return inventory === w.inventory ? w : { inventory, building: null };
+  if (code === 'Escape') return w.inventory || w.research || w.building !== null ? NONE : w;
+  if (code === 'KeyT') return w.research ? NONE : { ...NONE, research: true };
+  if (code === 'KeyE') {
+    if (w.building !== null) return NONE;
+    return applyUiKey(w.inventory, code) ? { ...NONE, inventory: true } : NONE;
+  }
+  return w;
 }
 
 /** Энергия здания по данным последнего тика: удовлетворённость сети (undefined — вне сети) и спрос сети, кВт. */
@@ -227,11 +238,16 @@ export interface RecipeChoice {
   available: boolean;
 }
 
-/** Рецепты сборщика (madeIn этого здания) с отметкой выбранного и доступности. */
-export function recipeChoices(inventory: readonly ItemStack[], b: PlacedBuilding, recipes: Recipes = contentRecipes): RecipeChoice[] {
+/** Рецепты сборщика (madeIn этого здания) с отметкой выбранного и доступности; закрытые (open) скрыты. */
+export function recipeChoices(
+  inventory: readonly ItemStack[],
+  b: PlacedBuilding,
+  recipes: Recipes = contentRecipes,
+  open: (recipe: string) => boolean = () => true,
+): RecipeChoice[] {
   const fits = fitsInInventory(inventory, b);
   return Object.entries(recipes)
-    .filter(([, def]) => def.madeIn === b.type)
+    .filter(([id, def]) => def.madeIn === b.type && (b.recipe === id || open(id)))
     .map(([id, def]) => ({ id, def, selected: b.recipe === id, available: b.recipe === id || fits }));
 }
 

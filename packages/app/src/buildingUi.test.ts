@@ -59,20 +59,34 @@ describe("клик по зданию", () => {
   });
 });
 
-describe("окна: инвентарь и здание взаимоисключающие", () => {
+describe("окна: инвентарь, исследования и здание взаимоисключающие", () => {
+  const closed = { inventory: false, research: false, building: null };
+
   it("E и Esc закрывают окно здания", () => {
-    const open = { inventory: false, building: 3 };
-    expect(applyWindowKey(open, "KeyE")).toEqual({ inventory: false, building: null });
-    expect(applyWindowKey(open, "Escape")).toEqual({ inventory: false, building: null });
+    const open = { ...closed, building: 3 };
+    expect(applyWindowKey(open, "KeyE")).toEqual(closed);
+    expect(applyWindowKey(open, "Escape")).toEqual(closed);
     expect(applyWindowKey(open, "KeyM")).toBe(open);
   });
 
   it("E без окна открывает инвентарь, Esc закрывает", () => {
-    const closed = { inventory: false, building: null };
     const inv = applyWindowKey(closed, "KeyE");
-    expect(inv).toEqual({ inventory: true, building: null });
+    expect(inv).toEqual({ ...closed, inventory: true });
     expect(applyWindowKey(inv, "Escape")).toEqual(closed);
     expect(applyWindowKey(closed, "KeyM")).toBe(closed);
+  });
+
+  it("T открывает и закрывает исследования, Esc тоже закрывает", () => {
+    const research = applyWindowKey(closed, "KeyT");
+    expect(research).toEqual({ ...closed, research: true });
+    expect(applyWindowKey(research, "KeyT")).toEqual(closed);
+    expect(applyWindowKey(research, "Escape")).toEqual(closed);
+  });
+
+  it("открытие одного окна закрывает другое", () => {
+    expect(applyWindowKey({ ...closed, inventory: true }, "KeyT")).toEqual({ ...closed, research: true });
+    expect(applyWindowKey({ ...closed, research: true }, "KeyE")).toEqual({ ...closed, inventory: true });
+    expect(applyWindowKey({ ...closed, building: 3 }, "KeyT")).toEqual({ ...closed, research: true });
   });
 });
 
@@ -226,6 +240,13 @@ describe("выбор рецепта сборщика", () => {
     expect(choices.every((c) => c.def.madeIn === "assembler")).toBe(true);
     expect(choices.find((c) => c.selected)?.id).toBe("ironGear");
     expect(choices.every((c) => c.available)).toBe(true);
+  });
+
+  it("закрытые рецепты скрыты, выбранный остаётся", () => {
+    const { state, b } = setup("assembler");
+    tick(state, [{ type: "setRecipe", building: b.id, recipe: "ironGear" }]);
+    const ids = recipeChoices(state.inventory, b, undefined, (id) => id === "circuit").map((c) => c.id);
+    expect(ids).toEqual(["ironGear", "circuit"]);
   });
 
   it("клик по другому рецепту — setRecipe, по выбранному — ничего", () => {

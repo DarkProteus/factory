@@ -24,6 +24,13 @@ describe("рецепты ручного крафта", () => {
     );
   });
 
+  it("закрытые рецепты в окне крафта скрыты", () => {
+    const open = (id: string) => id !== "circuit";
+    const ids = manualRecipes(recipes, open).map((r) => r.id);
+    expect(ids).toContain("ironGear");
+    expect(ids).not.toContain("circuit");
+  });
+
   it("рецепт серый, пока не хватает ингредиентов", () => {
     const gear = recipes.ironGear;
     expect(canCraft([], gear)).toBe(false);

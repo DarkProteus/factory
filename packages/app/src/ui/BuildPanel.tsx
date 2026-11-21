@@ -6,7 +6,7 @@ import {
   type ReactNode,
 } from "react";
 import type { Game } from "../game";
-import { buildingIds } from "../input";
+import { visibleBuildingIds } from "../input";
 import { ToolsPanel, WindowsPanel } from "./ActionButtons";
 import { buildingName } from "./names";
 
@@ -35,7 +35,7 @@ export function BuildPanel({ game }: { game: Game }) {
     <div className="dock">
       <Panel title="Строительство">
         <div className="row">
-          {buildingIds().map((id, i) => {
+          {visibleBuildingIds(game.getState()).map((id, i) => {
             const def = buildings[id as keyof typeof buildings];
             const active = tool.kind === "build" && tool.building === id;
             const count = game.itemCount(id);

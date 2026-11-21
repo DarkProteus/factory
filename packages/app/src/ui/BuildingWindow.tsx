@@ -1,4 +1,5 @@
 import { buildings } from '@factory/content';
+import { isUnlocked } from '@factory/sim';
 import { inventoryCells } from '../craftUi';
 import {
   acceptsItem,
@@ -37,7 +38,7 @@ export function BuildingWindow({ game }: { game: Game }) {
   const progress = buildingProgress(b);
   const energy = energyLine(def, satisfaction);
   const sections = buildingSections(b);
-  const choices = def.behavior === 'crafter' && def.recipeMode === 'chosen' ? recipeChoices(game.getInventory(), b) : [];
+  const choices = def.behavior === 'crafter' && def.recipeMode === 'chosen' ? recipeChoices(game.getInventory(), b, undefined, (id) => isUnlocked(state, id)) : [];
   const filters = filterChoices(b);
   const isChest = def.behavior === 'container';
 

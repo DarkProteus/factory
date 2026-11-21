@@ -14,12 +14,16 @@ export const SHIFT_CRAFT_COUNT = 5;
 
 type Recipes = Readonly<Record<string, RecipeDef>>;
 
-/** Рецепты ручного крафта: всё, что делается в сборщике (плавка руками недоступна). */
+/**
+ * Рецепты ручного крафта: всё, что делается в сборщике (плавка руками недоступна).
+ * open — открыт ли рецепт исследованиями; по умолчанию открыто всё.
+ */
 export function manualRecipes(
   recipes: Recipes = contentRecipes,
+  open: (recipe: string) => boolean = () => true,
 ): { id: string; def: RecipeDef }[] {
   return Object.entries(recipes)
-    .filter(([, def]) => def.madeIn === "assembler")
+    .filter(([id, def]) => def.madeIn === "assembler" && open(id))
     .map(([id, def]) => ({ id, def }));
 }
 

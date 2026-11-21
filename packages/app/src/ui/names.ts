@@ -15,7 +15,8 @@ const NAMES: Record<string, string> = {
   generator: 'Генератор',
 };
 
-export const buildingName = (id: string): string => NAMES[id] ?? id;
+/** Название здания: свой словарь, затем название предмета-здания из content.items, иначе id. */
+export const buildingName = (id: string): string => NAMES[id] ?? itemName(id);
 
 /** Название предмета: из content.items, неизвестный id показывается как есть. */
 export const itemName = (id: string): string => (Object.hasOwn(items, id) ? items[id as keyof typeof items].name : id);
