@@ -12,7 +12,7 @@ import {
   type BundleScenario,
   type Placement,
 } from './propBundles';
-import { applyStep, checkConservation, checkInventory, checkOccupancy } from './propKit';
+import { applyStep, checkConservation, checkInventory, checkOccupancy, UNTRACKED } from './propKit';
 import { tick } from './tick';
 
 // Миры из готовых связок: цепочки реально работают, поэтому прогонов меньше, чем в invariants.test.ts.
@@ -58,10 +58,10 @@ describe('инварианты sim на мирах из связок (property-b
     fc.assert(
       fc.property(bundleScenarioArb, ({ seed, placements, noise, steps }) => {
         const { state, ledger } = bundleWorld(seed, placements, noise, full);
-        checkConservation(state, ledger);
+        checkConservation(state, ledger, UNTRACKED);
         for (const step of steps) {
           applyStep(state, ledger, step);
-          checkConservation(state, ledger);
+          checkConservation(state, ledger, UNTRACKED);
           checkInventory(state);
         }
       }),
@@ -94,7 +94,7 @@ function peakSinks(seed: number, placements: Placement[], noise: BundleScenario[
     for (let i = 0; i < 50; i++) tick(state, []);
     resolved.forEach((r, i) => void (peaks[i] = Math.max(peaks[i]!, sinkLevel(state, [r]))));
   }
-  checkConservation(state, ledger);
+  checkConservation(state, ledger, UNTRACKED);
   return peaks;
 }
 

@@ -70,8 +70,9 @@ export const FACTORY_PREFIX: Step[] = [
 ];
 
 /**
- * Предметы, которые сгорают или расходуются и поэтому в балансе не участвуют: уголь жгут печи и генераторы,
- * пакеты съедает лаборатория. Из них ничего не крафтится, так что баланс остальных предметов остаётся точным.
+ * Предметы, которые сгорают или расходуются: уголь жгут печи и генераторы, пакеты съедает лаборатория.
+ * Миры из связок (propBundles.ts) исключают их из баланса — передают в checkConservation; остальные миры
+ * считают всё строго. Пакеты крафтятся из пластин, поэтому исключать их можно только в мирах без крафта пакетов.
  */
 export const UNTRACKED = ['coal', 'sciencePackRed', 'sciencePackGreen'];
 
@@ -176,13 +177,13 @@ export function checkInventory(state: SimState): void {
  * что лежит в зданиях и инвентаре, плюс цикл крафта в работе и сами поставленные здания (предмет-здание
  * при постройке превращается в здание, при сносе возвращается). Снос ничего не теряет (TASK-22).
  */
-export function checkConservation(state: SimState, ledger: Ledger): void {
+export function checkConservation(state: SimState, ledger: Ledger, untracked: readonly string[] = []): void {
   const remaining: Record<string, number> = {};
   for (const d of state.map.deposits) if (d) remaining[d.item] = (remaining[d.item] ?? 0) + d.amount;
   let mined = 0;
   for (const [item, total] of Object.entries(ledger.initial)) mined += (total - (remaining[item] ?? 0)) * oreValue(item);
   let held = -ledger.startingHeld;
-  const count = (s: ItemStack): void => void (held += UNTRACKED.includes(s.item) ? 0 : s.count * oreValue(s.item));
+  const count = (s: ItemStack): void => void (held += untracked.includes(s.item) ? 0 : s.count * oreValue(s.item));
   state.inventory.forEach(count);
   for (const b of Object.values(state.buildings)) {
     stacksOf(b).forEach(count);

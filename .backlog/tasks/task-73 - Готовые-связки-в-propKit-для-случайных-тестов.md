@@ -1,10 +1,10 @@
 ---
 id: TASK-73
 title: Готовые связки в propKit для случайных тестов
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-11-21T17:17:00Z'
-updated_date: '2026-11-21T18:39:00Z'
+updated_date: '2026-11-21T18:45:00Z'
 labels:
   - quality
 milestone: m-7
@@ -32,3 +32,9 @@ ordinal: 79000
 - [x] #3 Детерминизм по хешу на мирах из связок
 - [x] #4 pnpm test зелёный, рост времени тестов не больше 10 с
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Ревью: исключение угля и пакетов из баланса сделано параметром checkConservation(…, untracked = []) — старые свойства (invariants.test.ts) снова считают всё строго, UNTRACKED передают только миры из связок.
+<!-- SECTION:NOTES:END -->
