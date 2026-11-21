@@ -167,6 +167,21 @@ body,
 .btn .pickaxe .handle { stroke: var(--steel-light); }
 .btn .pickaxe .head { stroke: var(--steel); }
 
+/* Линейные иконки действий: линии 2 px steel-light, наконечник стрелки поворота — hazard. */
+.btn .line-icon {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: var(--steel-light);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.btn .line-icon .arrow { stroke: var(--hazard); }
+.btn:disabled .line-icon { opacity: 0.4; }
+/* Между инструментами и действиями над ними промежуток 16 px вместо 8 px. */
+.btn-gap { margin-left: 8px; }
+
 .tip {
   display: none;
   position: absolute;

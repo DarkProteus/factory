@@ -79,6 +79,10 @@ groma:
     - scanner: typescript
       file: packages/app/src/ui/RecipeTip.tsx
       symbol: RecipeTip
+    - scanner: react
+      file: packages/app/src/ui/ActionButtons.tsx
+    - scanner: typescript
+      file: packages/app/src/ui/ActionButtons.tsx
   technology: React
 description: Превращает ввод игрока в команды для ядра
 ---

@@ -7,7 +7,7 @@ import {
 } from "react";
 import type { Game } from "../game";
 import { buildingIds } from "../input";
-import { MineButton } from "./MineButton";
+import { ToolsPanel, WindowsPanel } from "./ActionButtons";
 import { buildingName } from "./names";
 
 export function Panel({ title, children }: { title?: string; children: ReactNode }) {
@@ -22,7 +22,7 @@ export function Panel({ title, children }: { title?: string; children: ReactNode
   );
 }
 
-/** Панель зданий снизу по центру и кнопка сноса справа от неё. */
+/** Панель зданий снизу по центру, справа от неё панели инструментов и окон. */
 export function BuildPanel({ game }: { game: Game }) {
   const { tool } = useSyncExternalStore(game.subscribe, game.getTools);
   // Число предметов меняется на тиках, а не по действиям игрока: перечитываем по таймеру.
@@ -60,21 +60,8 @@ export function BuildPanel({ game }: { game: Game }) {
           })}
         </div>
       </Panel>
-      <Panel>
-        <div className="row">
-          <button
-            className={`btn${tool.kind === "demolish" ? " active" : ""}`}
-            onClick={() => game.chooseDemolish()}
-          >
-            <span className="cross" />
-            <span className="key">X</span>
-            <span className="tip">
-              <b>Снос</b>
-            </span>
-          </button>
-          <MineButton game={game} />
-        </div>
-      </Panel>
+      <ToolsPanel game={game} />
+      <WindowsPanel game={game} />
     </div>
   );
 }
