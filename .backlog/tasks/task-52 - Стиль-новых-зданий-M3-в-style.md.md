@@ -1,13 +1,17 @@
 ---
 id: TASK-52
 title: Стиль новых зданий M3 в style.md
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-11-21T12:01:00Z'
+updated_date: '2026-11-21T12:04:00Z'
 labels:
   - m3
 dependencies: []
 references:
+  - docs/style.md
+modified_files:
+  - docs/style-m3.md
   - docs/style.md
 type: docs
 ordinal: 58000
@@ -21,5 +25,5 @@ ordinal: 58000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 В style.md описан вид каждого нового здания и предмета M3 с цветами из палитры
+- [x] #1 В style.md описан вид каждого нового здания и предмета M3 с цветами из палитры
 <!-- AC:END -->
