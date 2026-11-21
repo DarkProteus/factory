@@ -1,10 +1,10 @@
 ---
 id: TASK-56
 title: 'Тест готовности M3: завод пакетов'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-21T12:01:00Z'
-updated_date: '2026-11-21T12:01:00Z'
+updated_date: '2026-11-21T12:46:00Z'
 labels:
   - m3
 dependencies:
