@@ -1,8 +1,9 @@
-import { recipes as contentRecipes, type BuildingDef, type RecipeDef } from '@factory/content';
-import type { ItemStack, PlacedBuilding } from './buildings';
+import { items as contentItems, recipes as contentRecipes, type BuildingDef, type ItemDef, type RecipeDef } from '@factory/content';
+import type { AcceptLimit, ItemStack, PlacedBuilding } from './buildings';
 import { fuelAccept, fuelCanAccept, isFuel } from './fuel';
 import { energyTick } from './power';
 
+const itemDefs: Readonly<Record<string, ItemDef>> = contentItems;
 type Recipes = Readonly<Record<string, RecipeDef>>;
 /** Открытые рецепты (state.research.unlocked); undefined — открыто всё. */
 type Unlocked = readonly string[] | undefined;
@@ -28,20 +29,24 @@ function stackFor(b: PlacedBuilding, item: string): ItemStack | undefined {
   return b.input?.find((s) => s.item === item);
 }
 
-/** Принимает ли крафтер предмет: он есть во входе рецепта и вход не полон. Печь выбирает рецепт среди unlocked. */
+/**
+ * Принимает ли крафтер предмет: он есть во входе рецепта и вход не полон. Печь выбирает рецепт среди unlocked.
+ * limit: `buffer` — вход вмещает inputBuffer порций рецепта (манипуляторы), `stack` — до стопки предмета (ручная перекладка).
+ */
 export function crafterCanAccept(
   b: PlacedBuilding,
   def: BuildingDef,
   item: string,
   recipes: Recipes = contentRecipes,
   unlocked?: readonly string[],
+  limit: AcceptLimit = 'buffer',
 ): boolean {
   // Топливо идёт в ячейку топлива, а не во вход.
   if (isFuel(item) && def.fuelSlot) return fuelCanAccept(b, def, item);
   // Сборщик (recipeMode 'chosen') принимает только ингредиенты выбранного рецепта; без рецепта стоит.
   const id = def.recipeMode === 'chosen' ? b.recipe : recipeFor(b, item, recipes, unlocked);
   if (id === undefined || !(item in (recipes[id]?.in ?? {}))) return false;
-  const cap = recipes[id]!.in[item]! * (def.inputBuffer ?? 0);
+  const cap = limit === 'stack' ? (itemDefs[item]?.stack ?? 0) : recipes[id]!.in[item]! * (def.inputBuffer ?? 0);
   return (stackFor(b, item)?.count ?? 0) < cap;
 }
 

@@ -1,5 +1,5 @@
-import { technologies, type BuildingDef } from '@factory/content';
-import type { BuildingDefs, ItemStack, PlacedBuilding } from './buildings';
+import { items as contentItems, technologies, type BuildingDef, type ItemDef } from '@factory/content';
+import type { AcceptLimit, BuildingDefs, ItemStack, PlacedBuilding } from './buildings';
 import { electricTick } from './power';
 import { addResearchProgress } from './research';
 import type { SimState } from './state';
@@ -21,6 +21,8 @@ import type { SimState } from './state';
  *   пакеты не пропадают и не застревают, ячейка может временно превысить лимит приёма (тогда новые не принимаются).
  */
 
+const itemDefs: Readonly<Record<string, ItemDef>> = contentItems;
+
 type Unit = Readonly<Record<string, number>>;
 
 function stackOf(b: PlacedBuilding, item: string): ItemStack | undefined {
@@ -38,11 +40,13 @@ export const LAB_BUFFER_UNITS = 2;
  * Берёт пакет, только если он нужен активной технологии и в ячейке его меньше, чем на LAB_BUFFER_UNITS единиц.
  * Так несколько лабораторий, кормимых из одного источника, делят пакеты поровну. Пакеты сверх лимита
  * (возврат единицы, старый сейв) остаются в ячейке, новые при этом не принимаются.
+ * limit `stack` (ручная перекладка) снимает запас: пакет принимается до стопки предмета.
  */
-export function labCanAccept(b: PlacedBuilding, item: string, active: string | null | undefined): boolean {
+export function labCanAccept(b: PlacedBuilding, item: string, active: string | null | undefined, limit: AcceptLimit = 'buffer'): boolean {
   const need = techUnit(active ?? undefined)?.[item];
   if (need === undefined) return false;
-  return (stackOf(b, item)?.count ?? 0) < need * LAB_BUFFER_UNITS;
+  const cap = limit === 'stack' ? (itemDefs[item]?.stack ?? 0) : need * LAB_BUFFER_UNITS;
+  return (stackOf(b, item)?.count ?? 0) < cap;
 }
 
 /** Кладёт пакет в ячейку; перед этим нужно проверить labCanAccept. */
