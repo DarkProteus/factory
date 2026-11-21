@@ -1,10 +1,10 @@
 ---
 id: TASK-36
 title: Подземные конвейеры
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-11-20T18:38:00Z'
-updated_date: '2026-11-21T12:24:00Z'
+updated_date: '2026-11-21T12:32:00Z'
 labels:
   - m3
 dependencies:
@@ -12,6 +12,16 @@ dependencies:
 references:
   - sim
   - content
+modified_files:
+  - packages/sim/src/underground.ts
+  - packages/sim/src/underground.test.ts
+  - packages/sim/src/buildings.ts
+  - packages/sim/src/belt.ts
+  - packages/sim/src/segments.ts
+  - packages/sim/src/transfer.ts
+  - packages/sim/src/index.ts
+  - packages/save/src/validate.ts
+  - packages/save/src/index.test.ts
 priority: high
 type: feature
 ordinal: 42000
@@ -25,10 +35,10 @@ ordinal: 42000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Выход сцепляется с ближайшим несцепленным входом того же направления позади, не дальше 4 клеток между ними
-- [ ] #2 Предметы проходят тоннель со скоростью ленты; клетки между входом и выходом свободны для любых зданий
-- [ ] #3 Снос входа или выхода возвращает предметы из тоннеля в инвентарь; сейв и хеш учитывают тоннель
-- [ ] #4 pnpm test зелёный, бенчмарк конвейеров в прежних пределах
+- [x] #1 Выход сцепляется с ближайшим несцепленным входом того же направления позади, не дальше 4 клеток между ними
+- [x] #2 Предметы проходят тоннель со скоростью ленты; клетки между входом и выходом свободны для любых зданий
+- [x] #3 Снос входа или выхода возвращает предметы из тоннеля в инвентарь; сейв и хеш учитывают тоннель
+- [x] #4 pnpm test зелёный, бенчмарк конвейеров в прежних пределах
 <!-- AC:END -->
 
 ## Implementation Notes

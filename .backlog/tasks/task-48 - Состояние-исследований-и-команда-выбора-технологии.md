@@ -1,16 +1,30 @@
 ---
 id: TASK-48
 title: Состояние исследований и команда выбора технологии
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-11-21T12:01:00Z'
-updated_date: '2026-11-21T12:23:00Z'
+updated_date: '2026-11-21T12:32:00Z'
 labels:
   - m3
 dependencies:
   - TASK-47
 references:
   - sim
+modified_files:
+  - packages/sim/src/research.ts
+  - packages/sim/src/research.test.ts
+  - packages/sim/src/state.ts
+  - packages/sim/src/tick.ts
+  - packages/sim/src/commands.ts
+  - packages/sim/src/index.ts
+  - packages/sim/src/assembler.ts
+  - packages/sim/src/craftQueue.ts
+  - packages/sim/src/crafter.ts
+  - packages/sim/src/transfer.ts
+  - packages/sim/src/inserter.ts
+  - packages/sim/src/manual.ts
+  - packages/sim/src/miner.ts
 priority: high
 type: feature
 ordinal: 54000
@@ -24,9 +38,15 @@ ordinal: 54000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 setResearch принимает только доступную неизученную технологию; прогресс прочих сохраняется при переключении
-- [ ] #2 Закрытый рецепт нельзя поставить в очередь крафта и выбрать в сборщике; предмет закрытого здания ставится
-- [ ] #3 Завершение технологии открывает её unlocks и сбрасывает activeTech; состояние в хеше
-- [ ] #4 pnpm test зелёный
-- [ ] #5 Печь выбирает рецепт только среди открытых: до изучения steel железная пластина в печь не принимается (сейчас pickRecipe в crafter.ts берёт steelPlate по ironPlate во входе)
+- [x] #1 setResearch принимает только доступную неизученную технологию; прогресс прочих сохраняется при переключении
+- [x] #2 Закрытый рецепт нельзя поставить в очередь крафта и выбрать в сборщике; предмет закрытого здания ставится
+- [x] #3 Завершение технологии открывает её unlocks и сбрасывает activeTech; состояние в хеше
+- [x] #4 pnpm test зелёный
+- [x] #5 Печь выбирает рецепт только среди открытых: до изучения steel железная пластина в печь не принимается (сейчас pickRecipe в crafter.ts берёт steelPlate по ironPlate во входе)
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+События интерфейса — state.events (очищается в начале тика), сейчас один вид researchDone. canAccept/accept принимают unlocked необязательно: без него открыто всё (для юнит-тестов), в игре передаётся всегда. Сейв не тронут: старый сейв без research упадёт — TASK-51 обязательна до публикации.
+<!-- SECTION:NOTES:END -->
