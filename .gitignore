@@ -6,3 +6,6 @@ dist/
 .stryker-tmp/
 .stryker-cache/
 /reports/
+/test-results/
+/playwright-report/
+/blob-report/
