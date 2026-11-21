@@ -1,10 +1,10 @@
 ---
 id: TASK-82
 title: 'Мутанты: крафт, топливо, лаборатория, исследования'
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-11-21T17:54:00Z'
-updated_date: '2026-11-21T19:04:00Z'
+updated_date: '2026-11-21T19:07:00Z'
 labels:
   - quality
 milestone: m-7
@@ -54,4 +54,6 @@ ordinal: 88000
 - lab.ts L48 itemDefs[item]?.stack: item взят из unit технологии, всегда есть в items.
 - research.ts L50 (r.active === null -> false): r.progress[null] даёт undefined, как и ветка undefined.
 - craftQueue.ts L35 x2 (count <= 0 -> false и count < 0): при count <= 0 дальше removeItems(..., n*count) ничего не делает (left > 0), цикл for i < count не добавляет записей: проверка вырождена, наблюдаемого эффекта нет.
+
+Ревью: тесты на искусственные состояния (лаборатория с progress без единицы, печь с рецептом без input, прогресс при сброшенном рецепте) оставлены — фиксируют защитное поведение.
 <!-- SECTION:NOTES:END -->
