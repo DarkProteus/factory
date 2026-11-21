@@ -114,8 +114,14 @@ function clipHalf(poly: Pt[], a: number, b: number, c: number): Pt[] {
  * Предупредительная окраска внутри выпуклого многоугольника: фон hazard-dark,
  * полосы hazard под 45° шириной step, затем контур.
  */
-export function hazardStripes(g: Graphics, points: Pt[], step = 4, outline = OUTLINE_THIN): void {
-  g.poly(points.flat()).fill(fill('hazard-dark'));
+export function hazardStripes(
+  g: Graphics,
+  points: Pt[],
+  step = 4,
+  outline: { width: number; color: number; alpha: number } = OUTLINE_THIN,
+  tokens: [light: Token, dark: Token] = ['hazard', 'hazard-dark'],
+): void {
+  g.poly(points.flat()).fill(fill(tokens[1]));
   const k = Math.SQRT1_2;
   const us = points.map(([x, y]) => (x + y) * k);
   const lo = Math.min(...us);
@@ -123,7 +129,7 @@ export function hazardStripes(g: Graphics, points: Pt[], step = 4, outline = OUT
   for (let u = Math.floor(lo / (2 * step)) * 2 * step; u < hi; u += 2 * step) {
     let band = clipHalf(points, k, k, u + step);
     band = clipHalf(band, -k, -k, -u);
-    if (band.length >= 3) g.poly(band.flat()).fill(fill('hazard'));
+    if (band.length >= 3) g.poly(band.flat()).fill(fill(tokens[0]));
   }
   g.poly(points.flat()).stroke(outline);
 }

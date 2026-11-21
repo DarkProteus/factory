@@ -35,6 +35,13 @@ export const palette = {
   'lamp-wait': 0xd9a441,
   'lamp-off': 0x4a4540,
   power: 0x6fb7d9,
+  fast: 0x4f8fc0,
+  'fast-dark': 0x2c5170,
+  'science-red': 0xc9503c,
+  'science-green': 0x6fae5a,
+  glass: 0xb9d4dc,
+  'steel-plate': 0x8e9aa6,
+  'steel-plate-light': 0xc4ced8,
   ok: 0x7fb5a0,
   bad: 0xc2452d,
   text: 0xe6dfd3,
@@ -44,6 +51,8 @@ export type Token = keyof typeof palette;
 
 /** Альфа токенов, у которых она не 1. */
 export const SHADOW_ALPHA = 0.35;
+/** Альфа стекла колбы лаборатории (токен glass). */
+export const GLASS_ALPHA = 0.55;
 
 /** Размер клетки при зуме 1, px. */
 export const CELL = 32;
