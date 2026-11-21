@@ -6,7 +6,7 @@ import { add, canAdd, takeFirst } from './inventory';
 import { labAccept, labCanAccept } from './lab';
 
 /**
- * Принимает ли здание предмет прямо сейчас. Бур и манипулятор не принимают ничего.
+ * Принимает ли здание предмет прямо сейчас. Бур и манипулятор не принимают ничего; разделитель — один предмет в пустой буфер.
  * unlocked — открытые рецепты (state.research.unlocked): печь не берёт предмет без открытого рецепта; без параметра открыто всё.
  * active — активная технология (state.research.active): лаборатория берёт только её пакеты (и лишь до запаса в 2 единицы); без параметра не берёт ничего.
  * limit — лимит запаса крафтера и лаборатории: `buffer` (по умолчанию, манипуляторы) или `stack` (до стопки, ручная перекладка).
@@ -27,6 +27,10 @@ export function canAccept(
       const last = b.belt?.[b.belt.length - 1];
       return !last || last.pos >= BELT_GAP;
     }
+    case 'splitter':
+    case 'filterSplitter':
+      // Буфер разделителя — один предмет; руками (limit 'stack') в разделитель не кладут (TASK-37).
+      return limit === 'buffer' && !b.belt?.length;
     case 'crafter':
       return crafterCanAccept(b, def, item, undefined, unlocked, limit);
     case 'container':
@@ -47,6 +51,10 @@ export function accept(b: PlacedBuilding, item: string, defs: BuildingDefs, unlo
     case 'belt':
     case 'underground':
       pushToBelt(b, item);
+      break;
+    case 'splitter':
+    case 'filterSplitter':
+      b.belt = [{ item, pos: BELT_CELL / 2 }];
       break;
     case 'crafter':
       crafterAccept(b, def, item, undefined, unlocked);
@@ -83,6 +91,12 @@ export function takeFrom(b: PlacedBuilding, accepts: (item: string) => boolean, 
       // Из входа берётся только то, что ещё на поверхности, не в тоннеле.
       const i = (b.belt ?? []).findIndex((it) => it.pos <= BELT_CELL && accepts(it.item));
       return i < 0 ? null : b.belt!.splice(i, 1)[0]!.item;
+    }
+    case 'splitter':
+    case 'filterSplitter': {
+      // Из буфера, мимо круга выходов; фильтр не учитывается.
+      const held = b.belt?.[0];
+      return held && accepts(held.item) ? b.belt!.shift()!.item : null;
     }
     case 'miner':
     case 'crafter':
