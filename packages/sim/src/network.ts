@@ -15,7 +15,7 @@ export interface Networks {
   consumers: Map<number, number[]>;
   /** id сети -> id генераторов по возрастанию. */
   generators: Map<number, number[]>;
-  /** Провода: пары id соединённых столбов (меньший id первым). */
+  /** Провода: рёбра минимального остовного дерева по парам столбов в радиусе (меньший id первым). */
   wires: [number, number][];
 }
 
@@ -43,12 +43,17 @@ function find(parent: Map<number, number>, id: number): number {
   return root;
 }
 
-/** Объединяет группы так, что корнем остаётся меньший id: он и есть id сети. */
-function union(parent: Map<number, number>, a: number, b: number): void {
+/**
+ * Объединяет группы так, что корнем остаётся меньший id: он и есть id сети.
+ * Возвращает false, если столбы уже в одной группе (ребро лишнее для дерева).
+ */
+function union(parent: Map<number, number>, a: number, b: number): boolean {
   const ra = find(parent, a);
   const rb = find(parent, b);
+  if (ra === rb) return false;
   if (ra < rb) parent.set(rb, ra);
-  else if (rb < ra) parent.set(ra, rb);
+  else parent.set(ra, rb);
+  return true;
 }
 
 /** Пересекает ли отпечаток здания квадрат покрытия столба. */
@@ -69,7 +74,9 @@ function buildNetworks(state: SimState, defs: BuildingDefs): Networks {
   const all = Object.values(state.buildings);
   const poles = all.filter((b) => defs[b.type]?.behavior === 'pole');
   const parent = new Map<number, number>(poles.map((p) => [p.id, p.id]));
-  const wires: [number, number][] = [];
+  // Кандидаты в провода: все пары в радиусе. Kruskal берёт короткие первыми, при равенстве —
+  // по паре id (столбы идут по возрастанию id, поэтому в паре меньший id первый).
+  const edges: { d2: number; a: number; b: number }[] = [];
   for (let i = 0; i < poles.length; i++) {
     for (let j = i + 1; j < poles.length; j++) {
       const a = poles[i]!;
@@ -77,11 +84,13 @@ function buildNetworks(state: SimState, defs: BuildingDefs): Networks {
       const reach = Math.min(defs[a.type]!.wireReach ?? 0, defs[b.type]!.wireReach ?? 0);
       const dx = a.x - b.x;
       const dy = a.y - b.y;
-      if (dx * dx + dy * dy > reach * reach) continue;
-      wires.push([a.id, b.id]);
-      union(parent, a.id, b.id);
+      const d2 = dx * dx + dy * dy;
+      if (d2 <= reach * reach) edges.push({ d2, a: a.id, b: b.id });
     }
   }
+  edges.sort((p, q) => p.d2 - q.d2 || p.a - q.a || p.b - q.b);
+  const wires: [number, number][] = [];
+  for (const e of edges) if (union(parent, e.a, e.b)) wires.push([e.a, e.b]);
   const poleNet = new Map<number, number>(poles.map((p) => [p.id, find(parent, p.id)]));
   const buildingNet = new Map<number, number>();
   const consumers = new Map<number, number[]>();
