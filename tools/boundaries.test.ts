@@ -21,7 +21,8 @@ describe('границы пакета sim', () => {
   ])('запрещает %s', async (code) => {
     const errors = await errorsFor(code);
     expect(errors.map((e) => e.ruleId)).toContain('no-restricted-imports');
-  });
+    // Первый случай платит за холодный старт ESLint (~2,7 с в покое), под нагрузкой выходит за 5 с (TASK-65).
+  }, 30_000);
 
   it('разрешает импорт content', async () => {
     expect(await errorsFor("import '@factory/content';")).toEqual([]);

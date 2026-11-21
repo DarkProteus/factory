@@ -59,7 +59,8 @@ describe('сцена', () => {
       expect(hash(state)).toBe(before);
     }
     expect(Object.values(state.buildings).some((b) => (b.belt?.length ?? 0) > 0)).toBe(true);
-  });
+    // 600 тиков с отрисовкой и хешем: ~0,7 с в покое, под нагрузкой выходит за 5 с (TASK-65).
+  }, 30_000);
 
   it('рисует здания, залежи и предметы M2 без исключений, включая нехватку топлива', () => {
     const deposits = ['copperOre', 'coal', 'stone', 'ironOre'].map((item, x) => ({ x, y: 0, item, amount: 100 }));

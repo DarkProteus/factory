@@ -64,7 +64,8 @@ describe('руда -> пластины', () => {
     expect(fed).toBe(ORE);
     expect(chest.slots).toEqual([{ item: 'ironPlate', count: ORE }]);
     expect(count(state, 'ironOre')).toBe(0);
-  });
+    // Тысячи тиков с проверкой сохранения на каждом: ~1,9 с в покое, под нагрузкой выходит за 5 с (TASK-65).
+  }, 30_000);
 
   it('печь не берёт руды больше, чем вмещает: при полном входе манипулятор ждёт', () => {
     const state = stocked(createState(1, { width: 16, height: 16 }));

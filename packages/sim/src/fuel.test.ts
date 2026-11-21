@@ -226,5 +226,6 @@ describe('100 + 100 руды с углём', () => {
     const burned = taken - (f.fuel?.count ?? 0);
     expect(burned * COAL_UNITS - (f.burn ?? 0)).toBe(spent);
     expect(burned).toBe(Math.ceil(spent / COAL_UNITS));
-  });
+    // Тысячи тиков с проверками: ~1,3 с в покое, под нагрузкой параллельных прогонов выходит за 5 с (TASK-65).
+  }, 30_000);
 });

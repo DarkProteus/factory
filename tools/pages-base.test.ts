@@ -13,7 +13,8 @@ describe('базовый путь сборки для GitHub Pages', () => {
 
   it('по умолчанию корень', async () => {
     expect(await loadBase()).toBe('/');
-  });
+    // Холодный импорт vite.config (vite целиком): ~1 с в покое, под нагрузкой выходит за 5 с (TASK-65).
+  }, 30_000);
 
   it('берётся из BASE_PATH', async () => {
     process.env.BASE_PATH = '/factory/';
