@@ -27,7 +27,7 @@ export function runInserter(
   if (!b.output) {
     if (!from || !to || from === to) return;
     if (electric && !hasPower(b, satisfaction)) return;
-    const item = takeFrom(from, (it) => canAccept(to, it, defs, open), defs);
+    const item = takeFrom(from, (it) => canAccept(to, it, defs, open, state.research.active), defs);
     if (item === null) return;
     b.output = { item, count: 1 };
     b.progress = 0;
@@ -36,7 +36,7 @@ export function runInserter(
   const swing = def.swingTicks ?? 0;
   // Взмах идёт со скоростью × удовлетворённость; ожидание с завершённым взмахом — простой, без спроса.
   if (b.progress < swing && (!electric || electricTick(b, satisfaction))) b.progress += 1;
-  if (b.progress < swing || !to || !canAccept(to, b.output.item, defs, open)) return;
+  if (b.progress < swing || !to || !canAccept(to, b.output.item, defs, open, state.research.active)) return;
   accept(to, b.output.item, defs, open);
   b.output = null;
   b.progress = 0;

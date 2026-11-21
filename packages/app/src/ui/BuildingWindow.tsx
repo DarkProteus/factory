@@ -47,7 +47,7 @@ export function BuildingWindow({ game }: { game: Game }) {
         <div className="inv-columns">
           <div className="inv-grid">
             {inventoryCells(game.getInventory()).map((cell, i) => {
-              const cmd = putCommand(b, cell);
+              const cmd = putCommand(b, cell, buildings, state.research.active);
               return (
                 <ItemSlot
                   key={i}
@@ -55,7 +55,7 @@ export function BuildingWindow({ game }: { game: Game }) {
                   item={cell?.item ?? null}
                   count={cell?.count}
                   move
-                  reject={!!cell && !acceptsItem(b, cell.item)}
+                  reject={!!cell && !acceptsItem(b, cell.item, buildings, state.research.active)}
                   onClick={cell ? () => cmd && game.command(cmd) : undefined}
                 />
               );

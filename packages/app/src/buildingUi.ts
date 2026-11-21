@@ -5,6 +5,7 @@ import {
   INVENTORY_SLOTS,
   items as contentItems,
   recipes as contentRecipes,
+  technologies,
   type BuildingDef,
   type RecipeDef,
 } from '@factory/content';
@@ -32,7 +33,7 @@ type Recipes = Readonly<Record<string, RecipeDef>>;
 
 /** Окно есть у бура, печи, сборщика, сундука, генератора и фильтрующего разделителя: по виду поведения. */
 export function hasBuildingWindow(def: BuildingDef | undefined): boolean {
-  return !!def && ['miner', 'crafter', 'container', 'generator', 'filterSplitter'].includes(def.behavior);
+  return !!def && ['miner', 'crafter', 'container', 'generator', 'filterSplitter', 'lab'].includes(def.behavior);
 }
 
 /** Здание, чьё окно открывает клик по клетке: только без инструмента и только у зданий с окном. */
@@ -124,6 +125,13 @@ export function buildingStatus(
       if (unpowered) return NO_POWER;
       return b.progress > 0 ? WORK : (crafterBlock(b, def, recipe) ?? WORK);
     }
+    case 'lab': {
+      const active = state.research.active;
+      if (active === null) return { label: 'Нет исследования', lamp: 'off' };
+      const hasPacks = Object.entries(technologies[active].unit).every(([item, n]) => (b.input?.find((s) => s.item === item)?.count ?? 0) >= n);
+      if (b.unit === undefined && !hasPacks) return { label: 'Ждёт: нет пакетов', lamp: 'wait' };
+      return unpowered ? NO_POWER : { label: 'Исследует', lamp: 'work' };
+    }
     case 'generator':
       if (outOfFuel(b)) return NO_FUEL;
       return demand > 0 ? WORK : { label: 'Нет нагрузки', lamp: 'wait' };
@@ -136,6 +144,10 @@ export function buildingStatus(
 export function buildingProgress(b: PlacedBuilding, defs: Defs = contentBuildings, recipes: Recipes = contentRecipes): number | null {
   const def = defs[b.type];
   if (def?.behavior === 'miner') return Math.min(1, b.progress / (def.miningTicks || 1));
+  if (def?.behavior === 'lab') {
+    const ticks = b.unit === undefined ? 0 : (technologies[b.unit as keyof typeof technologies]?.unitTicks ?? 0);
+    return ticks > 0 ? Math.min(1, b.progress / ticks) : 0;
+  }
   if (def?.behavior !== 'crafter') return null;
   const ticks = b.recipe === undefined ? 0 : (recipes[b.recipe]?.ticks ?? 0);
   return ticks > 0 ? Math.min(1, b.progress / ticks) : 0;
@@ -181,6 +193,16 @@ export function buildingSections(b: PlacedBuilding, defs: Defs = contentBuilding
     });
     return [{ title: '', cells }];
   }
+  if (def.behavior === 'lab') {
+    // Ячейка на каждый вид пакета, пустые тоже видны (стек пакета лежит в b.input).
+    const packs = [...new Set(Object.values(technologies).flatMap((t) => Object.keys(t.unit)))];
+    const cells = packs.map((item): BuildingCell => {
+      const index = (b.input ?? []).findIndex((s) => s.item === item);
+      const stack = stackOrNull(b.input?.[index]);
+      return { slot: stack ? { kind: 'input', index } : null, stack, wants: item };
+    });
+    return [{ title: 'ПАКЕТЫ', cells }];
+  }
   const sections: Section[] = [];
   if (def.behavior === 'crafter') {
     const input = b.input ?? [];
@@ -205,13 +227,14 @@ export function takeCommand(b: PlacedBuilding, cell: BuildingCell): Command | nu
 }
 
 /** Клик по ячейке инвентаря: положить в здание всю стопку; если здание предмет не примет — null. */
-export function putCommand(b: PlacedBuilding, stack: ItemStack | null, defs: Defs = contentBuildings): Command | null {
-  if (!stack || !acceptsItem(b, stack.item, defs)) return null;
+export function putCommand(b: PlacedBuilding, stack: ItemStack | null, defs: Defs = contentBuildings, active?: string | null): Command | null {
+  if (!stack || !acceptsItem(b, stack.item, defs, active)) return null;
   return { type: 'putIntoBuilding', building: b.id, item: stack.item, count: stack.count };
 }
 
 /** Примет ли здание предмет сейчас (для подсветки «не примет»). */
-export const acceptsItem = (b: PlacedBuilding, item: string, defs: Defs = contentBuildings): boolean => canAccept(b, item, defs);
+export const acceptsItem = (b: PlacedBuilding, item: string, defs: Defs = contentBuildings, active?: string | null): boolean =>
+  canAccept(b, item, defs, undefined, active);
 
 /** Поместится ли всё содержимое здания в инвентарь: иначе смена рецепта запрещена. */
 export function fitsInInventory(inventory: readonly ItemStack[], b: PlacedBuilding, slotCount = INVENTORY_SLOTS): boolean {

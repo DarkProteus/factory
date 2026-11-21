@@ -3,12 +3,20 @@ import type { BuildingDefs, PlacedBuilding } from './buildings';
 import { crafterAccept, crafterCanAccept } from './crafter';
 import { fuelAccept, fuelCanAccept } from './fuel';
 import { add, canAdd, takeFirst } from './inventory';
+import { labAccept, labCanAccept } from './lab';
 
 /**
  * Принимает ли здание предмет прямо сейчас. Бур и манипулятор не принимают ничего.
  * unlocked — открытые рецепты (state.research.unlocked): печь не берёт предмет без открытого рецепта; без параметра открыто всё.
+ * active — активная технология (state.research.active): лаборатория берёт только её пакеты; без параметра не берёт ничего.
  */
-export function canAccept(b: PlacedBuilding, item: string, defs: BuildingDefs, unlocked?: readonly string[]): boolean {
+export function canAccept(
+  b: PlacedBuilding,
+  item: string,
+  defs: BuildingDefs,
+  unlocked?: readonly string[],
+  active?: string | null,
+): boolean {
   const def = defs[b.type];
   if (!def) return false;
   switch (def.behavior) {
@@ -23,6 +31,8 @@ export function canAccept(b: PlacedBuilding, item: string, defs: BuildingDefs, u
       return canAdd(b.slots ?? [], def.slots ?? 0, item);
     case 'generator':
       return fuelCanAccept(b, def, item);
+    case 'lab':
+      return labCanAccept(b, item, active);
     default:
       return false;
   }
@@ -44,6 +54,9 @@ export function accept(b: PlacedBuilding, item: string, defs: BuildingDefs, unlo
       break;
     case 'generator':
       fuelAccept(b, item);
+      break;
+    case 'lab':
+      labAccept(b, item);
       break;
   }
 }

@@ -292,3 +292,43 @@ describe("фильтрующий разделитель: окно (TASK-37)", ()
     expect(putCommand(b, stack("coal", 5))).toBeNull();
   });
 });
+
+describe("окно лаборатории", () => {
+  const lab = () => setup("lab");
+
+  it("открывается кликом", () => {
+    const { state, b } = lab();
+    expect(windowTarget(state, NO_TOOL, { x: 2, y: 2 })).toBe(b.id);
+  });
+
+  it("статус: нет исследования, нет пакетов, нет энергии, исследует", () => {
+    const { state, b } = lab();
+    expect(buildingStatus(state, b, undefined)).toEqual({ label: "Нет исследования", lamp: "off" });
+    state.research.active = "logistics";
+    expect(buildingStatus(state, b, POWER_SCALE)?.label).toBe("Ждёт: нет пакетов");
+    b.input = [stack("sciencePackRed", 3)];
+    expect(buildingStatus(state, b, 0)?.label).toBe("Нет энергии");
+    expect(buildingStatus(state, b, POWER_SCALE)).toEqual({ label: "Исследует", lamp: "work" });
+  });
+
+  it("ПАКЕТЫ: ячейка на каждый вид пакета, пустые видны; прогресс — доля единицы", () => {
+    const { b } = lab();
+    b.input = [stack("sciencePackRed", 3)];
+    const [section] = buildingSections(b);
+    expect(section!.title).toBe("ПАКЕТЫ");
+    expect(section!.cells.map((c) => c.wants)).toEqual(["sciencePackRed", "sciencePackGreen"]);
+    expect(section!.cells[0]!.slot).toEqual({ kind: "input", index: 0 });
+    expect(section!.cells[1]!.slot).toBeNull();
+    expect(buildingProgress(b)).toBe(0);
+    b.unit = "logistics";
+    b.progress = 300;
+    expect(buildingProgress(b)).toBe(0.5);
+  });
+
+  it("putCommand кладёт только пакеты активной технологии", () => {
+    const { b } = lab();
+    expect(putCommand(b, stack("sciencePackRed", 5))).toBeNull();
+    expect(putCommand(b, stack("sciencePackRed", 5), undefined, "logistics")).toEqual({ type: "putIntoBuilding", building: b.id, item: "sciencePackRed", count: 5 });
+    expect(putCommand(b, stack("sciencePackGreen", 5), undefined, "logistics")).toBeNull();
+  });
+});
