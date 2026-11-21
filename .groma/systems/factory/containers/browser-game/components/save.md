@@ -15,6 +15,9 @@ groma:
     - scanner: typescript
       file: packages/save/src/validate.ts
       symbol: validateState
+    - scanner: typescript
+      file: packages/save/src/validateResearch.ts
+      symbol: checkResearch
   technology: TypeScript
 description: Сохраняет и загружает состояние партии
 ---

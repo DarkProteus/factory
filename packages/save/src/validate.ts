@@ -1,6 +1,7 @@
 import { buildings, items, recipes } from '@factory/content';
 import type { SimState } from '@factory/sim';
 import { SaveError } from './errors';
+import { checkResearch } from './validateResearch';
 
 const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -144,5 +145,9 @@ export function validateState(state: unknown): SimState {
   checkStacks(state.inventory, 'инвентарь');
   checkMining(state.mining);
   checkCraftQueue(state.craftQueue);
+  checkResearch(state.research);
+  // События живут один тик и в сейве не нужны: содержимое отбрасываем.
+  if (!Array.isArray(state.events)) fail('состояние', 'поле events: ожидался список');
+  state.events = [];
   return state as unknown as SimState;
 }
