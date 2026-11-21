@@ -1,9 +1,10 @@
 ---
 id: TASK-72
 title: Мутационное тестирование sim на Stryker
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-21T17:17:00Z'
+updated_date: '2026-11-21T17:22:00Z'
 labels:
   - quality
 milestone: m-7
