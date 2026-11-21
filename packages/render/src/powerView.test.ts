@@ -1,4 +1,4 @@
-import { applyCommand, createState, tick, type SimState } from '@factory/sim';
+import { applyCommand, createState, powerNetworks, tick, type SimState } from '@factory/sim';
 import { describe, expect, it } from 'vitest';
 import { badgeAlpha, badges, ghostLinks, wireSegments, zoneRect } from './powerView';
 
@@ -49,6 +49,28 @@ describe('провода', () => {
     expect(ghostLinks(state, { x: 5, y: 2 }, 'pole')).toEqual([a.id, b.id]);
     expect(ghostLinks(state, { x: 17, y: 2 }, 'pole')).toEqual([]);
     expect(ghostLinks(state, { x: 17, y: 2 }, 'drill')).toEqual([]);
+  });
+
+  it('пунктир призрака совпадает с проводами после постановки: в плотном заводе — по дереву, не паутина', () => {
+    const { state, place } = world();
+    for (let y = 2; y <= 8; y += 2) for (let x = 2; x <= 8; x += 2) place('pole', x, y);
+    const at = { x: 5, y: 5 };
+    const links = ghostLinks(state, at, 'pole');
+    // Все 16 столбов в радиусе 7, но в дерево войдут лишь немногие рёбра призрака.
+    expect(links.length).toBeGreaterThan(0);
+    expect(links.length).toBeLessThan(6);
+    place('pole', at.x, at.y);
+    const ghost = Object.values(state.buildings).find((b) => b.x === at.x && b.y === at.y)!;
+    const after = powerNetworks(state).wires.filter(([a, b]) => a === ghost.id || b === ghost.id);
+    expect(links).toEqual(after.map(([a, b]) => (a === ghost.id ? b : a)).sort((p, q) => p - q));
+  });
+
+  it('призрак соединяется с дальним столбом, только если ближе пути нет', () => {
+    const { state, place } = world();
+    const a = place('pole', 2, 2);
+    const b = place('pole', 8, 2);
+    // Призрак посередине: a–призрак и призрак–b короче a–b (6), оба ребра входят в дерево.
+    expect(ghostLinks(state, { x: 5, y: 2 }, 'pole')).toEqual([a.id, b.id]);
   });
 });
 
