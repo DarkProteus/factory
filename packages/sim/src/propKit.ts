@@ -69,6 +69,12 @@ export const FACTORY_PREFIX: Step[] = [
   { kind: 'cmd', command: { type: 'build', building: 'chest', x: 5, y: 0, dir: 1 } },
 ];
 
+/**
+ * Предметы, которые сгорают или расходуются и поэтому в балансе не участвуют: уголь жгут печи и генераторы,
+ * пакеты съедает лаборатория. Из них ничего не крафтится, так что баланс остальных предметов остаётся точным.
+ */
+export const UNTRACKED = ['coal', 'sciencePackRed', 'sciencePackGreen'];
+
 /** Журнал модели: то, что состояние само не помнит, но нужно для баланса предметов. */
 export interface Ledger {
   /** Сумма исходных запасов залежей по предметам. */
@@ -91,7 +97,7 @@ export function newWorld(seed: number, map: MapParams, fullInventory = false): {
   return { state, ledger: { initial, startingHeld } };
 }
 
-const stacksOf = (b: PlacedBuilding): ItemStack[] => [
+export const stacksOf = (b: PlacedBuilding): ItemStack[] => [
   ...(b.belt ?? []).map((it) => ({ item: it.item, count: 1 })),
   ...(b.output ? [b.output] : []),
   ...(b.input ?? []),
@@ -149,7 +155,7 @@ export function checkOccupancy(state: SimState): void {
  * Ценность предмета в «руде»: считается рекурсивно по рецептам (цикла в рецептах нет).
  * Предмет без рецепта (руда, камень) стоит 1; предмет-здание стоит столько же, сколько его ингредиенты.
  */
-function oreValue(item: string): number {
+export function oreValue(item: string): number {
   for (const r of Object.values(recipes)) {
     const out = (r.out as Record<string, number>)[item];
     if (out) return Object.entries(r.in).reduce((a, [ing, n]) => a + n * oreValue(ing), 0) / out;
@@ -176,7 +182,7 @@ export function checkConservation(state: SimState, ledger: Ledger): void {
   let mined = 0;
   for (const [item, total] of Object.entries(ledger.initial)) mined += (total - (remaining[item] ?? 0)) * oreValue(item);
   let held = -ledger.startingHeld;
-  const count = (s: ItemStack): void => void (held += s.count * oreValue(s.item));
+  const count = (s: ItemStack): void => void (held += UNTRACKED.includes(s.item) ? 0 : s.count * oreValue(s.item));
   state.inventory.forEach(count);
   for (const b of Object.values(state.buildings)) {
     stacksOf(b).forEach(count);
