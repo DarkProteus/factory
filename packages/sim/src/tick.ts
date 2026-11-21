@@ -6,10 +6,11 @@ import type { SimState } from './state';
 
 /**
  * Один шаг симуляции. Мутирует состояние на месте (без копий на каждый тик).
- * Команды применяются по порядку в текущем тике, затем работают здания
+ * Сначала очищаются события прошлого тика, затем команды применяются по порядку в текущем тике, затем работают здания
  * по возрастанию id, затем ручная добыча и очередь ручного крафта, затем счётчик растёт на 1.
  */
 export function tick(state: SimState, commands: readonly Command[]): void {
+  state.events.length = 0;
   for (const command of commands) applyCommand(state, command);
   runBehaviors(state);
   runMining(state);

@@ -5,6 +5,7 @@ export { buildingAt, canPlace, footprintSize, type BuildingDefs, type Dir, type 
 export { BELT_CELL, BELT_GAP, pushToBelt, type BeltItem } from './belt';
 export { createState, type MiningState, type SimState } from './state';
 export { type CraftJob } from './craftQueue';
+export { canResearch, isUnlocked, type ResearchState, type SimEvent, type TechProgress } from './research';
 export { tick } from './tick';
 export { applyCommand, type Command } from './commands';
 export { type BuildingSlot } from './manual';

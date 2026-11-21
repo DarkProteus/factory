@@ -4,8 +4,11 @@ import { crafterAccept, crafterCanAccept } from './crafter';
 import { fuelAccept, fuelCanAccept } from './fuel';
 import { add, canAdd, takeFirst } from './inventory';
 
-/** Принимает ли здание предмет прямо сейчас. Бур и манипулятор не принимают ничего. */
-export function canAccept(b: PlacedBuilding, item: string, defs: BuildingDefs): boolean {
+/**
+ * Принимает ли здание предмет прямо сейчас. Бур и манипулятор не принимают ничего.
+ * unlocked — открытые рецепты (state.research.unlocked): печь не берёт предмет без открытого рецепта; без параметра открыто всё.
+ */
+export function canAccept(b: PlacedBuilding, item: string, defs: BuildingDefs, unlocked?: readonly string[]): boolean {
   const def = defs[b.type];
   if (!def) return false;
   switch (def.behavior) {
@@ -14,7 +17,7 @@ export function canAccept(b: PlacedBuilding, item: string, defs: BuildingDefs): 
       return !last || last.pos >= BELT_GAP;
     }
     case 'crafter':
-      return crafterCanAccept(b, def, item);
+      return crafterCanAccept(b, def, item, undefined, unlocked);
     case 'container':
       return canAdd(b.slots ?? [], def.slots ?? 0, item);
     case 'generator':
@@ -24,15 +27,15 @@ export function canAccept(b: PlacedBuilding, item: string, defs: BuildingDefs): 
   }
 }
 
-/** Кладёт предмет; перед этим нужно проверить canAccept. */
-export function accept(b: PlacedBuilding, item: string, defs: BuildingDefs): void {
+/** Кладёт предмет; перед этим нужно проверить canAccept (с теми же unlocked). */
+export function accept(b: PlacedBuilding, item: string, defs: BuildingDefs, unlocked?: readonly string[]): void {
   const def = defs[b.type]!;
   switch (def.behavior) {
     case 'belt':
       pushToBelt(b, item);
       break;
     case 'crafter':
-      crafterAccept(b, def, item);
+      crafterAccept(b, def, item, undefined, unlocked);
       break;
     case 'container':
       add((b.slots ??= []), def.slots ?? 0, item);

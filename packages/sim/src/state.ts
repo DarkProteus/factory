@@ -1,5 +1,6 @@
 import type { ItemStack, PlacedBuilding } from './buildings';
 import type { CraftJob } from './craftQueue';
+import { createResearch, type ResearchState, type SimEvent } from './research';
 import { createMap, type GameMap, type MapParams } from './grid';
 import { startInventory, startMapParams } from './start';
 
@@ -23,6 +24,10 @@ export interface SimState {
   mining: MiningState | null;
   /** Очередь ручного крафта игрока, см. craftQueue.ts; выполняется первая запись. */
   craftQueue: CraftJob[];
+  /** Исследования: активная технология, прогресс, открытые рецепты, см. research.ts. */
+  research: ResearchState;
+  /** События тика для интерфейса; очищаются в начале tick. */
+  events: SimEvent[];
 }
 
 /** Состояние ручной добычи (см. mining.ts). */
@@ -39,5 +44,5 @@ export interface MiningState {
  */
 export function createState(seed: number, map?: MapParams): SimState {
   const inventory = map ? [] : startInventory();
-  return { tick: 0, rng: seed | 0, counters: {}, map: createMap(map ?? startMapParams()), buildings: {}, nextId: 1, inventory, mining: null, craftQueue: [] };
+  return { tick: 0, rng: seed | 0, counters: {}, map: createMap(map ?? startMapParams()), buildings: {}, nextId: 1, inventory, mining: null, craftQueue: [], research: createResearch(), events: [] };
 }
