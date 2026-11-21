@@ -79,6 +79,8 @@ groma:
       file: packages/sim/src/milestone3.layout.ts
     - scanner: typescript
       file: packages/sim/src/pairsTable.testkit.ts
+    - scanner: typescript
+      file: vitest.stryker.config.ts
   technology: TypeScript
 description: Хранит состояние мира и обновляет его раз в тик
 ---
