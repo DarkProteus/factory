@@ -35,5 +35,6 @@ describe('границы пакета sim', () => {
     const results = await eslint.lintFiles(['packages/sim']);
     expect(results.length).toBeGreaterThan(0);
     expect(results.flatMap((r) => r.messages)).toEqual([]);
-  });
+    // Линтер всего sim под нагрузкой идёт дольше стандартных 5 с (TASK-60).
+  }, 30_000);
 });
