@@ -19,6 +19,8 @@ export type BuildingSlot =
 interface ManualState {
   buildings: Record<number, PlacedBuilding>;
   inventory: ItemStack[];
+  /** Открытые рецепты: печь не принимает предмет без открытого рецепта. */
+  research: { unlocked: readonly string[] };
 }
 
 function buildingById(state: ManualState, id: number): PlacedBuilding | undefined {
@@ -86,8 +88,8 @@ export function putIntoBuilding(
   if (!b || !Number.isInteger(count) || count <= 0) return;
   const limit = Math.min(count, countOf(state.inventory, item));
   let moved = 0;
-  while (moved < limit && canAccept(b, item, defs)) {
-    accept(b, item, defs);
+  while (moved < limit && canAccept(b, item, defs, state.research.unlocked)) {
+    accept(b, item, defs, state.research.unlocked);
     moved += 1;
   }
   if (moved > 0) removeItems(state.inventory, item, moved);

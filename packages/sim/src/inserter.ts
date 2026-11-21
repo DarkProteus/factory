@@ -20,13 +20,14 @@ export function runInserter(
   satisfaction: number | undefined,
 ): void {
   const dir: Dir = b.dir;
+  const open = state.research.unlocked;
   const electric = def.energy?.kind === 'electric';
   const from = buildingAt(state, b.x - DX[dir], b.y - DY[dir]);
   const to = buildingAt(state, b.x + DX[dir], b.y + DY[dir]);
   if (!b.output) {
     if (!from || !to || from === to) return;
     if (electric && !hasPower(b, satisfaction)) return;
-    const item = takeFrom(from, (it) => canAccept(to, it, defs), defs);
+    const item = takeFrom(from, (it) => canAccept(to, it, defs, open), defs);
     if (item === null) return;
     b.output = { item, count: 1 };
     b.progress = 0;
@@ -35,8 +36,8 @@ export function runInserter(
   const swing = def.swingTicks ?? 0;
   // Взмах идёт со скоростью × удовлетворённость; ожидание с завершённым взмахом — простой, без спроса.
   if (b.progress < swing && (!electric || electricTick(b, satisfaction))) b.progress += 1;
-  if (b.progress < swing || !to || !canAccept(to, b.output.item, defs)) return;
-  accept(to, b.output.item, defs);
+  if (b.progress < swing || !to || !canAccept(to, b.output.item, defs, open)) return;
+  accept(to, b.output.item, defs, open);
   b.output = null;
   b.progress = 0;
 }

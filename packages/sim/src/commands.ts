@@ -3,6 +3,7 @@ import { setRecipe } from './assembler';
 import { startMining, stopMining } from './mining';
 import { cancelCraft, enqueueCraft } from './craftQueue';
 import { putIntoBuilding, takeFromBuilding, type BuildingSlot } from './manual';
+import { setResearch } from './research';
 import { nextRandom } from './rng';
 import type { SimState } from './state';
 
@@ -29,7 +30,9 @@ export type Command =
   /** Переносит ячейку здания (id) в инвентарь целиком или сколько помещается. */
   | { type: 'takeFromBuilding'; building: number; slot: BuildingSlot }
   /** Кладёт из инвентаря в здание до count предметов туда, куда положил бы манипулятор; лишнее остаётся в инвентаре. */
-  | { type: 'putIntoBuilding'; building: number; item: string; count: number };
+  | { type: 'putIntoBuilding'; building: number; item: string; count: number }
+  /** Выбирает активную технологию: только доступную и неизученную; прогресс прочих сохраняется. */
+  | { type: 'setResearch'; tech: string };
 
 /** `defs` — таблица зданий; по умолчанию content.buildings (параметр нужен тестам). */
 export function applyCommand(state: SimState, command: Command, defs?: BuildingDefs): void {
@@ -66,6 +69,9 @@ export function applyCommand(state: SimState, command: Command, defs?: BuildingD
       return;
     case 'putIntoBuilding':
       putIntoBuilding(state, command.building, command.item, command.count, defs);
+      return;
+    case 'setResearch':
+      setResearch(state, command.tech);
       return;
   }
 }

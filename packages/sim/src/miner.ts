@@ -44,8 +44,9 @@ function frontCell(b: PlacedBuilding, def: BuildingDef): [number, number] {
 function emit(state: SimState, b: PlacedBuilding, def: BuildingDef, defs: BuildingDefs): void {
   if (!b.output) return;
   const to = buildingAt(state, ...frontCell(b, def));
-  if (!to || !canAccept(to, b.output.item, defs)) return;
-  accept(to, b.output.item, defs);
+  const open = state.research.unlocked;
+  if (!to || !canAccept(to, b.output.item, defs, open)) return;
+  accept(to, b.output.item, defs, open);
   b.output.count -= 1;
   if (b.output.count <= 0) b.output = null;
 }
