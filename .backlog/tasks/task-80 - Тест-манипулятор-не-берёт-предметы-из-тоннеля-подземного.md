@@ -1,9 +1,10 @@
 ---
 id: TASK-80
 title: 'Тест: манипулятор не берёт предметы из тоннеля подземного'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-21T17:42:00Z'
+updated_date: '2026-11-21T18:19:00Z'
 labels:
   - quality
 milestone: m-7

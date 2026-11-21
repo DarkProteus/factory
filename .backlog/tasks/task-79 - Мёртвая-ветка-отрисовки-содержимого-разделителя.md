@@ -1,9 +1,10 @@
 ---
 id: TASK-79
 title: Мёртвая ветка отрисовки содержимого разделителя
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-21T17:24:00Z'
+updated_date: '2026-11-21T18:19:00Z'
 labels:
   - quality
 milestone: m-7

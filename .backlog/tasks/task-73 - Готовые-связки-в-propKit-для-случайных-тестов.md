@@ -1,9 +1,10 @@
 ---
 id: TASK-73
 title: Готовые связки в propKit для случайных тестов
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-21T17:17:00Z'
+updated_date: '2026-11-21T18:19:00Z'
 labels:
   - quality
 milestone: m-7
