@@ -1,15 +1,22 @@
 ---
 id: TASK-65
 title: Тест плавки падает по таймауту под нагрузкой
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-11-21T13:08:00Z'
-updated_date: '2026-11-21T14:35:00Z'
+updated_date: '2026-11-21T14:39:00Z'
 labels:
   - m3
 dependencies: []
 references:
   - sim
+modified_files:
+  - packages/sim/src/fuel.test.ts
+  - packages/sim/src/smelting.test.ts
+  - packages/sim/src/invariants.test.ts
+  - packages/render/src/scene.test.ts
+  - tools/boundaries.test.ts
+  - tools/pages-base.test.ts
 type: bug
 ordinal: 71000
 ---
@@ -22,6 +29,6 @@ packages/sim/src/smelting.test.ts «100 руды по конвейеру пре�
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Долгие тесты sim имеют явный таймаут
-- [ ] #2 pnpm test зелёный под нагрузкой
+- [x] #1 Долгие тесты sim имеют явный таймаут
+- [x] #2 pnpm test зелёный под нагрузкой
 <!-- AC:END -->
