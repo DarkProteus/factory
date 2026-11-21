@@ -4,13 +4,14 @@ title: Аудит пропущенных сочетаний поведений �
 status: To Do
 assignee: []
 created_date: '2026-11-21T16:38:00Z'
-updated_date: '2026-11-21T16:43:00Z'
+updated_date: '2026-11-21T17:18:00Z'
 labels:
-  - m3
-milestone: m-3
+  - quality
+milestone: m-7
 dependencies: []
 references:
   - sim
+priority: high
 type: chore
 ordinal: 76000
 ---
