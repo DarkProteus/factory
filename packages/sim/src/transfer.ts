@@ -1,4 +1,4 @@
-import { BELT_GAP, pushToBelt } from './belt';
+import { BELT_CELL, BELT_GAP, pushToBelt } from './belt';
 import type { BuildingDefs, PlacedBuilding } from './buildings';
 import { crafterAccept, crafterCanAccept } from './crafter';
 import { fuelAccept, fuelCanAccept } from './fuel';
@@ -12,7 +12,8 @@ export function canAccept(b: PlacedBuilding, item: string, defs: BuildingDefs, u
   const def = defs[b.type];
   if (!def) return false;
   switch (def.behavior) {
-    case 'belt': {
+    case 'belt':
+    case 'underground': {
       const last = b.belt?.[b.belt.length - 1];
       return !last || last.pos >= BELT_GAP;
     }
@@ -32,6 +33,7 @@ export function accept(b: PlacedBuilding, item: string, defs: BuildingDefs, unlo
   const def = defs[b.type]!;
   switch (def.behavior) {
     case 'belt':
+    case 'underground':
       pushToBelt(b, item);
       break;
     case 'crafter':
@@ -60,6 +62,11 @@ export function takeFrom(b: PlacedBuilding, accepts: (item: string) => boolean, 
   switch (defs[b.type]?.behavior) {
     case 'belt': {
       const i = (b.belt ?? []).findIndex((it) => accepts(it.item));
+      return i < 0 ? null : b.belt!.splice(i, 1)[0]!.item;
+    }
+    case 'underground': {
+      // Из входа берётся только то, что ещё на поверхности, не в тоннеле.
+      const i = (b.belt ?? []).findIndex((it) => it.pos <= BELT_CELL && accepts(it.item));
       return i < 0 ? null : b.belt!.splice(i, 1)[0]!.item;
     }
     case 'miner':

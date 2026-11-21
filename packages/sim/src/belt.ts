@@ -35,13 +35,20 @@ export const isBelt = (b: PlacedBuilding | null, defs: BuildingDefs): b is Place
 /**
  * Двигает предметы конвейера и передаёт головной на цель. Цель — конвейер или разделитель
  * (intoSplitter): разделитель вмещает один предмет, поэтому на стыке с ним головной предмет
- * ждёт в конце клетки, пока буфер не освободится.
+ * ждёт в конце клетки, пока буфер не освободится. length — длина ленты: у входа подземного
+ * с парой она включает тоннель (underground.ts).
  */
-export function moveBelt(b: PlacedBuilding, def: BuildingDef, target: PlacedBuilding | null, intoSplitter: boolean): void {
+export function moveBelt(
+  b: PlacedBuilding,
+  def: BuildingDef,
+  target: PlacedBuilding | null,
+  intoSplitter: boolean,
+  length: number = BELT_CELL,
+): void {
   const items = lane(b);
   if (items.length === 0) return;
   const speed = def.beltSpeed ?? 0;
-  let limit = BELT_CELL;
+  let limit = length;
   if (target && !intoSplitter) {
     const tail = lane(target)[lane(target).length - 1];
     limit += tail ? tail.pos - BELT_GAP : BELT_CELL;
@@ -52,14 +59,14 @@ export function moveBelt(b: PlacedBuilding, def: BuildingDef, target: PlacedBuil
   }
   if (!target) return;
   if (intoSplitter) {
-    if (items[0]!.pos >= BELT_CELL && !target.belt?.length) {
+    if (items[0]!.pos >= length && !target.belt?.length) {
       target.belt = [{ item: items.shift()!.item, pos: BELT_CELL / 2 }];
     }
     return;
   }
-  while (items.length > 0 && items[0]!.pos >= BELT_CELL) {
+  while (items.length > 0 && items[0]!.pos >= length) {
     const it = items.shift()!;
-    lane(target).push({ item: it.item, pos: it.pos - BELT_CELL });
+    lane(target).push({ item: it.item, pos: it.pos - length });
   }
 }
 

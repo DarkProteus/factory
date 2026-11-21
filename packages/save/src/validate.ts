@@ -95,6 +95,7 @@ function checkBuilding(key: string, b: unknown): void {
     fail(where, `рецепт «${String(b.recipe)}» не делается в этом здании`);
   }
   checkCrafterInput(b, where);
+  if (b.underground !== undefined && b.underground !== 'in' && b.underground !== 'out') fail(where, 'неверное поле underground');
   if (b.belt !== undefined) {
     if (!Array.isArray(b.belt)) fail(where, 'belt: ожидался список');
     b.belt.forEach((it: unknown, i) => {
