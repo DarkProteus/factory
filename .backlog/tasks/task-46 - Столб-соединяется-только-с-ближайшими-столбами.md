@@ -1,15 +1,18 @@
 ---
 id: TASK-46
 title: Столб соединяется только с ближайшими столбами
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-11-21T00:09:00Z'
-updated_date: '2026-11-21T12:02:00Z'
+updated_date: '2026-11-21T12:13:00Z'
 labels:
   - m3
 dependencies: []
 references:
   - sim
+modified_files:
+  - packages/sim/src/network.ts
+  - packages/sim/src/wires.test.ts
 ordinal: 52000
 ---
 
@@ -21,9 +24,9 @@ ordinal: 52000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Столб соединяется не больше чем с N ближайшими столбами, правило в design.md
-- [ ] #2 Выбор детерминирован (равные расстояния — по id)
-- [ ] #3 Тесты сетей и хеш-тест зелёные; скриншот плотного завода проверен
+- [x] #1 Столб соединяется не больше чем с N ближайшими столбами, правило в design.md
+- [x] #2 Выбор детерминирован (равные расстояния — по id)
+- [x] #3 Тесты сетей и хеш-тест зелёные; скриншот плотного завода проверен
 <!-- AC:END -->
 
 ## Implementation Notes
