@@ -1,9 +1,10 @@
 ---
 id: TASK-87
 title: eslint сканирует worktree агентов и песочницы Stryker
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-21T18:59:00Z'
+updated_date: '2026-11-21T19:26:00Z'
 labels:
   - quality
 milestone: m-7

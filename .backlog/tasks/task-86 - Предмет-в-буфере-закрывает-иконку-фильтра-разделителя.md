@@ -1,9 +1,10 @@
 ---
 id: TASK-86
 title: Предмет в буфере закрывает иконку фильтра разделителя
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-21T18:33:00Z'
+updated_date: '2026-11-21T19:26:00Z'
 labels:
   - quality
 milestone: m-7
