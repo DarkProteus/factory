@@ -1,6 +1,7 @@
 // Здания M2 по docs/style.md: разделитель, сборщик, столб, генератор.
 // Как и в buildings.ts, всё рисуется в ориентации N с центром в (0, 0).
 import { recipes } from '@factory/content';
+import { splitterNextOutput } from '@factory/sim';
 import type { Graphics } from 'pixi.js';
 import type { ViewState } from '../interp';
 import type { Token } from '../palette';
@@ -10,11 +11,10 @@ import { body, fill, line, lamp, OUTLINE, OUTLINE_THIN, rivets, rust, type LampS
 
 /**
  * Индекс выхода разделителя, на который пойдёт следующий предмет: 0 — перед, 1 — лево, 2 — право.
- * Поля в состоянии sim пока нет (его делает задача про разделитель): рисуем значение по умолчанию,
- * первый выход подсвечен. Когда поле появится, читать его здесь.
+ * Правило общее с sim (splitterNextOutput); очередь выходов хранится в b.progress.
  */
-function splitterNext(_b: BuildingView): number {
-  return 0;
+export function splitterNext(b: Pick<BuildingView, 'progress'>): number {
+  return splitterNextOutput(b, '');
 }
 
 /** Нагрузка генератора, 0..1: min(выработка, спрос) / выработка его сети (powerStats). */

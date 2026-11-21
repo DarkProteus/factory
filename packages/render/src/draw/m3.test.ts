@@ -122,6 +122,10 @@ describe('фильтрующий разделитель', () => {
     const other = { ...f, belt: [{ item: 'coal', pos: 0 }] } as Parameters<typeof filterTip>[0];
     expect(filterTip(other)!(0)).toBe('rust-light');
     expect(filterTip(other)!(1)).toBe('hazard');
+    // Очередь боковых выходов берётся из sim: с индекса 2 следующий предмет идёт вправо.
+    const right = { ...other, progress: 2 } as Parameters<typeof filterTip>[0];
+    expect(filterTip(right)!(1)).toBe('rust-light');
+    expect(filterTip(right)!(2)).toBe('hazard');
   });
 });
 

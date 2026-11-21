@@ -28,6 +28,23 @@ export const isSplitter = (b: PlacedBuilding, defs: BuildingDefs): boolean => {
   return behavior === 'splitter' || behavior === 'filterSplitter';
 };
 
+type SplitterView = Pick<PlacedBuilding, 'progress' | 'filter'>;
+
+/** Допустимые выходы для предмета и позиция в них, с которой начинается круг: первый, чей индекс не меньше b.progress. */
+function splitterRound(b: SplitterView, item: string): { allowed: number[]; start: number } {
+  const allowed = b.filter === undefined ? [0, 1, 2] : item === b.filter ? [0] : [1, 2];
+  return { allowed, start: Math.max(0, allowed.findIndex((i) => i >= b.progress)) };
+}
+
+/**
+ * Выход, на который разделитель отправит следующий предмет `item` (0 — вперёд, 1 — влево, 2 — вправо),
+ * если на нём есть место. Единое правило для sim и подсветки в render.
+ */
+export function splitterNextOutput(b: SplitterView, item: string): number {
+  const { allowed, start } = splitterRound(b, item);
+  return allowed[start]!;
+}
+
 /**
  * Поведение splitter и filterSplitter: буфер на один предмет лежит в b.belt (он же возвращается при сносе),
  * круговой индекс следующего выхода — в b.progress (0..2). Предмет уходит на первый по кругу
@@ -38,9 +55,7 @@ export const isSplitter = (b: PlacedBuilding, defs: BuildingDefs): boolean => {
 export function runSplitter(b: PlacedBuilding, outs: readonly (PlacedBuilding | null)[]): void {
   const held = b.belt?.[0];
   if (!held) return;
-  const allowed = b.filter === undefined ? [0, 1, 2] : held.item === b.filter ? [0] : [1, 2];
-  // Начало круга среди допустимых выходов: первый, чей индекс не меньше b.progress.
-  const start = Math.max(0, allowed.findIndex((i) => i >= b.progress));
+  const { allowed, start } = splitterRound(b, held.item);
   for (let k = 0; k < allowed.length; k++) {
     const i = allowed[(start + k) % allowed.length]!;
     const out = outs[i];

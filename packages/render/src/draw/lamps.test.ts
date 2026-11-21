@@ -1,8 +1,8 @@
 import { buildings } from '@factory/content';
-import { applyCommand, createState, tick, type SimState } from '@factory/sim';
+import { applyCommand, createState, tick, type Command, type Dir, type SimState } from '@factory/sim';
 import { describe, expect, it } from 'vitest';
 import { drillLamp, furnaceLamp, type BuildingView } from './buildings';
-import { assemblerLamp, assemblerProduct, generatorLamp, generatorLoad } from './buildingsM2';
+import { assemblerLamp, assemblerProduct, generatorLamp, generatorLoad, splitterNext } from './buildingsM2';
 
 function world(deposits: { x: number; y: number }[] = []) {
   const state = createState(1, { width: 32, height: 32, deposits: deposits.map((d) => ({ ...d, item: 'ironOre', amount: 100 })) });
@@ -117,5 +117,34 @@ describe('лампы M2', () => {
     delete gen.fuel;
     gen.burn = 0;
     expect(generatorLamp(state, gen)).toBe('off');
+  });
+});
+
+describe('подсветка выхода разделителя', () => {
+  it('подсвечен тот выход, в который sim отправит следующий предмет', () => {
+    const state = createState(1, { width: 16, height: 16 });
+    for (const [type, n] of [['splitter', 1], ['belt', 4]] as const) state.inventory.push({ item: type, count: n });
+    // Разделитель смотрит на север (dir 0): вперёд (5,4), влево (4,5), вправо (6,5); лента на выходах смотрит от него.
+    const outs: [number, number, Dir][] = [[5, 4, 0], [4, 5, 3], [6, 5, 1]];
+    tick(state, [
+      { type: 'build', building: 'splitter', x: 5, y: 5, dir: 0 },
+      ...outs.map(([x, y, dir]): Command => ({ type: 'build', building: 'belt', x, y, dir })),
+    ]);
+    const s = Object.values(state.buildings).find((b) => b.type === 'splitter')!;
+    const at = (x: number, y: number) => Object.values(state.buildings).find((b) => b.x === x && b.y === y)!;
+    for (let n = 0; n < 6; n++) {
+      s.belt = [{ item: 'ironOre', pos: 0 }];
+      for (const [x, y] of outs) at(x, y).belt = [];
+      const predicted = splitterNext(s);
+      const before = outs.map(([x, y]) => at(x, y).belt?.length ?? 0);
+      tick(state, []);
+      const after = outs.map(([x, y]) => at(x, y).belt?.length ?? 0);
+      expect(after.findIndex((c, i) => c > before[i]!)).toBe(predicted);
+    }
+  });
+
+  it('с пустой очередью подсвечен первый выход', () => {
+    expect(splitterNext({ progress: 0 } as BuildingView)).toBe(0);
+    expect(splitterNext({ progress: 2 } as BuildingView)).toBe(2);
   });
 });
