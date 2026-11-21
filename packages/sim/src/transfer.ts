@@ -39,9 +39,16 @@ export function canAccept(
       return fuelCanAccept(b, def, item);
     case 'lab':
       return labCanAccept(b, item, active, limit);
-    default:
+    case 'miner':
+    case 'inserter':
+    case 'pole':
+    case 'turret':
+      // Бур, манипулятор и столб ничего не принимают; turret — заготовка M4 (здания пока нет).
       return false;
   }
+  // Исчерпывающий switch: новое поведение без решения здесь не компилируется.
+  const unreachable: never = def.behavior;
+  return unreachable;
 }
 
 /** Кладёт предмет; перед этим нужно проверить canAccept (с теми же unlocked). */
@@ -51,24 +58,32 @@ export function accept(b: PlacedBuilding, item: string, defs: BuildingDefs, unlo
     case 'belt':
     case 'underground':
       pushToBelt(b, item);
-      break;
+      return;
     case 'splitter':
     case 'filterSplitter':
       b.belt = [{ item, pos: BELT_CELL / 2 }];
-      break;
+      return;
     case 'crafter':
       crafterAccept(b, def, item, undefined, unlocked);
-      break;
+      return;
     case 'container':
       add((b.slots ??= []), def.slots ?? 0, item);
-      break;
+      return;
     case 'generator':
       fuelAccept(b, item);
-      break;
+      return;
     case 'lab':
       labAccept(b, item);
-      break;
+      return;
+    case 'miner':
+    case 'inserter':
+    case 'pole':
+    case 'turret':
+      // Эти здания canAccept не принимают, accept для них не зовут.
+      return;
   }
+  const unreachable: never = def.behavior;
+  return unreachable;
 }
 
 /** Берёт один предмет из выхода здания, если accepts его одобряет. */
@@ -82,7 +97,10 @@ function takeOutput(b: PlacedBuilding, accepts: (item: string) => boolean): stri
 
 /** Берёт один предмет, который принимает accepts; без подходящего возвращает null. */
 export function takeFrom(b: PlacedBuilding, accepts: (item: string) => boolean, defs: BuildingDefs): string | null {
-  switch (defs[b.type]?.behavior) {
+  const behavior = defs[b.type]?.behavior;
+  switch (behavior) {
+    case undefined:
+      return null;
     case 'belt': {
       const i = (b.belt ?? []).findIndex((it) => accepts(it.item));
       return i < 0 ? null : b.belt!.splice(i, 1)[0]!.item;
@@ -111,7 +129,13 @@ export function takeFrom(b: PlacedBuilding, accepts: (item: string) => boolean, 
       stack.count -= 1;
       return stack.item;
     }
-    default:
+    case 'generator':
+    case 'inserter':
+    case 'pole':
+    case 'turret':
+      // Из генератора (топливо), руки манипулятора и столба манипулятор ничего не берёт.
       return null;
   }
+  const unreachable: never = behavior;
+  return unreachable;
 }

@@ -60,9 +60,12 @@ export function drawBuilding(g: Graphics, b: BuildingView, def: BuildingDef, ctx
       return drawGenerator(g, b, ctx, w, h);
     case 'container':
       return drawChest(g, b);
-    default:
-      body(g, w, h, 'steel-dark');
+    case 'turret':
+      // Заготовка M4: здания пока нет, рисуем плоский корпус.
+      return body(g, w, h, 'steel-dark');
   }
+  const unreachable: never = def.behavior;
+  return unreachable;
 }
 
 /** Есть ли залежь под отпечатком (для лампы и вращения бура). */

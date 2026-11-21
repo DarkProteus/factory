@@ -20,20 +20,32 @@ export function runBehaviors(state: SimState, defs: BuildingDefs = contentBuildi
     switch (def.behavior) {
       case 'miner':
         runMiner(state, b, def, defs, power.get(b.id));
-        break;
+        continue;
       case 'inserter':
         runInserter(state, b, def, defs, power.get(b.id));
-        break;
+        continue;
       case 'crafter':
         runCrafter(b, def, power.get(b.id));
-        break;
+        continue;
       case 'lab':
         runLab(state, b, def, defs, power.get(b.id));
-        break;
-      default:
-        // Остальные поведения появятся в следующих задачах.
-        break;
+        continue;
+      // Двигаются в runBelts ниже: конвейеры, подземные и разделители.
+      case 'belt':
+      case 'underground':
+      case 'splitter':
+      case 'filterSplitter':
+      // Работают в stepPower (power.ts) выше: генератор вырабатывает энергию, столб соединяет сеть.
+      case 'generator':
+      case 'pole':
+      // Пассивны: контейнер только хранит; turret — заготовка M4 (здания пока нет).
+      case 'container':
+      case 'turret':
+        continue;
     }
+    // Исчерпывающий switch: новое поведение без решения здесь не компилируется.
+    const unreachable: never = def.behavior;
+    void unreachable;
   }
   runBelts(state, defs);
 }

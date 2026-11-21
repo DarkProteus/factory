@@ -4,7 +4,7 @@ title: Таблица «поведение × поведение» из content 
 status: In Progress
 assignee: []
 created_date: '2026-11-21T17:17:00Z'
-updated_date: '2026-11-21T17:32:00Z'
+updated_date: '2026-11-21T17:40:00Z'
 labels:
   - quality
 milestone: m-7
@@ -15,6 +15,12 @@ dependencies:
 references:
   - sim
   - content
+modified_files:
+  - packages/sim/src/transfer.ts
+  - packages/sim/src/behaviors.ts
+  - packages/render/src/draw/buildings.ts
+  - packages/sim/src/pairsTable.testkit.ts
+  - packages/sim/src/pairs.test.ts
 priority: high
 type: chore
 ordinal: 77000
@@ -28,9 +34,9 @@ ordinal: 77000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Тест строит пары из content, а не из списка в коде теста
-- [ ] #2 Новое здание без строки в таблице роняет тест (проверено временным зданием в тесте)
-- [ ] #3 Таблица совпадает с design.md; расхождения — отдельные задачи
-- [ ] #4 switch по behavior, отмеченные в TASK-70, исчерпывающие через never
-- [ ] #5 pnpm test зелёный
+- [x] #1 Тест строит пары из content, а не из списка в коде теста
+- [x] #2 Новое здание без строки в таблице роняет тест (проверено временным зданием в тесте)
+- [x] #3 Таблица совпадает с design.md; расхождения — отдельные задачи
+- [x] #4 switch по behavior, отмеченные в TASK-70, исчерпывающие через never
+- [x] #5 pnpm test зелёный
 <!-- AC:END -->
