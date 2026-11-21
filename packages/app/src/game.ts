@@ -52,6 +52,10 @@ export interface Game {
   /** Сколько предметов с этим id (в том числе зданий) лежит в инвентаре. */
   itemCount(id: string): number;
   chooseMine(): void;
+  /** Поворот призрака (клавиша R). */
+  rotate(): void;
+  /** Снять инструмент (клавиша Esc без открытых окон). */
+  clearTool(): void;
   getTick(): number;
   /** Сообщение об ошибке сохранения или null; пропадает само через 10 с. */
   getMessage(): string | null;
@@ -223,6 +227,8 @@ export async function startGame(host: HTMLElement, signal?: AbortSignal): Promis
     chooseDemolish: () => setTools(selectDemolish(tools)),
     itemCount: owned,
     chooseMine: () => setTools(selectMine(tools)),
+    rotate: () => setTools(applyKey(tools, 'KeyR')),
+    clearTool: () => setTools(applyKey(tools, 'Escape')),
     getTick: () => state.tick,
     getMessage: () => message,
     newGame() {
