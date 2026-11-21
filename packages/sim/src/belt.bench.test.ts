@@ -98,8 +98,9 @@ describe.each([false, true])('бенчмарк конвейеров, разде�
     const results: number[] = [];
     for (let attempt = 0; attempt < ATTEMPTS; attempt++) {
       if (attempt > 0) await pause(RETRY_PAUSE_MS);
-      results.push(measure(state));
-      if (results[attempt] < budget) break;
+      const ms = measure(state);
+      results.push(ms);
+      if (ms < budget) break;
     }
     const times = results.map((ms) => `${ms.toFixed(2)} мс`).join(', ');
     expect(Math.min(...results), `бюджет ${budget} мс, попытки: ${times}`).toBeLessThan(budget);
