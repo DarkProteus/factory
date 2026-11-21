@@ -4,13 +4,15 @@ title: Мёртвая ветка отрисовки содержимого ра�
 status: In Progress
 assignee: []
 created_date: '2026-11-21T17:24:00Z'
-updated_date: '2026-11-21T18:19:00Z'
+updated_date: '2026-11-21T18:30:00Z'
 labels:
   - quality
 milestone: m-7
 dependencies: []
 references:
   - render
+modified_files:
+  - packages/render/src/scene.ts
 priority: low
 type: chore
 ordinal: 85000
@@ -24,6 +26,6 @@ ordinal: 85000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Ветка удалена, предмет в буфере разделителя виден (скриншот в .playwright-mcp/)
-- [ ] #2 pnpm test зелёный
+- [x] #1 Ветка удалена, предмет в буфере разделителя виден (скриншот в .playwright-mcp/)
+- [x] #2 pnpm test зелёный
 <!-- AC:END -->
