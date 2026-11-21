@@ -4,13 +4,15 @@ title: 'Тест: манипулятор не берёт предметы из �
 status: In Progress
 assignee: []
 created_date: '2026-11-21T17:42:00Z'
-updated_date: '2026-11-21T18:19:00Z'
+updated_date: '2026-11-21T18:22:00Z'
 labels:
   - quality
 milestone: m-7
 dependencies: []
 references:
   - sim
+modified_files:
+  - packages/sim/src/underground.test.ts
 priority: low
 type: chore
 ordinal: 86000
@@ -24,6 +26,6 @@ ordinal: 86000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Тест с парой подземных: предмет в тоннеле манипулятор не берёт, на поверхности входа — берёт
-- [ ] #2 pnpm test зелёный
+- [x] #1 Тест с парой подземных: предмет в тоннеле манипулятор не берёт, на поверхности входа — берёт
+- [x] #2 pnpm test зелёный
 <!-- AC:END -->
