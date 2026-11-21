@@ -1,15 +1,17 @@
 ---
 id: TASK-45
 title: Кнопки мышью для действий с горячими клавишами
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-21T00:09:00Z'
-updated_date: '2026-11-21T12:02:00Z'
+updated_date: '2026-11-21T12:03:00Z'
 labels:
   - m3
 dependencies: []
 references:
   - ui
+modified_files:
+  - docs/style-ui.md
 ordinal: 51000
 ---
 
@@ -24,5 +26,5 @@ ordinal: 51000
 - [ ] #1 Каждое действие с горячей клавишей доступно и кнопкой мышью
 - [ ] #2 На кнопке подписана её клавиша
 - [ ] #3 Скриншот проверен
-- [ ] #4 Раскладка кнопок описана в docs/style-ui.md до реализации
+- [x] #4 Раскладка кнопок описана в docs/style-ui.md до реализации
 <!-- AC:END -->
