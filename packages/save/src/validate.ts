@@ -1,7 +1,7 @@
 import { buildings, items, recipes } from '@factory/content';
 import type { SimState } from '@factory/sim';
 import { SaveError } from './errors';
-import { checkResearch } from './validateResearch';
+import { checkLab, checkResearch } from './validateResearch';
 
 const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -96,7 +96,9 @@ function checkBuilding(key: string, b: unknown): void {
   if (b.recipe !== undefined && recipes[b.recipe as keyof typeof recipes].madeIn !== b.type) {
     fail(where, `рецепт «${String(b.recipe)}» не делается в этом здании`);
   }
-  checkCrafterInput(b, where);
+  // У лаборатории вход — ячейки пакетов без рецепта, а идущая единица — поле unit (TASK-59).
+  if (buildings[b.type as keyof typeof buildings].behavior === 'lab') checkLab(b, where);
+  else checkCrafterInput(b, where);
   if (b.underground !== undefined && b.underground !== 'in' && b.underground !== 'out') fail(where, 'неверное поле underground');
   if (b.belt !== undefined) {
     if (!Array.isArray(b.belt)) fail(where, 'belt: ожидался список');

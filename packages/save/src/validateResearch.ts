@@ -46,3 +46,10 @@ export function checkResearch(research: unknown): void {
     seen.add(id as string);
   }
 }
+
+/** Лаборатория: unit (если есть) — известная технология, чьи пакеты списаны на идущую единицу. */
+export function checkLab(b: Record<string, unknown>, where: string): void {
+  if (b.unit !== undefined && (typeof b.unit !== 'string' || !Object.hasOwn(technologies, b.unit))) {
+    fail(where, `неизвестная технология единицы «${String(b.unit)}»`);
+  }
+}
