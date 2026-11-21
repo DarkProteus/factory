@@ -1,9 +1,10 @@
 ---
 id: TASK-57
 title: Пунктир призрака столба по правилу дерева
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-21T12:13:00Z'
+updated_date: '2026-11-21T13:00:00Z'
 labels:
   - m3
 dependencies: []

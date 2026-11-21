@@ -1,9 +1,10 @@
 ---
 id: TASK-61
 title: Подсказка карточки исследования обрезается у края экрана
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-21T12:48:00Z'
+updated_date: '2026-11-21T13:00:00Z'
 labels:
   - m3
 dependencies: []
