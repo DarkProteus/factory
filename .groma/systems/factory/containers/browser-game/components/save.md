@@ -18,6 +18,8 @@ groma:
     - scanner: typescript
       file: packages/save/src/validateResearch.ts
       symbol: checkResearch
+    - scanner: typescript
+      file: packages/save/src/index.testkit.ts
   technology: TypeScript
 description: Сохраняет и загружает состояние партии
 ---

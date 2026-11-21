@@ -95,6 +95,10 @@ groma:
       symbol: ResearchWindow
     - scanner: typescript
       file: packages/app/src/techUi.ts
+    - scanner: typescript
+      file: packages/app/src/buildingUi.testkit.ts
+    - scanner: typescript
+      file: packages/app/src/input.testkit.ts
   technology: React
 description: Превращает ввод игрока в команды для ядра
 ---
