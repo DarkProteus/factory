@@ -219,6 +219,20 @@ describe('битые сохранения', () => {
     expect(() => deserialize(tamper((s) => delete s.craftQueue))).toThrow(SaveError);
   });
 
+  it('фильтр фильтрующего разделителя сохраняется и валидируется', () => {
+    const state = createState(3, { width: 8, height: 8 });
+    state.inventory = [{ item: 'filterSplitter', count: 1 }];
+    runTicks(state, [{ tick: 0, command: { type: 'build', building: 'filterSplitter', x: 2, y: 2, dir: 1 } }], 1);
+    const id = Object.values(state.buildings)[0]!.id;
+    runTicks(state, [{ tick: 1, command: { type: 'setFilter', building: id, item: 'coal' } }], 2);
+    const loaded = roundtrip(state);
+    expect(loaded.buildings[id]!.filter).toBe('coal');
+    expect(hash(loaded)).toBe(hash(state));
+    const file = JSON.parse(serialize(state));
+    file.state.buildings[id].filter = 'nope';
+    expect(() => deserialize(JSON.stringify(file))).toThrow(/нет в игре/);
+  });
+
   it('рецепт сборщика сохраняется; рецепт чужого здания не принимается', () => {
     const state = createState(3, { width: 8, height: 8 });
     state.inventory = [

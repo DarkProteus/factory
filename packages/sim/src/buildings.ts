@@ -15,7 +15,7 @@ export interface PlacedBuilding {
   x: number;
   y: number;
   dir: Dir;
-  /** Накопленные тики текущего рабочего цикла; у splitter — индекс следующего выхода по кругу (0..2), см. splitter.ts. */
+  /** Накопленные тики текущего рабочего цикла; у splitter и filterSplitter — индекс следующего выхода по кругу (0..2), см. splitter.ts. */
   progress: number;
   /** Выходной буфер: один вид предмета или пусто. */
   output: ItemStack | null;
@@ -27,6 +27,8 @@ export interface PlacedBuilding {
   recipe?: string;
   /** Ячейки контейнера: только непустые стеки. */
   slots?: ItemStack[];
+  /** Фильтр фильтрующего разделителя (id предмета); без фильтра поля нет. См. splitter.ts. */
+  filter?: string;
   /** Ячейка топлива (fuelSlot): одна стопка; пустой не бывает, при нуле поле удаляется. См. fuel.ts. */
   fuel?: ItemStack;
   /** Остаток энергии уже сожжённого топлива, Вт·тик (целое); появляется после первого предмета топлива. */

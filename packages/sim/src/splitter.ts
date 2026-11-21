@@ -1,3 +1,4 @@
+import { buildings as contentBuildings, items } from '@factory/content';
 import { buildingAt, type BuildingDefs, type Dir, type PlacedBuilding } from './buildings';
 import { DX, DY, isBelt, pushToBelt } from './belt';
 import type { SimState } from './state';
@@ -18,21 +19,44 @@ export function splitterOutputs(state: SimState, s: PlacedBuilding, defs: Buildi
   });
 }
 
+/** Разделитель или фильтрующий разделитель: общая раздача по трём выходам. */
+export const isSplitter = (b: PlacedBuilding, defs: BuildingDefs): boolean => {
+  const behavior = defs[b.type]?.behavior;
+  return behavior === 'splitter' || behavior === 'filterSplitter';
+};
+
 /**
- * Поведение splitter: буфер на один предмет лежит в b.belt (он же возвращается при сносе),
+ * Поведение splitter и filterSplitter: буфер на один предмет лежит в b.belt (он же возвращается при сносе),
  * круговой индекс следующего выхода — в b.progress (0..2). Предмет уходит на первый по кругу
  * выход, где есть место; если выходов нет или все заняты, он стоит в буфере.
+ * Фильтр (b.filter, только у filterSplitter): предмет-фильтр идёт лишь вперёд (выход 0) и ждёт в буфере,
+ * остальные — лишь влево и вправо (выходы 1 и 2) по кругу. Без фильтра — как обычный разделитель.
  */
 export function runSplitter(b: PlacedBuilding, outs: readonly (PlacedBuilding | null)[]): void {
   const held = b.belt?.[0];
   if (!held) return;
-  for (let k = 0; k < outs.length; k++) {
-    const i = (b.progress + k) % outs.length;
+  const allowed = b.filter === undefined ? [0, 1, 2] : held.item === b.filter ? [0] : [1, 2];
+  // Начало круга среди допустимых выходов: первый, чей индекс не меньше b.progress.
+  const start = Math.max(0, allowed.findIndex((i) => i >= b.progress));
+  for (let k = 0; k < allowed.length; k++) {
+    const i = allowed[(start + k) % allowed.length]!;
     const out = outs[i];
     if (out && pushToBelt(out, held.item)) {
       b.belt!.shift();
-      b.progress = (i + 1) % outs.length;
+      // Предмет-фильтр круг боковых выходов не сдвигает.
+      if (b.filter === undefined || i !== 0) b.progress = (i + 1) % outs.length;
       return;
     }
   }
+}
+
+/**
+ * Задаёт фильтр фильтрующего разделителя (id здания); null снимает фильтр.
+ * Неверную команду (нет здания, не filterSplitter, неизвестный предмет) молча игнорирует.
+ */
+export function setFilter(state: SimState, buildingId: number, item: string | null, defs: BuildingDefs = contentBuildings): void {
+  const b = Object.hasOwn(state.buildings, buildingId) ? state.buildings[buildingId] : undefined;
+  if (!b || defs[b.type]?.behavior !== 'filterSplitter') return;
+  if (item === null) delete b.filter;
+  else if (Object.hasOwn(items, item)) b.filter = item;
 }

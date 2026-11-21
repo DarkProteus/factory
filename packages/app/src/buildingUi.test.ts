@@ -7,6 +7,8 @@ import {
   buildingSections,
   buildingStatus,
   energyLine,
+  filterChoices,
+  filterCommand,
   hasBuildingWindow,
   putCommand,
   recipeChoices,
@@ -31,8 +33,8 @@ function setup(type: string, deposit = false): { state: SimState; b: PlacedBuild
 const stack = (item: string, count: number) => ({ item, count });
 
 describe("клик по зданию", () => {
-  it("открывает окно у бура, печи, сборщика, сундука и генератора", () => {
-    for (const type of ["drill", "furnace", "assembler", "chest", "generator"]) {
+  it("открывает окно у бура, печи, сборщика, сундука, генератора и фильтрующего разделителя", () => {
+    for (const type of ["drill", "furnace", "assembler", "chest", "generator", "filterSplitter"]) {
       const { state, b } = setup(type);
       expect(windowTarget(state, NO_TOOL, { x: 2, y: 2 })).toBe(b.id);
     }
@@ -246,5 +248,47 @@ describe("выбор рецепта сборщика", () => {
     expect(circuit.available).toBe(false);
     expect(recipeCommand(b, circuit)).toBeNull();
     expect(choices.find((c) => c.selected)!.available).toBe(true);
+  });
+});
+
+describe("фильтрующий разделитель: окно (TASK-37)", () => {
+  it("варианты фильтра: «без фильтра» и все предметы content, выбранный отмечен", () => {
+    const { b } = setup("filterSplitter");
+    const none = filterChoices(b);
+    expect(none[0]).toEqual({ item: null, selected: true });
+    expect(none.slice(1).map((c) => c.item)).toEqual(Object.keys(items));
+    expect(none.slice(1).some((c) => c.selected)).toBe(false);
+    b.filter = "coal";
+    const coal = filterChoices(b);
+    expect(coal[0]!.selected).toBe(false);
+    expect(coal.filter((c) => c.selected).map((c) => c.item)).toEqual(["coal"]);
+  });
+
+  it("у других зданий вариантов фильтра нет", () => {
+    for (const type of ["splitter", "chest", "assembler"]) expect(filterChoices(setup(type).b)).toEqual([]);
+  });
+
+  it("клик по другому предмету шлёт setFilter, по выбранному — ничего, «без фильтра» снимает", () => {
+    const { b } = setup("filterSplitter");
+    expect(filterCommand(b, "coal")).toEqual({ type: "setFilter", building: b.id, item: "coal" });
+    expect(filterCommand(b, null)).toBeNull();
+    b.filter = "coal";
+    expect(filterCommand(b, "coal")).toBeNull();
+    expect(filterCommand(b, "ironOre")).toEqual({ type: "setFilter", building: b.id, item: "ironOre" });
+    expect(filterCommand(b, null)).toEqual({ type: "setFilter", building: b.id, item: null });
+  });
+
+  it("команда меняет состояние sim, статуса, прогресса и секций у разделителя нет", () => {
+    const { state, b } = setup("filterSplitter");
+    tick(state, [filterCommand(b, "coal")!]);
+    expect(b.filter).toBe("coal");
+    expect(buildingStatus(state, b, undefined)).toBeNull();
+    expect(buildingProgress(b)).toBeNull();
+    expect(buildingSections(b)).toEqual([]);
+  });
+
+  it("клик по инвентарю не кладёт предметы в разделитель", () => {
+    const { b } = setup("filterSplitter");
+    expect(putCommand(b, stack("coal", 5))).toBeNull();
   });
 });

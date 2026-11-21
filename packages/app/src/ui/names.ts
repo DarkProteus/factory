@@ -9,6 +9,7 @@ const NAMES: Record<string, string> = {
   inserter: 'Манипулятор',
   chest: 'Сундук',
   splitter: 'Разделитель',
+  filterSplitter: 'Фильтрующий разделитель',
   assembler: 'Сборщик',
   pole: 'Столб',
   generator: 'Генератор',

@@ -3,6 +3,7 @@
 import {
   buildings as contentBuildings,
   INVENTORY_SLOTS,
+  items as contentItems,
   recipes as contentRecipes,
   type BuildingDef,
   type RecipeDef,
@@ -29,9 +30,9 @@ import type { Cell, Tool } from './input';
 type Defs = Readonly<Record<string, BuildingDef>>;
 type Recipes = Readonly<Record<string, RecipeDef>>;
 
-/** Окно есть у бура, печи, сборщика, сундука и генератора: по виду поведения. */
+/** Окно есть у бура, печи, сборщика, сундука, генератора и фильтрующего разделителя: по виду поведения. */
 export function hasBuildingWindow(def: BuildingDef | undefined): boolean {
-  return !!def && ['miner', 'crafter', 'container', 'generator'].includes(def.behavior);
+  return !!def && ['miner', 'crafter', 'container', 'generator', 'filterSplitter'].includes(def.behavior);
 }
 
 /** Здание, чьё окно открывает клик по клетке: только без инструмента и только у зданий с окном. */
@@ -237,4 +238,22 @@ export function recipeChoices(inventory: readonly ItemStack[], b: PlacedBuilding
 /** Клик по рецепту: setRecipe; выбранный и недоступный рецепты команды не дают. */
 export function recipeCommand(b: PlacedBuilding, choice: RecipeChoice): Command | null {
   return choice.selected || !choice.available ? null : { type: 'setRecipe', building: b.id, recipe: choice.id };
+}
+
+export interface FilterChoice {
+  /** Предмет-фильтр; null — «без фильтра». */
+  item: string | null;
+  selected: boolean;
+}
+
+/** Кнопки фильтра фильтрующего разделителя: «без фильтра» и все предметы; у других зданий пусто. */
+export function filterChoices(b: PlacedBuilding, defs: Defs = contentBuildings): FilterChoice[] {
+  if (defs[b.type]?.behavior !== 'filterSplitter') return [];
+  const current = b.filter ?? null;
+  return [null, ...Object.keys(contentItems)].map((item) => ({ item, selected: item === current }));
+}
+
+/** Клик по кнопке фильтра: setFilter; уже выбранный вариант команды не даёт. */
+export function filterCommand(b: PlacedBuilding, item: string | null): Command | null {
+  return (b.filter ?? null) === item ? null : { type: 'setFilter', building: b.id, item };
 }

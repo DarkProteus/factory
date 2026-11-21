@@ -1,5 +1,6 @@
 import { demolishAt, placeBuilding, type BuildingDefs, type Dir } from './buildings';
 import { setRecipe } from './assembler';
+import { setFilter } from './splitter';
 import { startMining, stopMining } from './mining';
 import { cancelCraft, enqueueCraft } from './craftQueue';
 import { putIntoBuilding, takeFromBuilding, type BuildingSlot } from './manual';
@@ -32,7 +33,9 @@ export type Command =
   /** Кладёт из инвентаря в здание до count предметов туда, куда положил бы манипулятор; лишнее остаётся в инвентаре. */
   | { type: 'putIntoBuilding'; building: number; item: string; count: number }
   /** Выбирает активную технологию: только доступную и неизученную; прогресс прочих сохраняется. */
-  | { type: 'setResearch'; tech: string };
+  | { type: 'setResearch'; tech: string }
+  /** Задаёт фильтр фильтрующего разделителя (id здания); null снимает фильтр. */
+  | { type: 'setFilter'; building: number; item: string | null };
 
 /** `defs` — таблица зданий; по умолчанию content.buildings (параметр нужен тестам). */
 export function applyCommand(state: SimState, command: Command, defs?: BuildingDefs): void {
@@ -72,6 +75,9 @@ export function applyCommand(state: SimState, command: Command, defs?: BuildingD
       return;
     case 'setResearch':
       setResearch(state, command.tech);
+      return;
+    case 'setFilter':
+      setFilter(state, command.building, command.item, defs);
       return;
   }
 }

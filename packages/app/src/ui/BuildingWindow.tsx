@@ -7,6 +7,8 @@ import {
   buildingSections,
   buildingStatus,
   energyLine,
+  filterChoices,
+  filterCommand,
   putCommand,
   recipeChoices,
   recipeCommand,
@@ -36,6 +38,7 @@ export function BuildingWindow({ game }: { game: Game }) {
   const energy = energyLine(def, satisfaction);
   const sections = buildingSections(b);
   const choices = def.behavior === 'crafter' && def.recipeMode === 'chosen' ? recipeChoices(game.getInventory(), b) : [];
+  const filters = filterChoices(b);
   const isChest = def.behavior === 'container';
 
   return (
@@ -119,6 +122,28 @@ export function BuildingWindow({ game }: { game: Game }) {
                 </div>
               </div>
             ))}
+            {filters.length > 0 && (
+              <div>
+                <h3>Фильтр</h3>
+                <ItemSlot game={game} item={b.filter ?? null} tip={b.filter ? itemName(b.filter) : 'Без фильтра'} />
+                <div className="recipe-grid bw-filter">
+                  {filters.map((c) => (
+                    <button
+                      key={c.item ?? 'none'}
+                      type="button"
+                      className={`btn${c.selected ? ' active' : ''}`}
+                      onClick={() => {
+                        const cmd = filterCommand(b, c.item);
+                        if (cmd) game.command(cmd);
+                      }}
+                    >
+                      {c.item ? <img src={game.itemIcon(c.item)} alt={itemName(c.item)} /> : <span className="cross" />}
+                      <span className="tip">{c.item ? itemName(c.item) : 'Без фильтра'}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </Panel>
