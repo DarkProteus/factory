@@ -1,7 +1,7 @@
 // Сущности M3 по docs/style-m3.md: лаборатория, подземный конвейер, фильтрующий разделитель,
 // акцент быстрых версий. Как и остальные здания, всё рисуется в ориентации N с центром в (0, 0).
 import { buildings as contentBuildings, technologies, type BuildingDef } from '@factory/content';
-import { BELT_CELL } from '@factory/sim';
+import { BELT_CELL, splitterNextOutput } from '@factory/sim';
 import type { Graphics } from 'pixi.js';
 import type { ViewState } from '../interp';
 import { CELL, GLASS_ALPHA, type Token } from '../palette';
@@ -225,7 +225,8 @@ export function drawFunnel(g: Graphics, cx: number, cy: number, size: number, di
 export function filterTip(b: BuildingView): ((i: number) => Token) | undefined {
   if (b.filter === undefined) return undefined;
   const held = b.belt?.[0]?.item;
-  const next = b.progress === 2 ? 2 : 1;
+  // Предмет не фильтр — идёт на боковой выход; какой именно, решает правило sim.
+  const next = held === undefined ? 1 : splitterNextOutput(b, held);
   return (i) => (i === 0 ? (held === b.filter ? 'ok' : 'rust-light') : held !== undefined && held !== b.filter && i === next ? 'hazard' : 'rust-light');
 }
 

@@ -11,6 +11,7 @@ import {
   type Command,
   type Dir,
   type PlacedBuilding,
+  splitterNextOutput,
   type SimState,
 } from './index';
 import { stocked } from './testKit';
@@ -142,5 +143,17 @@ describe('разделитель (TASK-29)', () => {
     expect(at(state, 5, 5).belt).toHaveLength(1);
     tick(state, [{ type: 'demolish', x: 5, y: 5 }]);
     expect(state.inventory.find((s) => s.item === 'ironOre')?.count).toBe(1);
+  });
+});
+
+describe('splitterNextOutput', () => {
+  it('без фильтра возвращает круговой индекс, с фильтром учитывает допустимые выходы', () => {
+    for (const progress of [0, 1, 2]) expect(splitterNextOutput({ progress }, 'ironOre')).toBe(progress);
+    // Предмет-фильтр идёт только вперёд.
+    expect(splitterNextOutput({ progress: 2, filter: 'ironOre' }, 'ironOre')).toBe(0);
+    // Остальные — по кругу боковых: с 0 и 1 на левый, с 2 на правый.
+    expect(splitterNextOutput({ progress: 0, filter: 'ironOre' }, 'coal')).toBe(1);
+    expect(splitterNextOutput({ progress: 1, filter: 'ironOre' }, 'coal')).toBe(1);
+    expect(splitterNextOutput({ progress: 2, filter: 'ironOre' }, 'coal')).toBe(2);
   });
 });

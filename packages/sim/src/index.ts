@@ -17,3 +17,4 @@ export { canAccept } from './transfer';
 export { undergroundPlacement } from './underground';
 export { powerNetworks, type Networks } from './network';
 export { POWER_SCALE, powerStats, type NetworkStats, type PowerTick } from './power';
+export { splitterNextOutput } from './splitter';
