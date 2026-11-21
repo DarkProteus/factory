@@ -103,7 +103,7 @@ function segments(state: SimState, defs: BuildingDefs): Step[] {
 /** Поведения belt и splitter: двигает предметы конвейеров, передаёт их дальше и раздаёт из разделителей. */
 export function runBelts(state: SimState, defs: BuildingDefs): void {
   for (const s of segments(state, defs)) {
-    if (s.outs) runSplitter(s.b, s.outs);
+    if (s.outs) runSplitter(s.b, s.outs, defs);
     else moveBelt(s.b, s.def, s.target, s.intoSplitter, s.length);
   }
 }
