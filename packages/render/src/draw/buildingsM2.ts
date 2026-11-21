@@ -3,6 +3,7 @@
 import { recipes } from '@factory/content';
 import type { Graphics } from 'pixi.js';
 import type { ViewState } from '../interp';
+import type { Token } from '../palette';
 import { generatorLoadOf, satisfactionOf } from '../powerView';
 import type { BuildingView, FrameCtx } from './buildings';
 import { body, fill, line, lamp, OUTLINE, OUTLINE_THIN, rivets, rust, type LampState } from './shapes';
@@ -47,7 +48,8 @@ function frontStrip(g: Graphics, w: number, h: number): void {
   g.rect(-w / 2 + 2, -h / 2 + 2, w - 4, 4).fill(fill('hazard')).stroke(OUTLINE_THIN);
 }
 
-export function drawSplitter(g: Graphics, b: BuildingView, w: number, h: number): void {
+/** tipToken — цвет стрелки выхода i (0 — перед, 1 — лево, 2 — право); по умолчанию подсвечен первый. */
+export function drawSplitter(g: Graphics, b: BuildingView, w: number, h: number, tipToken?: (i: number) => Token): void {
   // Вход: полотно и рельсы конвейера на задней половине клетки.
   g.rect(-w / 2 + 3, 0, w - 6, h / 2).fill(fill('hazard-dark'));
   for (const x of [-w / 2, w / 2 - 3]) g.rect(x, 0, 3, h / 2).fill(fill('steel')).stroke(OUTLINE_THIN);
@@ -71,7 +73,7 @@ export function drawSplitter(g: Graphics, b: BuildingView, w: number, h: number)
       [-6, -3],
       [-6, 3],
     ].flatMap(([u, v]) => [tx - c * 0.5 + u! * c - v! * s, ty - s * 0.5 + u! * s + v! * c]);
-    g.poly(pts).fill(fill(i === next ? 'hazard' : 'rust-light')).stroke(OUTLINE_THIN);
+    g.poly(pts).fill(fill(tipToken ? tipToken(i) : i === next ? 'hazard' : 'rust-light')).stroke(OUTLINE_THIN);
   });
 }
 

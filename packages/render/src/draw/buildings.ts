@@ -5,6 +5,7 @@ import type { Graphics } from 'pixi.js';
 import type { ViewState } from '../interp';
 import { CELL, palette, SHADOW_ALPHA } from '../palette';
 import { satisfactionOf } from '../powerView';
+import { beltBed, beltChevrons, drawFilterMark, drawLab, drawUnderground, fastInserterMark, filterTip, isFast } from './m3';
 import { drawAssembler, drawGenerator, drawPole, drawSplitter, outOfFuel } from './buildingsM2';
 import { body, fill, hazardStripes, lamp, line, OUTLINE, OUTLINE_THIN, rectPts, rivets, rust, type LampState } from './shapes';
 
@@ -17,6 +18,8 @@ export interface FrameCtx {
   alpha: number;
   /** Угол руки манипулятора (0 — вперёд, π — назад), считает renderer. */
   armAngle: (b: BuildingView, def: BuildingDef) => number;
+  /** Порталы подземных рисует сцена отдельным слоем над предметами; здание рисует только ленту. */
+  portalsApart?: boolean;
 }
 
 /** Размер здания в px в ориентации N. */
@@ -44,6 +47,13 @@ export function drawBuilding(g: Graphics, b: BuildingView, def: BuildingDef, ctx
       return def.recipeMode === 'chosen' ? drawAssembler(g, b, ctx, w, h) : drawFurnace(g, b, def, ctx, w, h);
     case 'splitter':
       return drawSplitter(g, b, w, h);
+    case 'filterSplitter':
+      drawSplitter(g, b, w, h, filterTip(b));
+      return drawFilterMark(g, b);
+    case 'underground':
+      return drawUnderground(g, b, def, ctx);
+    case 'lab':
+      return drawLab(g, b, ctx, w, h);
     case 'pole':
       return drawPole(g);
     case 'generator':
@@ -98,28 +108,16 @@ function drawDrill(g: Graphics, b: BuildingView, def: BuildingDef, ctx: FrameCtx
 }
 
 function drawBelt(g: Graphics, def: BuildingDef, ctx: FrameCtx, w: number, h: number): void {
-  g.rect(-w / 2 + 3, -h / 2, w - 6, h).fill(fill('hazard-dark'));
-  for (const x of [-w / 2, w / 2 - 3]) g.rect(x, -h / 2, 3, h).fill(fill('steel')).stroke(OUTLINE_THIN);
-  // Шевроны едут со скоростью предметов: 256 единиц пути = 32 px, шаг 16 px.
-  const speed = def.beltSpeed ?? 0;
-  const shift = ((((ctx.tick + ctx.alpha) * speed) % 128) / 256) * CELL;
-  for (let k = 0; k < 3; k++) {
-    const tip = h / 2 - k * 16 - shift;
-    // Ветви «>» обрезаются по клетке, чтобы шевроны не вылезали за конец конвейера.
-    for (const side of [-1, 1]) {
-      const t0 = Math.max(0, (tip + 5 - h / 2) / 5);
-      const t1 = Math.min(1, (tip + 5 + h / 2) / 5);
-      if (t0 >= t1) continue;
-      g.moveTo(side * 5 * (1 - t0), tip + 5 - 5 * t0).lineTo(side * 5 * (1 - t1), tip + 5 - 5 * t1);
-    }
-  }
-  g.stroke(line('rust-light', 2));
+  beltBed(g, -h / 2, h / 2);
+  beltChevrons(g, ctx, def, -h / 2, h / 2);
 }
 
 function drawInserter(g: Graphics, b: BuildingView, def: BuildingDef, ctx: FrameCtx): void {
   g.circle(0, 0, 10).fill(fill('steel-dark')).stroke(OUTLINE);
   g.circle(0, 0, 8).stroke(line('steel', 2));
-  g.poly([0, -10, -3, -5, 3, -5]).fill(fill('hazard'));
+  const fast = isFast(def);
+  g.poly([0, -10, -3, -5, 3, -5]).fill(fill(fast ? 'fast' : 'hazard'));
+  if (fast) fastInserterMark(g);
   const a = ctx.armAngle(b, def);
   const [sin, cos] = [Math.sin(a), Math.cos(a)];
   // Рука 5×15 от шарнира, повёрнутая на угол a (0 — вперёд, вверх).
@@ -185,8 +183,8 @@ function drawChest(g: Graphics, b: BuildingView): void {
 /** Тень корпуса в мировых координатах: та же форма, смещение (+3, +3). Конвейер плоский, без тени. */
 export function drawShadow(g: Graphics, def: BuildingDef, cx: number, cy: number, w: number, h: number): void {
   const color = { color: palette.shadow, alpha: SHADOW_ALPHA };
-  if (def.behavior === 'belt') return;
-  if (def.behavior === 'splitter') {
+  if (def.behavior === 'belt' || def.behavior === 'underground') return;
+  if (def.behavior === 'splitter' || def.behavior === 'filterSplitter') {
     const d = 8 * Math.SQRT2;
     g.poly([cx + 3, cy - d + 3, cx + d + 3, cy + 3, cx + 3, cy + d + 3, cx - d + 3, cy + 3]).fill(color);
   } else if (def.behavior === 'pole') {

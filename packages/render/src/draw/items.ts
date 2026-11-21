@@ -1,7 +1,7 @@
 // Иконки предметов: одна форма на карте, в руке манипулятора и в интерфейсе.
 import { buildings as contentBuildings } from '@factory/content';
 import type { Graphics } from 'pixi.js';
-import { palette } from '../palette';
+import { palette, type Token } from '../palette';
 import { seeded } from '../wear';
 import { drawBuildingIcon } from './buildingIcon';
 import { coalChunk, oreRock, stoneBlock } from './rocks';
@@ -20,6 +20,9 @@ const MAIN_COLOR: Record<string, number> = {
   copperCable: palette.copper,
   circuit: palette.pcb,
   ammo: palette.brass,
+  steelPlate: palette['steel-plate'],
+  sciencePackRed: palette['science-red'],
+  sciencePackGreen: palette['science-green'],
 };
 
 /** Предмет размером size px с центром в (x, y); lod — круг ⌀5 вместо формы. */
@@ -43,6 +46,15 @@ export function drawItem(g: Graphics, item: string, x: number, y: number, size: 
       return plate(g, x, y, s, 'plate', 'plate-light');
     case 'copperPlate':
       return plate(g, x, y, s, 'copper', 'copper-light');
+    case 'steelPlate':
+      plate(g, x, y, s, 'steel-plate', 'steel-plate-light');
+      // Диагональная риска 1 px `steel` через центр.
+      g.moveTo(x - 3 * s, y + 3 * s).lineTo(x + 3 * s, y - 3 * s).stroke({ width: s, color: palette.steel });
+      return;
+    case 'sciencePackRed':
+      return flask(g, x, y, s, 'science-red');
+    case 'sciencePackGreen':
+      return flask(g, x, y, s, 'science-green');
     case 'stoneBrick':
       g.rect(x - 6 * s, y - 3.5 * s, 12 * s, 7 * s).fill(fill('rust'));
       g.moveTo(x - 6 * s, y).lineTo(x + 6 * s, y).stroke({ width: s, color: palette['rust-dark'] });
@@ -70,7 +82,7 @@ export function drawItem(g: Graphics, item: string, x: number, y: number, size: 
 }
 
 /** Пластина: квадрат со скруглением, блик по верхнему и левому краю. */
-function plate(g: Graphics, x: number, y: number, s: number, base: 'plate' | 'copper', light: 'plate-light' | 'copper-light'): void {
+function plate(g: Graphics, x: number, y: number, s: number, base: Token, light: Token): void {
   const h = 5 * s;
   g.roundRect(x - h, y - h, 2 * h, 2 * h, 2 * s).fill(fill(base));
   g.rect(x - h + s, y - h + s, 2 * h - 3 * s, 2 * s).fill(fill(light));
@@ -116,4 +128,21 @@ function circuit(g: Graphics, x: number, y: number, s: number): void {
   g.stroke({ width: s, color: palette.copper });
   g.rect(x - 2 * s, y - 2 * s, 4 * s, 4 * s).fill(fill('hazard-dark'));
   g.roundRect(x - 6 * s, y - 6 * s, 12 * s, 12 * s, s).stroke(OUTLINE_THIN);
+}
+
+/** Колба научного пакета: круг ⌀9 снизу, горлышко 4×4 сверху, блик слева, пробка 4×2 `steel`, контур. */
+function flask(g: Graphics, x: number, y: number, s: number, color: Token): void {
+  const [cy, r] = [y + 1.5 * s, 4.5 * s];
+  const k = Math.asin((2 * s) / r);
+  const path = () => {
+    g.moveTo(x - 2 * s, y - 5.5 * s).lineTo(x + 2 * s, y - 5.5 * s).lineTo(x + 2 * s, cy - r * Math.cos(k));
+    g.arc(x, cy, r, -Math.PI / 2 + k, (3 * Math.PI) / 2 - k).lineTo(x - 2 * s, y - 5.5 * s).closePath();
+  };
+  path();
+  g.fill(fill(color));
+  // Блик: дуга 1 px `plate-light` слева.
+  g.moveTo(x + 3.4 * s * Math.cos(Math.PI * 1.2), cy + 3.4 * s * Math.sin(Math.PI * 1.2)).arc(x, cy, 3.4 * s, Math.PI * 1.2, Math.PI * 0.8, true).stroke({ width: s, color: palette['plate-light'] });
+  path();
+  g.stroke(OUTLINE_THIN);
+  g.rect(x - 2 * s, y - 7.5 * s, 4 * s, 2 * s).fill(fill('steel')).stroke(OUTLINE_THIN);
 }

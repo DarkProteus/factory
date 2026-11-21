@@ -6,6 +6,7 @@ import { assemblerProduct } from './draw/buildingsM2';
 import { drawBuilding, drawShadow, placement, type BuildingView, type FrameCtx, armTip } from './draw/buildings';
 import { DepositLayer, drawGround } from './draw/ground';
 import { drawItem } from './draw/items';
+import { drawPortal, hiddenByPortal, inTunnel, isFast, PACK_KINDS, packCell } from './draw/m3';
 import { OverlayLayer, type Overlay } from './overlay';
 import { beltItemPos, captureBelts, type BeltSnapshot, type ViewState } from './interp';
 import { CELL } from './palette';
@@ -29,6 +30,8 @@ export class Scene {
   /** Конвейеры ниже остальных зданий: жёлоб бура лежит поверх конвейера перед ним. */
   private buildingLayer = new Container({ sortableChildren: true });
   private items = new Graphics();
+  /** Порталы подземных над предметами: край проёма «обрезает» предмет, входящий в тоннель. */
+  private portals = new Graphics();
   private byId = new Map<number, Graphics>();
   private snapshot: BeltSnapshot = new Map();
   private groundFor: unknown = null;
@@ -50,6 +53,7 @@ export class Scene {
       this.shadows,
       this.buildingLayer,
       this.items,
+      this.portals,
       this.power.wires,
       this.overlay.top,
       this.power.badges,
@@ -75,9 +79,10 @@ export class Scene {
       this.groundFor = state.map;
     }
     this.deposits.update(state.map);
-    const ctx: FrameCtx = { state, tick: state.tick, alpha, armAngle: (b, def) => this.armAngle(state, b, def, alpha) };
+    const ctx: FrameCtx = { state, tick: state.tick, alpha, portalsApart: true, armAngle: (b, def) => this.armAngle(state, b, def, alpha) };
     this.shadows.clear();
     this.items.clear();
+    this.portals.clear();
     const lod = camera.zoom < ITEM_LOD_ZOOM;
     const seen = new Set<number>();
     for (const b of Object.values(state.buildings)) {
@@ -89,10 +94,11 @@ export class Scene {
       const g = this.graphicsFor(b.id);
       g.position.set(cx, cy);
       g.zIndex = def.behavior === 'belt' ? 0 : 1;
-      // Столб направления не имеет и не поворачивается.
-      g.rotation = def.behavior === 'pole' ? 0 : (b.dir * Math.PI) / 2;
+      // Столб и лаборатория направления не имеют и не поворачиваются.
+      g.rotation = def.behavior === 'pole' || def.behavior === 'lab' ? 0 : (b.dir * Math.PI) / 2;
       g.clear();
       drawBuilding(g, b, def, ctx);
+      if (def.behavior === 'underground') this.drawPortal(b, def, cx, cy);
       this.drawContents(b, def, ctx, cx, cy, lod);
     }
     for (const [id, g] of this.byId) {
@@ -104,6 +110,16 @@ export class Scene {
     }
     this.overlay.update(this.overlayState, state);
     this.power.update(state, this.overlayState, state.tick + alpha);
+  }
+
+  /** Портал подземного в мировых координатах: поворот вокруг центра клетки, потом сдвиг (матрицы Pixi идут «после»). */
+  private drawPortal(b: BuildingView, def: BuildingDef, cx: number, cy: number): void {
+    const c = this.portals.context;
+    c.save();
+    c.rotate((b.dir * Math.PI) / 2);
+    c.translate(cx, cy);
+    drawPortal(this.portals, b.underground, isFast(def));
+    c.restore();
   }
 
   /** Центр отпечатка в мире и размер в ориентации N. */
@@ -140,10 +156,15 @@ export class Scene {
       const a = (b.dir * Math.PI) / 2;
       return [cx + lx * Math.cos(a) - ly * Math.sin(a), cy + lx * Math.sin(a) + ly * Math.cos(a)];
     };
+    // Фильтр разделителя: иконка 8 px в центре ромба (воронка уходит в угол).
+    if (def.behavior === 'filterSplitter' && b.filter !== undefined) drawItem(this.items, b.filter, cx, cy, 8, lod);
     if (b.belt) {
       const prev = this.snapshot.get(b.id);
       for (const it of b.belt) {
+        // Предметы тоннеля (за первой клеткой ленты входа) под землёй: не рисуем.
+        if (b.underground && inTunnel(it.pos)) continue;
         const p = beltItemPos(prev, it.item, it.pos, def.beltSpeed ?? 0, ctx.alpha);
+        if (hiddenByPortal(b.underground, p)) continue;
         drawItem(this.items, it.item, ...rot(0, CELL / 2 - (p / BELT_CELL) * CELL), BELT_ICON, lod);
       }
     } else if (def.behavior === 'inserter' && b.output) {
@@ -152,6 +173,11 @@ export class Scene {
       drawItem(this.items, b.slots[0].item, cx, cy, 10, lod);
     } else if (def.behavior === 'splitter' && b.output) {
       drawItem(this.items, b.output.item, cx, cy, 8, lod);
+    } else if (def.behavior === 'lab') {
+      // Ячейки пакетов вдоль заднего края: иконка 6 px в непустой.
+      PACK_KINDS.forEach((kind, k) => {
+        if (b.input?.some((s) => s.item === kind && s.count > 0)) drawItem(this.items, kind, cx + packCell(k)[0], cy + packCell(k)[1], 6, lod);
+      });
     } else if (def.behavior === 'crafter' && def.recipeMode === 'chosen') {
       // Продукт рецепта в окне сборщика: иконка 24 px не поворачивается со зданием и не уменьшается до круга.
       const product = assemblerProduct(b);

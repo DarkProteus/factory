@@ -47,6 +47,8 @@ groma:
       symbol: PowerLayer
     - scanner: typescript
       file: packages/render/src/powerView.ts
+    - scanner: typescript
+      file: packages/render/src/draw/m3.ts
   technology: TypeScript, PixiJS
 description: Рисует состояние мира, ничего в нём не меняя
 ---
