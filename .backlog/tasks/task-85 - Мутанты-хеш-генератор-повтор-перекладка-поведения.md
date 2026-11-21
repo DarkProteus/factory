@@ -1,10 +1,10 @@
 ---
 id: TASK-85
 title: 'Мутанты: хеш, генератор, повтор, перекладка, поведения'
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-11-21T17:55:00Z'
-updated_date: '2026-11-21T19:03:00Z'
+updated_date: '2026-11-21T19:05:00Z'
 labels:
   - quality
 milestone: m-7
