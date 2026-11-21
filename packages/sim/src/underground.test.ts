@@ -171,3 +171,28 @@ describe('подземный конвейер: снос и хеш', () => {
     expect(hash(s)).not.toBe(hash(t));
   });
 });
+
+describe('разделитель перед подземным (TASK-58)', () => {
+  it('разделитель отдаёт на вход подземного, смотрящий от него, и не отдаёт на выход', () => {
+    const s = stocked(createState(1, { width: 16, height: 16 }));
+    // Разделитель (5,5) на восток; вперёд — вход подземного (6,5) с выходом (8,5);
+    // слева (5,4) — выход пары (3,4) → (5,4), смотрит на восток; справа (5,6) — вход, смотрящий не от разделителя.
+    tick(s, [
+      build('splitter', 5, 5),
+      build('undergroundBelt', 6, 5),
+      build('undergroundBelt', 8, 5),
+      build('undergroundBelt', 3, 4),
+      build('undergroundBelt', 5, 4),
+      build('undergroundBelt', 5, 6),
+    ]);
+    expect(at(s, 5, 4).underground).toBe('out');
+    expect(at(s, 5, 6).underground).toBe('in');
+    for (let i = 0; i < 4; i++) {
+      at(s, 5, 5).belt = [{ item: 'coal', pos: BELT_CELL / 2 }];
+      run(s, 40);
+    }
+    expect((at(s, 6, 5).belt ?? []).length + (at(s, 8, 5).belt ?? []).length).toBeGreaterThan(0);
+    expect(at(s, 5, 4).belt ?? []).toEqual([]);
+    expect(at(s, 5, 6).belt ?? []).toEqual([]);
+  });
+});

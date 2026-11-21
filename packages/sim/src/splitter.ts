@@ -2,6 +2,7 @@ import { buildings as contentBuildings, items } from '@factory/content';
 import { buildingAt, type BuildingDefs, type Dir, type PlacedBuilding } from './buildings';
 import { DX, DY, isBelt, pushToBelt } from './belt';
 import type { SimState } from './state';
+import { isUnderground } from './underground';
 
 /** Принимает ли разделитель предметы с конвейера: только сзади, то есть лента смотрит туда же, что и он. */
 export function feedsSplitter(belt: PlacedBuilding, splitter: PlacedBuilding): boolean {
@@ -10,11 +11,13 @@ export function feedsSplitter(belt: PlacedBuilding, splitter: PlacedBuilding): b
 
 /**
  * Выходы разделителя в порядке круга: вперёд, влево, вправо. Выход без принимающей ленты
- * (нет здания, не конвейер, лента смотрит на разделитель) — null.
+ * (нет здания, не конвейер, лента смотрит на разделитель) — null. Вход подземного принимает,
+ * если смотрит от разделителя; выход подземного — никогда.
  */
 export function splitterOutputs(state: SimState, s: PlacedBuilding, defs: BuildingDefs): (PlacedBuilding | null)[] {
   return [s.dir, (s.dir + 3) % 4, (s.dir + 1) % 4].map((d) => {
     const next = buildingAt(state, s.x + DX[d]!, s.y + DY[d]!);
+    if (next !== null && isUnderground(next, defs)) return next.underground === 'in' && next.dir === d ? next : null;
     return isBelt(next, defs) && next.dir !== (((d + 2) % 4) as Dir) ? next : null;
   });
 }

@@ -1,14 +1,18 @@
 ---
 id: TASK-58
 title: Разделитель отдаёт на вход подземного конвейера
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-11-21T12:32:00Z'
+updated_date: '2026-11-21T12:35:00Z'
 labels:
   - m3
 dependencies: []
 references:
   - sim
+modified_files:
+  - packages/sim/src/splitter.ts
+  - packages/sim/src/underground.test.ts
 type: feature
 ordinal: 64000
 ---
@@ -21,6 +25,6 @@ splitterOutputs (splitter.ts) принимает только конвейер, 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Разделитель отдаёт предметы на вход подземного, смотрящий от него, и не отдаёт на выход подземного
-- [ ] #2 pnpm test зелёный
+- [x] #1 Разделитель отдаёт предметы на вход подземного, смотрящий от него, и не отдаёт на выход подземного
+- [x] #2 pnpm test зелёный
 <!-- AC:END -->
