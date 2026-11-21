@@ -25,7 +25,7 @@ describe('startMap', () => {
 
 describe('player', () => {
   it('START_KIT из design.md', () => {
-    expect(START_KIT).toEqual({ generator: 1, pole: 4, drill: 2, furnace: 2, inserter: 4, belt: 20, chest: 1, coal: 20 });
+    expect(START_KIT).toEqual({ generator: 1, pole: 10, drill: 2, furnace: 2, inserter: 4, belt: 20, chest: 1, coal: 20 });
   });
 
   it('START_KIT помещается в инвентарь', () => {
