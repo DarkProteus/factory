@@ -4,13 +4,15 @@ title: Бенч конвейеров падает под нагрузкой
 status: In Progress
 assignee: []
 created_date: '2026-11-21T14:39:00Z'
-updated_date: '2026-11-21T19:26:00Z'
+updated_date: '2026-11-21T19:35:00Z'
 labels:
   - m3
 milestone: m-3
 dependencies: []
 references:
   - sim
+modified_files:
+  - packages/sim/src/belt.bench.test.ts
 type: chore
 ordinal: 74000
 ---
@@ -23,6 +25,6 @@ packages/sim/src/belt.bench.test.ts уже берёт минимум из 15 п�
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Бенч повторяет замер до 3 раз, порог прежний
-- [ ] #2 pnpm test зелёный
+- [x] #1 Бенч повторяет замер до 3 раз, порог прежний
+- [x] #2 pnpm test зелёный
 <!-- AC:END -->

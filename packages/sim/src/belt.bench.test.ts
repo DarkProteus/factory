@@ -63,21 +63,45 @@ function movingShare(state: SimState): number {
   return moved / before.size;
 }
 
+/** Число попыток замера: повтор спасает от всплеска внешней нагрузки (TASK-68). */
+const ATTEMPTS = 3;
+
+/** Пауза перед повтором, мс: соседняя нагрузка идёт волнами, и попытки вплотную друг к другу ловят одну и ту же волну. */
+const RETRY_PAUSE_MS = 1000;
+
+/** Пауза без DOM- и node-типов: в sim их нет. */
+const pause = (ms: number): Promise<void> =>
+  new Promise((resolve) => (globalThis as unknown as { setTimeout(f: () => void, ms: number): void }).setTimeout(resolve, ms));
+
+/** Один замер: минимум по пачкам тиков, мс на тик. Минимум устойчив к соседним воркерам, показывает собственную цену тика. */
+function measure(state: SimState): number {
+  const samples: number[] = [];
+  for (let batch = 0; batch < 15; batch++) {
+    const t0 = now();
+    for (let i = 0; i < 20; i++) tick(state, []);
+    samples.push((now() - t0) / 20);
+  }
+  return Math.min(...samples);
+}
+
 describe.each([false, true])('бенчмарк конвейеров, разделители: %s', (withSplitters) => {
   const budget = withSplitters ? BUDGET_SPLIT_MS : BUDGET_MS;
-  it(`${CELLS} загруженных клеток с движущимися предметами укладываются в ${budget} мс на тик`, () => {
+  it(`${CELLS} загруженных клеток с движущимися предметами укладываются в ${budget} мс на тик`, async () => {
     const state = factory(withSplitters);
     expect(Object.keys(state.buildings).length).toBeGreaterThanOrEqual(CELLS);
     for (let i = 0; i < 50; i++) tick(state, []);
     // Без этой проверки бенчмарк мог бы мерить стоящий завод (так было до TASK-40).
     expect(movingShare(state)).toBeGreaterThan(0.5);
-    const samples: number[] = [];
-    for (let batch = 0; batch < 15; batch++) {
-      const t0 = now();
-      for (let i = 0; i < 20; i++) tick(state, []);
-      samples.push((now() - t0) / 20);
+    // Под внешней нагрузкой всё окно замера (~1,5 с) может оказаться медленным, поэтому весь замер повторяется
+    // до ATTEMPTS раз: тест проходит, если хотя бы одна попытка уложилась в бюджет. Порог при этом прежний,
+    // реальный откат скорости медленнее бюджета в каждой попытке и всё равно падает.
+    const results: number[] = [];
+    for (let attempt = 0; attempt < ATTEMPTS; attempt++) {
+      if (attempt > 0) await pause(RETRY_PAUSE_MS);
+      results.push(measure(state));
+      if (results[attempt] < budget) break;
     }
-    // Минимум по пачкам: устойчив к соседним воркерам тестов, показывает собственную цену тика.
-    expect(Math.min(...samples)).toBeLessThan(budget);
+    const times = results.map((ms) => `${ms.toFixed(2)} мс`).join(', ');
+    expect(Math.min(...results), `бюджет ${budget} мс, попытки: ${times}`).toBeLessThan(budget);
   }, 60_000);
 });
