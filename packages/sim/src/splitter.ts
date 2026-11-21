@@ -1,6 +1,6 @@
 import { buildings as contentBuildings, items } from '@factory/content';
 import { buildingAt, type BuildingDefs, type Dir, type PlacedBuilding } from './buildings';
-import { DX, DY, isBelt, pushToBelt } from './belt';
+import { BELT_CELL, DX, DY, isBelt, pushToBelt } from './belt';
 import type { SimState } from './state';
 import { isUnderground } from './underground';
 
@@ -12,12 +12,14 @@ export function feedsSplitter(belt: PlacedBuilding, splitter: PlacedBuilding): b
 /**
  * Выходы разделителя в порядке круга: вперёд, влево, вправо. Выход без принимающей ленты
  * (нет здания, не конвейер, лента смотрит на разделитель) — null. Вход подземного принимает,
- * если смотрит от разделителя; выход подземного — никогда.
+ * если смотрит от разделителя; выход подземного — никогда. Соседний разделитель принимает, если
+ * смотрит в сторону выхода (вход сзади, как у feedsSplitter), иначе — null.
  */
 export function splitterOutputs(state: SimState, s: PlacedBuilding, defs: BuildingDefs): (PlacedBuilding | null)[] {
   return [s.dir, (s.dir + 3) % 4, (s.dir + 1) % 4].map((d) => {
     const next = buildingAt(state, s.x + DX[d]!, s.y + DY[d]!);
     if (next !== null && isUnderground(next, defs)) return next.underground === 'in' && next.dir === d ? next : null;
+    if (next !== null && isSplitter(next, defs)) return next.dir === d ? next : null;
     return isBelt(next, defs) && next.dir !== (((d + 2) % 4) as Dir) ? next : null;
   });
 }
@@ -27,6 +29,13 @@ export const isSplitter = (b: PlacedBuilding, defs: BuildingDefs): boolean => {
   const behavior = defs[b.type]?.behavior;
   return behavior === 'splitter' || behavior === 'filterSplitter';
 };
+
+/** Кладёт предмет в буфер разделителя-цели (один предмет, как в moveBelt и accept); false, если буфер занят. */
+function pushToSplitter(b: PlacedBuilding, item: string): boolean {
+  if (b.belt?.length) return false;
+  b.belt = [{ item, pos: BELT_CELL / 2 }];
+  return true;
+}
 
 type SplitterView = Pick<PlacedBuilding, 'progress' | 'filter'>;
 
@@ -48,18 +57,19 @@ export function splitterNextOutput(b: SplitterView, item: string): number {
 /**
  * Поведение splitter и filterSplitter: буфер на один предмет лежит в b.belt (он же возвращается при сносе),
  * круговой индекс следующего выхода — в b.progress (0..2). Предмет уходит на первый по кругу
- * выход, где есть место; если выходов нет или все заняты, он стоит в буфере.
+ * выход, где есть место (выход — конвейер, вход подземного или соседний разделитель);
+ * если выходов нет или все заняты, он стоит в буфере.
  * Фильтр (b.filter, только у filterSplitter): предмет-фильтр идёт лишь вперёд (выход 0) и ждёт в буфере,
  * остальные — лишь влево и вправо (выходы 1 и 2) по кругу. Без фильтра — как обычный разделитель.
  */
-export function runSplitter(b: PlacedBuilding, outs: readonly (PlacedBuilding | null)[]): void {
+export function runSplitter(b: PlacedBuilding, outs: readonly (PlacedBuilding | null)[], defs: BuildingDefs): void {
   const held = b.belt?.[0];
   if (!held) return;
   const { allowed, start } = splitterRound(b, held.item);
   for (let k = 0; k < allowed.length; k++) {
     const i = allowed[(start + k) % allowed.length]!;
     const out = outs[i];
-    if (out && pushToBelt(out, held.item)) {
+    if (out && (isSplitter(out, defs) ? pushToSplitter(out, held.item) : pushToBelt(out, held.item))) {
       b.belt!.shift();
       // Предмет-фильтр круг боковых выходов не сдвигает.
       if (b.filter === undefined || i !== 0) b.progress = (i + 1) % outs.length;
