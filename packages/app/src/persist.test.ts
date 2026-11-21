@@ -87,9 +87,9 @@ describe('loadGame', () => {
     expect(storage.getItem(BROKEN_KEY)).not.toBeNull();
   });
 
-  it('сохранение старой версии не загружается: новая партия с уведомлением', () => {
+  it('сохранение версии M1 не загружается: новая партия с уведомлением', () => {
     const storage = new FakeStorage();
-    storage.setItem(SAVE_KEY, JSON.stringify({ version: SAVE_VERSION - 1, state: {} }));
+    storage.setItem(SAVE_KEY, JSON.stringify({ version: SAVE_VERSION - 2, state: {} }));
     const r = loadGame(storage, newGame);
     expect(hash(r.state)).toBe(hash(newGame()));
     expect(r.error).toContain('устарело');
