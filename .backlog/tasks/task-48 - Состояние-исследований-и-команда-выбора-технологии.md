@@ -1,10 +1,10 @@
 ---
 id: TASK-48
 title: Состояние исследований и команда выбора технологии
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-21T12:01:00Z'
-updated_date: '2026-11-21T12:13:00Z'
+updated_date: '2026-11-21T12:23:00Z'
 labels:
   - m3
 dependencies:

@@ -1,10 +1,10 @@
 ---
 id: TASK-36
 title: Подземные конвейеры
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-20T18:38:00Z'
-updated_date: '2026-11-21T12:02:00Z'
+updated_date: '2026-11-21T12:23:00Z'
 labels:
   - m3
 dependencies:
