@@ -1,10 +1,10 @@
 ---
 id: TASK-68
 title: Бенч конвейеров падает под нагрузкой
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-11-21T14:39:00Z'
-updated_date: '2026-11-21T19:35:00Z'
+updated_date: '2026-11-21T19:37:00Z'
 labels:
   - m3
 milestone: m-3
