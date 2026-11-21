@@ -1,15 +1,24 @@
 ---
 id: TASK-67
 title: Ручная перекладка в здание — до стопки, мимо лимита манипуляторов
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-11-21T13:36:00Z'
-updated_date: '2026-11-21T14:35:00Z'
+updated_date: '2026-11-21T14:41:00Z'
 labels:
   - m3
 dependencies: []
 references:
   - sim
+modified_files:
+  - packages/sim/src/buildings.ts
+  - packages/sim/src/transfer.ts
+  - packages/sim/src/crafter.ts
+  - packages/sim/src/lab.ts
+  - packages/sim/src/manual.ts
+  - packages/app/src/buildingUi.ts
+  - packages/sim/src/manual.test.ts
+  - packages/sim/src/lab.test.ts
 type: feature
 ordinal: 73000
 ---
@@ -22,8 +31,14 @@ ordinal: 73000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Руками в лабораторию кладётся до стопки пакетов активной технологии
-- [ ] #2 Руками в сборщик кладутся ингредиенты рецепта до стопки
-- [ ] #3 Манипулятор по-прежнему не кладёт сверх запаса (тест)
-- [ ] #4 pnpm test зелёный
+- [x] #1 Руками в лабораторию кладётся до стопки пакетов активной технологии
+- [x] #2 Руками в сборщик кладутся ингредиенты рецепта до стопки
+- [x] #3 Манипулятор по-прежнему не кладёт сверх запаса (тест)
+- [x] #4 pnpm test зелёный
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+AcceptLimit 'buffer' | 'stack' в canAccept; manual и подсветка в app передают 'stack'. После ручной перекладки сверх запаса манипуляторы ждут, пока запас не израсходуется.
+<!-- SECTION:NOTES:END -->
