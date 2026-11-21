@@ -1,5 +1,5 @@
 import { technologies } from '@factory/content';
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import type { Game } from '../game';
 import {
   CARD_H,
@@ -10,6 +10,7 @@ import {
   techStatus,
   techUnits,
   techUnlocks,
+  tipPosition,
   unitSeconds,
   type TechStatus,
 } from '../techUi';
@@ -24,10 +25,21 @@ const sec = (s: number) => String(s).replace('.', ',');
 /** Подсказка карточки: «Открывает:» с иконками 24 px; у закрытой — «Нужно: …» красным. */
 function TechTip({ game, id, status, x, y }: { game: Game; id: string; status: TechStatus; x: number; y: number }) {
   const missing = missingRequires(game.getState(), id);
-  // Подсказка у правого края окна браузера уходит влево от курсора, чтобы не обрезаться.
-  const left = x + 16 + 260 > window.innerWidth ? x - 16 - 260 : x + 16;
+  // Размер известен только после отрисовки: меряем и ставим позицию так, чтобы подсказка вся была на экране.
+  const ref = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const { left, top } = tipPosition(
+      { x, y },
+      { w: el.offsetWidth, h: el.offsetHeight },
+      { w: window.innerWidth, h: window.innerHeight },
+    );
+    el.style.left = `${left}px`;
+    el.style.top = `${top}px`;
+  });
   return (
-    <div className="research-tip" style={{ left, top: y + 16 }}>
+    <div ref={ref} className="research-tip">
       <div className="rs-title">Открывает:</div>
       {techUnlocks(id).map((item) => (
         <div key={item} className="rs-row">

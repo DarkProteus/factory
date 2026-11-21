@@ -120,6 +120,8 @@
 
 .research-tip {
   position: fixed;
+  left: 0;
+  top: 0;
   box-sizing: border-box;
   width: 260px;
   padding: 6px 10px;
