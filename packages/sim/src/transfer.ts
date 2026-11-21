@@ -87,6 +87,14 @@ export function takeFrom(b: PlacedBuilding, accepts: (item: string) => boolean, 
       return takeOutput(b, accepts);
     case 'container':
       return takeFirst(b.slots ?? [], accepts);
+    case 'lab': {
+      // Только пакеты из ячеек (b.input); пакеты идущей единицы уже списаны в b.unit и не берутся.
+      // Опустевший стек остаётся с нулём — как после старта единицы (runLab), формат сейва тот же.
+      const stack = (b.input ?? []).find((s) => s.count > 0 && accepts(s.item));
+      if (!stack) return null;
+      stack.count -= 1;
+      return stack.item;
+    }
     default:
       return null;
   }
