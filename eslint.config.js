@@ -7,7 +7,21 @@ const simOnlyContent =
   'sim импортирует только content: ядро должно работать без рендера, интерфейса и DOM.';
 
 export default tseslint.config(
-  { ignores: ['**/node_modules/**', '**/dist/**'] },
+  {
+    // Артефакты инструментов: worktree агентов, песочницы и отчёты Stryker/Playwright.
+    ignores: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '.claude/**',
+      '.stryker-tmp/**',
+      '.stryker-cache/**',
+      'reports/**',
+      '.playwright-mcp/**',
+      'test-results/**',
+      'playwright-report/**',
+      'blob-report/**',
+    ],
+  },
   {
     files: ['**/*.{ts,tsx}'],
     languageOptions: { parser: tseslint.parser },
