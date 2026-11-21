@@ -83,6 +83,18 @@ groma:
       file: packages/app/src/ui/ActionButtons.tsx
     - scanner: typescript
       file: packages/app/src/ui/ActionButtons.tsx
+    - scanner: react
+      file: packages/app/src/ui/ResearchBar.tsx
+    - scanner: typescript
+      file: packages/app/src/ui/ResearchBar.tsx
+      symbol: ResearchBar
+    - scanner: react
+      file: packages/app/src/ui/ResearchWindow.tsx
+    - scanner: typescript
+      file: packages/app/src/ui/ResearchWindow.tsx
+      symbol: ResearchWindow
+    - scanner: typescript
+      file: packages/app/src/techUi.ts
   technology: React
 description: Превращает ввод игрока в команды для ядра
 ---

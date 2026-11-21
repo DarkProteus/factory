@@ -1,0 +1,228 @@
+/* Окно исследований, полоска и уведомление: docs/style-ui.md, «Раскладка M3». */
+.research-window {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 90vw;
+}
+.research-window .panel {
+  max-width: 90vw;
+}
+.research-scroll {
+  overflow-x: auto;
+  padding: 8px;
+  max-width: calc(90vw - 24px - 16px);
+}
+.research-tree {
+  position: relative;
+}
+.research-links {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+.research-links path {
+  fill: none;
+  stroke: var(--outline);
+  stroke-width: 2;
+}
+.research-links path.done {
+  stroke: var(--steel-light);
+}
+
+.tech-card {
+  position: absolute;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 6px;
+  background: var(--ui-raised);
+  border: 1px solid var(--outline);
+  cursor: pointer;
+  overflow: hidden;
+}
+.tech-card.available:hover {
+  background: var(--ui-hover);
+}
+.tech-card.active {
+  border: 2px solid var(--hazard);
+  padding: 0 5px;
+}
+.tech-card.done {
+  background: var(--ui-pressed);
+  border-color: var(--lamp-work);
+  cursor: default;
+}
+.tech-card.locked {
+  cursor: default;
+}
+.tc-icon {
+  width: 32px;
+  height: 32px;
+  flex: none;
+}
+.tech-card.locked .tc-icon,
+.tech-card.locked .tc-cost img {
+  opacity: 0.4;
+}
+.tc-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.tc-name {
+  font: 500 12px 'Oswald', sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.1;
+  color: var(--text);
+}
+.tech-card.locked .tc-name,
+.tech-card.locked .tc-cost {
+  color: var(--text-off);
+}
+.tc-cost {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font: 500 12px 'IBM Plex Mono', monospace;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.tc-cost img {
+  width: 16px;
+  height: 16px;
+}
+/* Два пакета в стоимости чуть наезжают друг на друга, иначе строка не влезает в карточку 168 px. */
+.tc-cost img + img {
+  margin-left: -3px;
+}
+.tc-cost span:first-of-type {
+  margin-left: 2px;
+}
+.tc-done {
+  font: 500 12px 'Oswald', sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--lamp-work);
+}
+.tc-bar {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--hazard);
+}
+
+.research-tip {
+  position: fixed;
+  box-sizing: border-box;
+  width: 260px;
+  padding: 6px 10px;
+  background: var(--ui-bg);
+  border: 2px solid var(--steel);
+  pointer-events: none;
+  z-index: 3;
+}
+.research-tip .rs-title {
+  margin-bottom: 4px;
+  font: 500 12px 'Oswald', sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.research-tip .rs-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+  font: 400 14px 'IBM Plex Sans', sans-serif;
+  color: var(--text);
+}
+.research-tip .rs-row img {
+  width: 24px;
+  height: 24px;
+}
+.research-tip .rs-need {
+  margin-top: 4px;
+  font: 400 12px 'IBM Plex Sans', sans-serif;
+  color: var(--bad);
+}
+
+.top-center {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+/* Полоска: маленькая панель без ленты, ширина 280 px. */
+.research-bar {
+  box-sizing: border-box;
+  width: 280px;
+  padding: 6px 10px;
+  background: var(--ui-bg);
+  border: 2px solid var(--steel);
+}
+.rb-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.rb-row img {
+  width: 16px;
+  height: 16px;
+}
+.rb-name {
+  flex: 1;
+  font: 400 12px 'IBM Plex Sans', sans-serif;
+  color: var(--text);
+}
+.rb-count {
+  font: 500 12px 'IBM Plex Mono', monospace;
+  color: var(--text-dim);
+}
+.rb-track {
+  height: 4px;
+  background: var(--ui-pressed);
+}
+.rb-track i {
+  display: block;
+  height: 100%;
+  background: var(--hazard);
+}
+.research-bar.idle {
+  font: 400 12px 'IBM Plex Sans', sans-serif;
+  color: var(--hazard);
+  text-align: center;
+  cursor: pointer;
+}
+.research-bar.idle:hover {
+  background: var(--ui-hover);
+}
+
+.research-notice {
+  pointer-events: none;
+}
+.rn-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  font: 500 14px 'Oswald', sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.rn-row img {
+  width: 24px;
+  height: 24px;
+}

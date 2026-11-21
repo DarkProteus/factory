@@ -53,6 +53,21 @@ export function inventoryButton(game: Game, open: boolean) {
   );
 }
 
+/** Кнопка исследований (T): выбрана, пока окно открыто; повторный клик закрывает его. Иконка — колба контуром. */
+export function researchButton(game: Game, open: boolean) {
+  return (
+    <button className={`btn${open ? ' active' : ''}`} onClick={() => game.setResearchOpen(!open)}>
+      <svg className="line-icon" viewBox="0 0 24 24" aria-label="Исследования">
+        <path d="M9 3 H15 M10 3 V10 L4.5 19.5 A1.5 1.5 0 0 0 6 21 H18 A1.5 1.5 0 0 0 19.5 19.5 L14 10 V3" />
+      </svg>
+      <span className="key">T</span>
+      <span className="tip">
+        <b>Исследования</b>
+      </span>
+    </button>
+  );
+}
+
 /** Панель инструментов: Снос (X), Кирка (M), затем действия над ними — Поворот (R), Снять (Esc). */
 export function ToolsPanel({ game }: { game: Game }) {
   const tools = useSyncExternalStore(game.subscribe, game.getTools, game.getTools);
@@ -77,12 +92,16 @@ export function ToolsPanel({ game }: { game: Game }) {
   );
 }
 
-/** Панель окон: Инвентарь (E); сюда же встанут Исследования (T). */
+/** Панель окон: Инвентарь (E), Исследования (T). */
 export function WindowsPanel({ game }: { game: Game }) {
   const open = useSyncExternalStore(game.subscribe, game.isInventoryOpen, game.isInventoryOpen);
+  const researchOpen = useSyncExternalStore(game.subscribe, game.isResearchOpen, game.isResearchOpen);
   return (
     <Panel>
-      <div className="row">{inventoryButton(game, open)}</div>
+      <div className="row">
+        {inventoryButton(game, open)}
+        {researchButton(game, researchOpen)}
+      </div>
     </Panel>
   );
 }

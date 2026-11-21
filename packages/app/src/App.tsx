@@ -10,6 +10,8 @@ import { CraftQueue } from './ui/CraftQueue';
 import { Hud } from './ui/Hud';
 import { InventoryWindow } from './ui/InventoryWindow';
 import { NetSummaryTip } from './ui/NetSummaryTip';
+import { ResearchBar } from './ui/ResearchBar';
+import { ResearchWindow } from './ui/ResearchWindow';
 import './ui/fonts';
 import './ui/theme.css';
 import './ui/ui.css';
@@ -46,7 +48,9 @@ export function App() {
             <CraftQueue game={game} />
             <BuildPanel game={game} />
           </div>
+          <ResearchBar game={game} />
           <InventoryWindow game={game} />
+          <ResearchWindow game={game} />
           <NetSummaryTip game={game} />
           <BuildingWindow game={game} />
         </div>

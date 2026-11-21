@@ -1,3 +1,4 @@
+import { isUnlocked } from '@factory/sim';
 import { canCraft, craftCommand, inventoryCells, manualRecipes } from '../craftUi';
 import type { Game } from '../game';
 import { Panel } from './BuildPanel';
@@ -6,13 +7,14 @@ import { RecipeTip } from './RecipeTip';
 import { useTick } from './useTick';
 import './inventory.css';
 
-const RECIPES = manualRecipes();
-
 /** Окно инвентаря (E): слева ячейки, справа рецепты ручного крафта. Рисуется, только пока открыто. */
 export function InventoryWindow({ game }: { game: Game }) {
   useTick(game);
   if (!game.isInventoryOpen()) return null;
   const inventory = game.getInventory();
+  const state = game.getState();
+  // В окне крафта только рецепты, открытые исследованиями.
+  const recipes = manualRecipes(undefined, (id) => isUnlocked(state, id));
   return (
     <div className="inventory-window">
       <Panel title="Инвентарь">
@@ -25,7 +27,7 @@ export function InventoryWindow({ game }: { game: Game }) {
           <div>
             <h3>Ручной крафт</h3>
             <div className="recipe-grid">
-              {RECIPES.map(({ id, def }) => {
+              {recipes.map(({ id, def }) => {
                 const ok = canCraft(inventory, def);
                 return (
                   <button

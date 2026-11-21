@@ -3,14 +3,15 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import type { Game } from '../game';
 import { NO_TOOL, type Tool, type ToolState } from '../input';
-import { clearToolButton, inventoryButton, rotateButton, ToolsPanel, WindowsPanel } from './ActionButtons';
+import { clearToolButton, inventoryButton, researchButton, rotateButton, ToolsPanel, WindowsPanel } from './ActionButtons';
 
 /** Заглушка игры: кнопкам нужны только подписка, инструмент, окно инвентаря и сами действия. */
-const fakeGame = (tool: Tool, inventoryOpen = false) => {
-  const spies = { rotate: vi.fn(), clearTool: vi.fn(), setInventoryOpen: vi.fn() };
+const fakeGame = (tool: Tool, inventoryOpen = false, researchOpen = false) => {
+  const spies = { rotate: vi.fn(), clearTool: vi.fn(), setInventoryOpen: vi.fn(), setResearchOpen: vi.fn() };
   const game = {
     getTools: () => ({ tool, dir: 0 }),
     isInventoryOpen: () => inventoryOpen,
+    isResearchOpen: () => researchOpen,
     subscribe: () => () => {},
     chooseDemolish: () => {},
     chooseMine: () => {},
@@ -90,6 +91,25 @@ describe('кнопка инвентаря (E)', () => {
   });
 });
 
+describe('кнопка исследований (T)', () => {
+  it('подписана клавишей T и подсказкой «Исследования»', () => {
+    const out = html(researchButton(fakeGame(NO_TOOL).game, false));
+    expect(out).toContain('>T<');
+    expect(out).toContain('Исследования');
+  });
+
+  it('подсвечена, пока окно открыто; клик открывает и закрывает', () => {
+    expect(html(researchButton(fakeGame(NO_TOOL, false, true).game, true))).toContain('btn active');
+    expect(html(researchButton(fakeGame(NO_TOOL).game, false))).not.toContain('active');
+    const closed = fakeGame(NO_TOOL);
+    researchButton(closed.game, false).props.onClick();
+    expect(closed.setResearchOpen).toHaveBeenCalledWith(true);
+    const open = fakeGame(NO_TOOL, false, true);
+    researchButton(open.game, true).props.onClick();
+    expect(open.setResearchOpen).toHaveBeenCalledWith(false);
+  });
+});
+
 describe('панели', () => {
   it('панель инструментов: Снос, Кирка, Поворот, Снять в таком порядке', () => {
     const out = html(<ToolsPanel game={fakeGame(build).game} />);
@@ -98,8 +118,12 @@ describe('панели', () => {
     expect([...at].sort((a, b) => a - b)).toEqual(at);
   });
 
-  it('панель окон содержит инвентарь и отражает его состояние', () => {
+  it('панель окон: инвентарь, затем исследования; отражает состояние окон', () => {
     expect(html(<WindowsPanel game={fakeGame(NO_TOOL, true).game} />)).toContain('btn active');
-    expect(html(<WindowsPanel game={fakeGame(NO_TOOL).game} />)).toContain('Инвентарь');
+    expect(html(<WindowsPanel game={fakeGame(NO_TOOL, false, true).game} />)).toContain('btn active');
+    const out = html(<WindowsPanel game={fakeGame(NO_TOOL).game} />);
+    expect(out).not.toContain('active');
+    expect(out.indexOf('Инвентарь')).toBeGreaterThanOrEqual(0);
+    expect(out.indexOf('Исследования')).toBeGreaterThan(out.indexOf('Инвентарь'));
   });
 });

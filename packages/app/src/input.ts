@@ -1,9 +1,9 @@
 // Ввод игрока без DOM и PixiJS: инструмент, клетка под курсором, якорь призрака,
 // очередь команд и оверлей. Всё чистые функции, состояние sim только читается.
 // Менять состояние можно лишь командами через CommandQueue -> tick(state, commands).
-import { buildings, type BuildingDef } from '@factory/content';
+import { buildings, recipes as contentRecipes, type BuildingDef } from '@factory/content';
 import { CELL, type Overlay } from '@factory/render';
-import { canPlace, depositAt, footprintSize, type Command, type Dir, type ItemStack, type SimState } from '@factory/sim';
+import { canPlace, depositAt, footprintSize, isUnlocked, type Command, type Dir, type ItemStack, type SimState } from '@factory/sim';
 
 export type Tool = { kind: 'none' } | { kind: 'build'; building: string } | { kind: 'demolish' } | { kind: 'mine' };
 
@@ -57,6 +57,18 @@ export interface ToolState {
 
 /** Id зданий для клавиш 1–9 — по порядку content.buildings. */
 export const buildingIds = (defs: Readonly<Record<string, BuildingDef>> = buildings): string[] => Object.keys(defs);
+
+/**
+ * Здания, видимые на панели стройки: рецепт предмета-здания открыт исследованиями
+ * либо предмет уже лежит в инвентаре (закрытое здание из инвентаря ставится). Здание без рецепта видно всегда.
+ */
+export function visibleBuildingIds(
+  state: SimState,
+  ids: readonly string[] = buildingIds(),
+  recipes: Readonly<Record<string, unknown>> = contentRecipes,
+): string[] {
+  return ids.filter((id) => !Object.hasOwn(recipes, id) || isUnlocked(state, id) || itemCount(state.inventory, id) > 0);
+}
 
 /** Сколько предметов с этим id в инвентаре (предмет-здание имеет id здания). */
 export function itemCount(inventory: readonly ItemStack[], item: string): number {
