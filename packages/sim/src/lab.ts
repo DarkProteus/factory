@@ -1,4 +1,4 @@
-import { items, technologies, type BuildingDef } from '@factory/content';
+import { technologies, type BuildingDef } from '@factory/content';
 import type { BuildingDefs, ItemStack, PlacedBuilding } from './buildings';
 import { electricTick } from './power';
 import { addResearchProgress } from './research';
@@ -6,8 +6,8 @@ import type { SimState } from './state';
 
 /**
  * Поведение lab. Модель исследования:
- * - Ячейки пакетов — b.input: стеки по одному на вид пакета, вместимость стека — одна стопка предмета.
- *   Принимаются только пакеты активной технологии (technologies[active].unit); без активной — ничего.
+ * - Ячейки пакетов — b.input: стеки по одному на вид пакета, принимаются только пакеты активной технологии
+ *   (technologies[active].unit; без активной — ничего) и пока в ячейке меньше LAB_BUFFER_UNITS единиц этого вида.
  * - Лаборатория ведёт собственную единицу: b.unit — id технологии, чьи пакеты списаны, b.progress — её тики (0..unitTicks).
  *   Единица стартует, когда есть активная технология, в ячейках хватает пакетов и сеть даёт энергию: пакеты списываются.
  * - Каждый тик работы (electricTick: скорость × удовлетворённость сети) лаборатория добавляет 1 тик в общий
@@ -18,7 +18,7 @@ import type { SimState } from './state';
  * - Простой (нет технологии, пакетов или единицы чужой технологии) — без спроса энергии (b.draw не ставится).
  * - Смена технологии (releaseLabUnits из команды setResearch) и её завершение (лениво, на следующем тике лаборатории)
  *   возвращают пакеты идущей единицы в ячейки и обнуляют b.progress. Возврат не ограничен вместимостью ячейки:
- *   пакеты не пропадают и не застревают, ячейка может временно превысить стопку (тогда новые не принимаются).
+ *   пакеты не пропадают и не застревают, ячейка может временно превысить лимит приёма (тогда новые не принимаются).
  */
 
 type Unit = Readonly<Record<string, number>>;
@@ -31,10 +31,18 @@ function techUnit(id: string | undefined): Unit | undefined {
   return id !== undefined && Object.hasOwn(technologies, id) ? technologies[id as keyof typeof technologies].unit : undefined;
 }
 
-/** Пакеты, нужные активной технологии, а не просто любые: принимаются только они и пока ячейка не полна. */
+/** Запас пакетов в ячейке — на столько единиц активной технологии лаборатория берёт пакеты вперёд (чтобы не копить стопку). */
+export const LAB_BUFFER_UNITS = 2;
+
+/**
+ * Берёт пакет, только если он нужен активной технологии и в ячейке его меньше, чем на LAB_BUFFER_UNITS единиц.
+ * Так несколько лабораторий, кормимых из одного источника, делят пакеты поровну. Пакеты сверх лимита
+ * (возврат единицы, старый сейв) остаются в ячейке, новые при этом не принимаются.
+ */
 export function labCanAccept(b: PlacedBuilding, item: string, active: string | null | undefined): boolean {
-  if (!techUnit(active ?? undefined) || !(item in techUnit(active ?? undefined)!)) return false;
-  return (stackOf(b, item)?.count ?? 0) < (items as Record<string, { stack: number }>)[item]!.stack;
+  const need = techUnit(active ?? undefined)?.[item];
+  if (need === undefined) return false;
+  return (stackOf(b, item)?.count ?? 0) < need * LAB_BUFFER_UNITS;
 }
 
 /** Кладёт пакет в ячейку; перед этим нужно проверить labCanAccept. */
