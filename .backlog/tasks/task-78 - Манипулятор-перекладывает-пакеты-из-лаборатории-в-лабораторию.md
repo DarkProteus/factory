@@ -1,16 +1,20 @@
 ---
 id: TASK-78
 title: Манипулятор перекладывает пакеты из лаборатории в лабораторию
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-11-21T17:24:00Z'
-updated_date: '2026-11-21T17:25:00Z'
+updated_date: '2026-11-21T17:30:00Z'
 labels:
   - quality
 milestone: m-7
 dependencies: []
 references:
   - sim
+modified_files:
+  - packages/sim/src/transfer.ts
+  - packages/sim/src/labChain.test.ts
+  - docs/design.md
 priority: low
 type: feature
 ordinal: 84000
@@ -24,8 +28,14 @@ ordinal: 84000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Цепочка лаборатория → манипулятор → лаборатория: вторая получает пакеты (тест)
-- [ ] #2 Пакеты идущей единицы манипулятор не забирает
-- [ ] #3 Правило в design.md
-- [ ] #4 pnpm test зелёный
+- [x] #1 Цепочка лаборатория → манипулятор → лаборатория: вторая получает пакеты (тест)
+- [x] #2 Пакеты идущей единицы манипулятор не забирает
+- [x] #3 Правило в design.md
+- [x] #4 pnpm test зелёный
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Ветка 'lab' в takeFrom (transfer.ts): берётся пакет из b.input, b.unit не трогается, пустой стек остаётся с нулём. Тест: labChain.test.ts.
+<!-- SECTION:NOTES:END -->
