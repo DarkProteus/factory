@@ -75,6 +75,8 @@ groma:
       file: packages/sim/src/underground.ts
     - scanner: typescript
       file: packages/sim/src/lab.ts
+    - scanner: typescript
+      file: packages/sim/src/milestone3.layout.ts
   technology: TypeScript
 description: Хранит состояние мира и обновляет его раз в тик
 ---
